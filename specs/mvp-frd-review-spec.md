@@ -44,6 +44,8 @@ Out of scope:
 - If schema `$schema` declares any other draft, fail fast and block review run.
 - Unknown fields are errors unless schema explicitly allows them.
 - Required fields and type mismatches are treated as errors.
+- Issue levels supported in MVP: `error` and `warning`.
+- Warnings are non-blocking; a file with warnings and no errors remains valid.
 - Schema must compile before FRD review run can start.
 - Parse failures are separate from schema validation issues.
 
@@ -89,6 +91,7 @@ Out of scope:
   - Show issue list with keyword, path, and message.
 - Duplicate filenames in one review run:
   - Keep separate entries by upload order index.
+  - Use stable per-file ID for internal selection and future persistence compatibility.
 
 ## 9. Non-Functional Requirements
 - Typical run with 20 medium FRD files should complete quickly on local machine.
@@ -103,6 +106,7 @@ Out of scope:
 5. Given duplicate filenames, app displays separate result rows with unique display identifiers.
 6. Given no persistence requirement, reloading app clears prior review run state.
 7. Given schema with unsupported `$schema`, app blocks run and reports supported draft `2020-12`.
+8. Given mixed parse failures and valid files, parse failures show required fixes while valid files still render readable FRDs.
 
 ## 11. Dependencies
 - Architecture: [architecture-overview.md](./architecture-overview.md)

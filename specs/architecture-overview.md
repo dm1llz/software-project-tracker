@@ -5,7 +5,7 @@
 - Last Updated: 2026-02-25
 - Depends On: [mvp-frd-review-spec.md](./mvp-frd-review-spec.md), [data-contracts.md](./data-contracts.md)
 - Open Questions:
-  - Do we want worker-based file processing in MVP or only if performance requires it?
+  - None currently.
 
 ## 1. Technology Baseline
 - Frontend framework: React
@@ -29,13 +29,15 @@
   - Schema compilation and issue mapping.
 - `domain/rendering/`
   - Schema-driven transformation from FRD JSON to readable section model.
+- `infra/workers/`
+  - Worker entry points and message contracts for heavy parse/validate tasks.
 - `types/`
   - Canonical contracts from [data-contracts.md](./data-contracts.md).
 
 ## 4. Data Flow
 1. Schema upload -> parse schema JSON.
 2. Compile validator once per active schema.
-3. FRD uploads -> parse each file.
+3. FRD uploads -> parse each file via worker-enabled pipeline (fallback to main thread when worker is unavailable).
 4. Validate parsed FRD -> collect issues.
 5. If valid -> transform to rendered sections.
 6. Aggregate into review run summary + per-file result list.
@@ -58,6 +60,7 @@
 
 ## 7. Performance and UX Considerations
 - Process files incrementally to keep UI responsive.
+- Support Web Workers for parse/validation performance on larger batches.
 - Avoid expensive deep cloning in render pipeline.
 - Limit synchronous UI-blocking operations during large review runs.
 

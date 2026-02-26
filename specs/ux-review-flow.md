@@ -34,7 +34,11 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
   - failed
   - parse failed
 - Show per-file rows/cards with status badge.
-- Default sort: failed first, then passed.
+- Default sort order:
+  - parse failed first
+  - validation failed second
+  - passed third
+  - tie-breaker by upload order
 
 ## Screen 5: Per-File Detail
 - Two tabs/sections:
@@ -42,9 +46,11 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
   - Readable FRD (only for valid files)
 - Issue row fields:
   - level
+  - code
   - path
   - message
   - keyword (if available)
+- Parse-failed files show required fixes in the Issues view and do not show a Readable FRD tab.
 
 ## Error and Edge States
 - Invalid schema JSON: block run and show actionable parse error.
@@ -56,6 +62,8 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
 - A review run is immutable once complete unless user uploads new schema or new FRD set.
 - Uploading a new schema clears prior results because validation context changed.
 - Valid file readable view is generated from structured JSON only.
+- Mixed-result review runs must allow successful files to be reviewed even when other files failed parsing.
+- UI selection and routing should use stable file IDs (not file names) to enable future persistence.
 
 ## Traceability
 - Flow baseline: [MVP Spec §6](./mvp-frd-review-spec.md#6-review-run-flow)
