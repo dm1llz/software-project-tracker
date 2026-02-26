@@ -1,7 +1,7 @@
 # Roadmap
 
 - Owner: David
-- Status: Draft
+- Status: Approved
 - Last Updated: 2026-02-25
 - Depends On: [mvp-frd-review-spec.md](./mvp-frd-review-spec.md), [product-vision.md](./product-vision.md)
 - Open Questions:

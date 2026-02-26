@@ -1,7 +1,7 @@
 # Non-Goals
 
 - Owner: David
-- Status: Draft
+- Status: Approved
 - Last Updated: 2026-02-25
 - Depends On: [mvp-frd-review-spec.md](./mvp-frd-review-spec.md), [roadmap.md](./roadmap.md)
 - Open Questions:
