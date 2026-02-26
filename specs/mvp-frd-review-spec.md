@@ -39,6 +39,9 @@ Out of scope:
 
 ## 4. Validation Behavior
 - Engine: JSON Schema validation using strict mode.
+- Supported schema draft in MVP: `2020-12` only.
+- If schema `$schema` is missing, treat it as `2020-12` for MVP.
+- If schema `$schema` declares any other draft, fail fast and block review run.
 - Unknown fields are errors unless schema explicitly allows them.
 - Required fields and type mismatches are treated as errors.
 - Schema must compile before FRD review run can start.
@@ -75,6 +78,9 @@ Out of scope:
 - Schema compile failure:
   - Block review run.
   - Show compile-time issue details.
+- Unsupported schema draft:
+  - Block review run.
+  - Show expected draft (`2020-12`) and the detected `$schema` value.
 - Invalid FRD JSON:
   - Mark file as parse failed.
   - Continue processing remaining files.
@@ -96,6 +102,7 @@ Out of scope:
 4. Given invalid schema, app blocks FRD upload flow and displays schema errors.
 5. Given duplicate filenames, app displays separate result rows with unique display identifiers.
 6. Given no persistence requirement, reloading app clears prior review run state.
+7. Given schema with unsupported `$schema`, app blocks run and reports supported draft `2020-12`.
 
 ## 11. Dependencies
 - Architecture: [architecture-overview.md](./architecture-overview.md)

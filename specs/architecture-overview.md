@@ -12,6 +12,7 @@
 - Build tool: Vite
 - Language: TypeScript
 - Validation library: Ajv (strict JSON Schema mode)
+- Schema draft support policy (MVP): accept `2020-12` only; reject other declared drafts.
 - Test stack: Vitest + React Testing Library + Playwright (smoke)
 
 ## 2. System Boundaries
@@ -51,6 +52,7 @@
 
 ## 6. Error Strategy
 - Fatal pre-run errors: schema parse or compile failure.
+- Fatal pre-run errors also include unsupported schema draft declaration.
 - Non-fatal per-file errors: FRD parse or validation failures.
 - Always continue processing remaining files when per-file failures occur.
 

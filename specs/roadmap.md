@@ -41,6 +41,7 @@ Candidate scope:
 - Export options (Markdown/HTML/PDF).
 - Enhanced filtering/sorting of issues.
 - Comparison between two FRD versions.
+- Multi-draft schema compatibility (for example draft-07 in addition to 2020-12).
 
 Exit criteria:
 1. Repeat review workflows become faster for recurring users.
