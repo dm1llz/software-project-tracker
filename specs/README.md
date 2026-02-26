@@ -16,7 +16,7 @@ This folder defines the product and technical baseline for the FRD review applic
 | [product-vision.md](./product-vision.md) | Product mission, users, problems, success metrics, principles | Approved |
 | [mvp-frd-review-spec.md](./mvp-frd-review-spec.md) | MVP behavior, scope, acceptance criteria, and failure handling | Approved |
 | [architecture-overview.md](./architecture-overview.md) | Vite/React/TypeScript architecture, module boundaries, data flow | Draft |
-| [data-contracts.md](./data-contracts.md) | Canonical interfaces/types for schema review pipeline | Draft |
+| [data-contracts.md](./data-contracts.md) | Canonical interfaces/types for schema review pipeline | Approved |
 | [ux-review-flow.md](./ux-review-flow.md) | Screen-by-screen review run UX and UI states | Draft |
 | [roadmap.md](./roadmap.md) | Milestones and post-MVP delivery plan | Draft |
 | [non-goals.md](./non-goals.md) | Explicit out-of-scope boundaries | Draft |
