@@ -74,7 +74,7 @@ Out of scope:
 - Ready: schema loaded, waiting for FRD files.
 - Running: processing files.
 - Complete: summary + per-file results.
-- Error: schema parse/compile failure with actionable message.
+- Error: schema parse/compile/draft failure with actionable message.
 
 ## 8. Failure Handling
 - Invalid schema JSON:
@@ -111,7 +111,7 @@ Out of scope:
 6. Given no persistence requirement, reloading app clears prior review run state.
 7. Given schema with unsupported `$schema`, app blocks run and reports supported draft `2020-12`.
 8. Given mixed parse failures and valid files, parse failures show required fixes while valid files still render readable FRDs.
-9. Given a warning-only file (no errors), the file remains valid and warnings are visible in the issue list.
+9. If validator/parsing layers emit warning-only diagnostics (no errors), the file remains valid and warnings are visible in the issue list.
 
 ## 11. Dependencies
 - Architecture: [architecture-overview.md](./architecture-overview.md)

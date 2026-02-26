@@ -62,6 +62,16 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
 - FRD parse failure: show parse issue and continue batch.
 - Duplicate file names: display indexed labels (example: `feature.json (2)`).
 
+## Run Issue Presentation
+- For run-blocking schema errors, show a dedicated run-issue panel above file results.
+- Run-issue row fields:
+  - code
+  - message
+  - path (if available)
+  - line (if available)
+  - column (if available)
+- If run is blocked before FRD processing, do not render file result rows.
+
 ## Interaction Rules
 - A review run is immutable once complete unless user uploads new schema or new FRD set.
 - Uploading a new schema clears prior results because validation context changed.
