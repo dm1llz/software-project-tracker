@@ -5,8 +5,9 @@
 - Last Updated: 2026-02-25
 - Depends On: [README.md](./README.md)
 - Open Questions:
-  - Should post-MVP include team collaboration and approvals?
-  - Should local-only operation remain the default long term?
+  - None blocking for MVP.
+  - Post-MVP backlog: Should include team collaboration and approvals.
+  - Post-MVP backlog: Should local-only operation remain the default long term.
 
 ## Mission
 Help software teams move from high-level PRD to implementation-ready FRD with higher quality and less ambiguity by making FRD JSON validation and review fast, strict, and readable.

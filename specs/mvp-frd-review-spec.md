@@ -5,7 +5,8 @@
 - Last Updated: 2026-02-25
 - Depends On: [product-vision.md](./product-vision.md), [data-contracts.md](./data-contracts.md), [ux-review-flow.md](./ux-review-flow.md)
 - Open Questions:
-  - Should strict and lenient validation modes both be offered after MVP?
+  - None blocking for MVP.
+  - Post-MVP backlog: Should strict and lenient validation modes both be offered.
 
 ## 1. Summary
 Build a local-first web application that accepts one JSON schema and multiple FRD JSON files, validates each FRD strictly, and renders valid FRDs in a readable sectioned format.
@@ -42,10 +43,12 @@ Out of scope:
 - Supported schema draft in MVP: `2020-12` only.
 - If schema `$schema` is missing, treat it as `2020-12` for MVP.
 - If schema `$schema` declares any other draft, fail fast and block review run.
+- Use run issues for schema-level failures and file issues for FRD parse/validation findings.
 - Unknown fields are errors unless schema explicitly allows them.
 - Required fields and type mismatches are treated as errors.
 - Issue levels supported in MVP: `error` and `warning`.
 - Warnings are non-blocking; a file with warnings and no errors remains valid.
+- Warning ingestion is source-driven: warnings appear only when validator/parsing layers emit non-fatal diagnostics.
 - Schema must compile before FRD review run can start.
 - Parse failures are separate from schema validation issues.
 
@@ -76,15 +79,16 @@ Out of scope:
 ## 8. Failure Handling
 - Invalid schema JSON:
   - Block review run.
-  - Show schema parse error with line/column when available.
+  - Show run issue with line/column when available.
 - Schema compile failure:
   - Block review run.
-  - Show compile-time issue details.
+  - Show run issue with compile-time details.
 - Unsupported schema draft:
   - Block review run.
   - Show expected draft (`2020-12`) and the detected `$schema` value.
 - Invalid FRD JSON:
-  - Mark file as parse failed.
+  - Mark file as parse failed and display file issue with `path="/"`.
+  - Include line/column when parse output provides them.
   - Continue processing remaining files.
 - Validation failures:
   - Mark file as failed.
@@ -101,12 +105,13 @@ Out of scope:
 ## 10. Acceptance Criteria
 1. Given valid schema and valid FRD files, all files return `valid=true` and render readable sections.
 2. Given valid schema and invalid FRD files, each file shows one or more issues with JSON pointer path.
-3. Given mixed file quality, review run summary correctly reports total, passed, failed, and parse-failed counts.
+3. Given mixed file quality, review run summary correctly reports counts where `total = passed + failed + parseFailed`.
 4. Given invalid schema, app blocks FRD upload flow and displays schema errors.
 5. Given duplicate filenames, app displays separate result rows with unique display identifiers.
 6. Given no persistence requirement, reloading app clears prior review run state.
 7. Given schema with unsupported `$schema`, app blocks run and reports supported draft `2020-12`.
 8. Given mixed parse failures and valid files, parse failures show required fixes while valid files still render readable FRDs.
+9. Given a warning-only file (no errors), the file remains valid and warnings are visible in the issue list.
 
 ## 11. Dependencies
 - Architecture: [architecture-overview.md](./architecture-overview.md)

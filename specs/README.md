@@ -41,7 +41,8 @@ This folder defines the product and technical baseline for the FRD review applic
 - FRD: Feature Requirements Document represented as JSON.
 - schema: JSON Schema used to validate FRD JSON.
 - review run: One execution that validates one schema against one or more FRD files.
-- issue: A parse or validation finding associated with one FRD file.
+- run issue: A schema-level finding associated with the review run.
+- file issue: A parse or validation finding associated with one FRD file.
 
 ## Review Checklist
 - All docs include metadata headers.

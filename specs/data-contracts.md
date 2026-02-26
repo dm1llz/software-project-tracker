@@ -5,7 +5,8 @@
 - Last Updated: 2026-02-25
 - Depends On: [mvp-frd-review-spec.md](./mvp-frd-review-spec.md)
 - Open Questions:
-  - Should issue severity include `info` post-MVP?
+  - None blocking for MVP.
+  - Post-MVP backlog: Should issue severity include `info`.
 
 ## Purpose
 This document freezes canonical TypeScript contracts for the FRD review run domain. These names are normative across UI and domain modules.
@@ -41,17 +42,27 @@ export type ReviewInput = {
 
 export type IssueLevel = "error" | "warning";
 
-export type ValidationIssueCode =
-  | "PARSE_ERROR"
-  | "VALIDATION_ERROR"
-  | "SCHEMA_ERROR";
+export type FileIssueCode = "PARSE_ERROR" | "VALIDATION_ERROR";
 
-export type ValidationIssue = {
+export type RunIssueCode = "SCHEMA_ERROR";
+
+export type RunIssue = {
+  level: "error";
+  code: RunIssueCode;
+  message: string;
+  path?: string; // schema JSON pointer when available
+  line?: number; // 1-based when available
+  column?: number; // 1-based when available
+};
+
+export type FileIssue = {
   fileId: string;
   level: IssueLevel;
-  code: ValidationIssueCode;
+  code: FileIssueCode;
   fileName: string;
-  path: string; // JSON pointer, e.g. "/features/0/name"
+  path: string; // JSON pointer. Use "/" for document-level parse errors.
+  line?: number; // 1-based when available
+  column?: number; // 1-based when available
   message: string;
   keyword?: string;
 };
@@ -118,7 +129,7 @@ export type ReviewResult = {
   status: ReviewStatus;
   parseOk: boolean;
   valid: boolean;
-  issues: ValidationIssue[];
+  issues: FileIssue[];
   sections?: RenderedSection[];
 };
 
@@ -128,31 +139,47 @@ export type BatchReviewSummary = {
   failed: number;
   parseFailed: number;
 };
+
+export type ReviewRunResult = {
+  runIssues: RunIssue[];
+  summary: BatchReviewSummary;
+  files: ReviewResult[];
+};
 ```
 
 ## Contract Rules
+- `RunIssue` is for review-run-level schema failures; it is not tied to a file.
+- `FileIssue` is for FRD file parse/validation findings.
 - `id` on `ReviewInputFile`/`ReviewResult` is the primary file identifier and must be unique per review run.
 - `uploadIndex` is 0-based and preserves ingestion order.
 - `fileName` must always refer to the original uploaded file label.
 - `displayName` is the user-facing label and is used to disambiguate duplicate file names.
 - `path` must be JSON pointer format where available.
+- For document-level parse errors where no pointer exists, use `path="/"`.
+- `line` and `column` are optional but should be included for parse/schema errors when parser output provides them.
 - `parseOk=false` implies `valid=false`.
 - `status="parse_failed"` implies `parseOk=false` and `valid=false`.
 - `status="validation_failed"` implies `parseOk=true` and `valid=false`.
 - `status="passed"` implies `parseOk=true` and `valid=true`.
 - `sections` are present only when `status="passed"`.
 - `BatchReviewSummary.total` must equal total uploaded FRD files in review run.
+- `BatchReviewSummary.failed` counts only `status="validation_failed"` files.
+- `BatchReviewSummary.parseFailed` counts only `status="parse_failed"` files.
+- `BatchReviewSummary.passed` counts only `status="passed"` files.
+- `BatchReviewSummary.total = passed + failed + parseFailed`.
 - Accepted schema draft for MVP is `2020-12` only.
 - When `$schema` is absent, the system assumes `2020-12` in MVP.
 - Any non-`2020-12` `$schema` must fail before FRD validation starts.
 - MVP sorting for result lists is deterministic: `parse_failed`, then `validation_failed`, then `passed`, each by `uploadIndex`.
-- MVP supports issue levels `error` and `warning`; if the validator emits warnings, the UI must display them.
+- MVP supports issue levels `error` and `warning`.
+- Warning ingestion is source-driven: only non-fatal diagnostics emitted by validator/parsing layers are mapped to `level="warning"`.
+- If no diagnostics source emits warnings, issue output is `error`-only and remains MVP-compliant.
 - Field order in rendered sections should follow schema property order when available, otherwise source JSON key order.
 
 ## Mapping Guidance
-- Parse errors are represented as `ValidationIssue` with `code="PARSE_ERROR"` and `level="error"`.
-- Schema validation issues map from validator output with `code="VALIDATION_ERROR"` and `keyword` when available.
-- Schema load/compile problems map to `code="SCHEMA_ERROR"` and block the review run.
+- Parse errors are represented as `FileIssue` with `code="PARSE_ERROR"` and `level="error"`, with `line`/`column` when available.
+- Schema validation issues map from validator output to `FileIssue` with `code="VALIDATION_ERROR"` and `keyword` when available.
+- Schema load/compile/draft problems map to `RunIssue` with `code="SCHEMA_ERROR"` and block the review run.
 - Warnings are non-blocking; files with warnings and no errors remain `status="passed"`.
 
 ## Traceability
