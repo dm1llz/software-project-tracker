@@ -1,0 +1,205 @@
+{
+  "metadata": {
+    "frdId": "FRD-006",
+    "title": "Quality and Performance",
+    "description": "Define and implement quality gates across unit, integration, and e2e smoke tests, including worker fallback and responsiveness expectations.",
+    "status": "not_started",
+    "priority": 6,
+    "estimatedEffort": "medium",
+    "dependencies": ["FRD-002", "FRD-003", "FRD-004", "FRD-005"],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/roadmap.md",
+      "specs/architecture-overview.md",
+      "specs/ux-review-flow.md"
+    ],
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-02-25"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-006-T1",
+      "title": "Establish unit-test quality gates",
+      "description": "Add deterministic unit tests for contracts, mapping, sorting, and invariant helpers in domain modules.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-002", "FRD-003", "FRD-004"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-006-T1-S1",
+          "title": "Create unit test suites for domain helpers",
+          "description": "Cover parsing mappers, validation issue mapping, summary invariants, and deterministic sorting utilities.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/__tests__/reviewRunUtils.test.ts",
+            "src/domain/validation/__tests__/schemaValidation.test.ts",
+            "src/domain/rendering/__tests__/renderingUtils.test.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-006-T1-V1",
+          "type": "test",
+          "description": "Unit suite passes with deterministic outputs across repeated runs."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-006-T1-TR1",
+          "type": "unit",
+          "description": "Ensure core domain logic is validated with success, error, and edge conditions.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-006-T1-TR1-S1",
+              "type": "success",
+              "description": "Valid inputs produce expected mapped outputs in each helper.",
+              "expectedOutcome": "All utility-level assertions pass and outputs match contracts."
+            },
+            {
+              "scenarioId": "FRD-006-T1-TR1-S2",
+              "type": "error",
+              "description": "Malformed data is passed to issue mapping helpers.",
+              "expectedOutcome": "Helpers surface controlled failures or explicit fallback behavior."
+            },
+            {
+              "scenarioId": "FRD-006-T1-TR1-S3",
+              "type": "edge",
+              "description": "Warning-only diagnostics are provided with no errors.",
+              "expectedOutcome": "Status remains passed and warning entries are retained."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-006-T2",
+      "title": "Establish integration tests for end-to-end review pipeline",
+      "description": "Exercise schema load, file processing, failure continuation, and summary invariants through integration harnesses.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-006-T1", "FRD-005"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-006-T2-S1",
+          "title": "Create integration harness with fixture batches",
+          "description": "Model valid, invalid, and mixed batches to assert run outcomes and per-file details.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/__tests__/reviewRun.integration.test.ts",
+            "src/test-fixtures/schema/valid-2020-12.json",
+            "src/test-fixtures/schema/unsupported-draft.json",
+            "src/test-fixtures/frd/valid-frd.json",
+            "src/test-fixtures/frd/invalid-json.frd",
+            "src/test-fixtures/frd/invalid-schema.frd"
+          ]
+        },
+        {
+          "subtaskId": "FRD-006-T2-S2",
+          "title": "Add worker fallback integration coverage",
+          "description": "Verify pipeline produces equivalent results with worker-enabled and fallback-to-main-thread execution.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/infra/workers/__tests__/workerFallback.integration.test.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-006-T2-V1",
+          "type": "integration",
+          "description": "Integration suite confirms run-level and file-level contracts for all primary and failure flows."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-006-T2-TR1",
+          "type": "integration",
+          "description": "Validate the full pipeline and fallback behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-006-T2-TR1-S1",
+              "type": "success",
+              "description": "Schema and all FRD files are valid.",
+              "expectedOutcome": "All files pass, sections are generated, and summary totals align."
+            },
+            {
+              "scenarioId": "FRD-006-T2-TR1-S2",
+              "type": "error",
+              "description": "Unsupported schema draft is uploaded.",
+              "expectedOutcome": "Run is blocked with SCHEMA_ERROR and no file processing occurs."
+            },
+            {
+              "scenarioId": "FRD-006-T2-TR1-S3",
+              "type": "edge",
+              "description": "Worker is unavailable and main-thread fallback is used.",
+              "expectedOutcome": "Results are functionally equivalent to worker-enabled execution."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-006-T3",
+      "title": "Add e2e smoke checks for UX responsiveness and network isolation",
+      "description": "Implement lightweight e2e tests to prove first-run usability, responsiveness, and no-network assumptions.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": ["FRD-006-T2"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-006-T3-S1",
+          "title": "Create Playwright smoke flow",
+          "description": "Automate user path from schema upload to mixed-result file detail inspection.",
+          "status": "not_started",
+          "filesToCreate": [
+            "tests/e2e/review-run-smoke.spec.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-006-T3-S2",
+          "title": "Add no-network and responsiveness assertions",
+          "description": "Assert no outbound network calls during core flows and UI remains interactive while processing.",
+          "status": "not_started",
+          "filesToCreate": [
+            "tests/e2e/network-and-responsiveness.spec.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-006-T3-V1",
+          "type": "test",
+          "description": "E2E smoke tests pass for baseline run flow and network-isolation checks."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-006-T3-TR1",
+          "type": "e2e",
+          "description": "Validate primary UX flow and critical non-functional behaviors.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-006-T3-TR1-S1",
+              "type": "success",
+              "description": "User completes first review run with valid schema and valid FRDs.",
+              "expectedOutcome": "Summary and readable sections are visible without console or runtime errors."
+            },
+            {
+              "scenarioId": "FRD-006-T3-TR1-S2",
+              "type": "error",
+              "description": "User uploads invalid schema then attempts FRD upload.",
+              "expectedOutcome": "Error messaging appears and FRD upload remains blocked until schema is fixed."
+            },
+            {
+              "scenarioId": "FRD-006-T3-TR1-S3",
+              "type": "edge",
+              "description": "Batch of 20 medium files runs through processing state.",
+              "expectedOutcome": "Progress UI updates and interface remains responsive during run."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

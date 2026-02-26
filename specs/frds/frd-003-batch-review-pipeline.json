@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "frdId": "FRD-003",
+    "title": "Batch Review Pipeline",
+    "description": "Implement FRD multi-file ingestion, per-file parse and validation, duplicate name handling, and summary/status invariants.",
+    "status": "not_started",
+    "priority": 3,
+    "estimatedEffort": "large",
+    "dependencies": ["FRD-001", "FRD-002"],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/data-contracts.md",
+      "specs/architecture-overview.md",
+      "specs/ux-review-flow.md"
+    ],
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-02-25"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-003-T1",
+      "title": "Ingest FRD files with stable IDs and upload ordering",
+      "description": "Convert uploaded files into ReviewInputFile entries with unique IDs and stable uploadIndex values.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-001", "FRD-002"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-003-T1-S1",
+          "title": "Implement file ingestion mapper",
+          "description": "Read selected FRD files as text and assign deterministic id + uploadIndex.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/mapReviewInputFiles.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-003-T1-S2",
+          "title": "Apply duplicate filename disambiguation",
+          "description": "Generate display names that preserve source filename while avoiding collisions.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/domain/review-run/disambiguateDisplayName.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-003-T1-V1",
+          "type": "manual",
+          "description": "Uploading duplicate file names shows separate file rows with indexed labels."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-003-T1-TR1",
+          "type": "integration",
+          "description": "Verify file ingestion contract and duplicate handling.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-003-T1-TR1-S1",
+              "type": "success",
+              "description": "Upload three uniquely named FRDs.",
+              "expectedOutcome": "Each file receives unique id and ordered uploadIndex values."
+            },
+            {
+              "scenarioId": "FRD-003-T1-TR1-S2",
+              "type": "error",
+              "description": "Ingestion receives a file read failure from browser API.",
+              "expectedOutcome": "Failed file emits parse-related file issue while remaining files continue."
+            },
+            {
+              "scenarioId": "FRD-003-T1-TR1-S3",
+              "type": "edge",
+              "description": "Two files share name and content but differ by upload order.",
+              "expectedOutcome": "Files remain distinct by id and displayName suffix."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-003-T2",
+      "title": "Execute per-file parse and strict validation with continue-on-error",
+      "description": "Process each FRD independently, mapping parse and validation diagnostics to FileIssue entries.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-003-T1"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-003-T2-S1",
+          "title": "Implement FRD parse stage",
+          "description": "Parse FRD JSON and map parse failures to PARSE_ERROR with path '/'.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/parseFrdFile.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-003-T2-S2",
+          "title": "Implement schema validation stage",
+          "description": "Invoke compiled validator and map errors/warnings to VALIDATION_ERROR issues.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/validateFrdFile.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-003-T2-S3",
+          "title": "Implement per-file result reducer",
+          "description": "Build ReviewResult status and valid/parseOk flags from collected diagnostics.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/buildReviewResult.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-003-T2-G1",
+          "severity": "critical",
+          "text": "Any per-file failure must not abort processing of later files in the same run."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-003-T2-V1",
+          "type": "integration",
+          "description": "Mixed quality batches produce parse_failed, validation_failed, and passed statuses in one run."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-003-T2-TR1",
+          "type": "integration",
+          "description": "Validate parse/validation mapping and non-fatal warning behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-003-T2-TR1-S1",
+              "type": "success",
+              "description": "Valid FRD passes validation with no errors.",
+              "expectedOutcome": "Result status is passed with valid=true and parseOk=true."
+            },
+            {
+              "scenarioId": "FRD-003-T2-TR1-S2",
+              "type": "error",
+              "description": "Malformed FRD JSON fails parse.",
+              "expectedOutcome": "Result status is parse_failed with PARSE_ERROR at path '/'."
+            },
+            {
+              "scenarioId": "FRD-003-T2-TR1-S3",
+              "type": "edge",
+              "description": "Validator emits warning diagnostics without errors.",
+              "expectedOutcome": "File remains passed and warning issues are visible."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-003-T3",
+      "title": "Aggregate batch summary and deterministic output ordering",
+      "description": "Compute ReviewRunResult summary counts and produce sorted per-file output list.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": ["FRD-003-T2"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-003-T3-S1",
+          "title": "Implement summary aggregation",
+          "description": "Count passed, failed, and parseFailed according to status-to-bucket rules.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/summarizeBatchReview.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-003-T3-S2",
+          "title": "Integrate deterministic result sort",
+          "description": "Apply contract order parse_failed -> validation_failed -> passed and tie-break by uploadIndex.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/domain/review-run/sortReviewResults.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-003-T3-V1",
+          "type": "test",
+          "description": "Summary invariant total = passed + failed + parseFailed always holds."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-003-T3-TR1",
+          "type": "unit",
+          "description": "Verify summary math and ordering guarantees.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-003-T3-TR1-S1",
+              "type": "success",
+              "description": "Batch contains 1 passed, 1 validation_failed, and 1 parse_failed file.",
+              "expectedOutcome": "Summary fields and total are computed exactly as contracts define."
+            },
+            {
+              "scenarioId": "FRD-003-T3-TR1-S2",
+              "type": "error",
+              "description": "Result reducer emits inconsistent status and valid flags.",
+              "expectedOutcome": "Aggregator detects contract violation and fails test."
+            },
+            {
+              "scenarioId": "FRD-003-T3-TR1-S3",
+              "type": "edge",
+              "description": "All files fail parsing.",
+              "expectedOutcome": "Summary reports parseFailed=total and passed=failed=0."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

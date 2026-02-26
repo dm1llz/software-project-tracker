@@ -1,0 +1,55 @@
+{
+  "schemaPath": "./frd-schema.json",
+  "generatedAt": "2026-02-25",
+  "scope": "mvp",
+  "frds": [
+    {
+      "frdId": "FRD-001",
+      "title": "Foundation and Contracts",
+      "status": "not_started",
+      "priority": 1,
+      "path": "./frd-001-foundation-contracts.json",
+      "dependencies": []
+    },
+    {
+      "frdId": "FRD-002",
+      "title": "Schema Intake and Validation Core",
+      "status": "not_started",
+      "priority": 2,
+      "path": "./frd-002-schema-intake-validation.json",
+      "dependencies": ["FRD-001"]
+    },
+    {
+      "frdId": "FRD-003",
+      "title": "Batch Review Pipeline",
+      "status": "not_started",
+      "priority": 3,
+      "path": "./frd-003-batch-review-pipeline.json",
+      "dependencies": ["FRD-001", "FRD-002"]
+    },
+    {
+      "frdId": "FRD-004",
+      "title": "Rendering Engine",
+      "status": "not_started",
+      "priority": 4,
+      "path": "./frd-004-rendering-engine.json",
+      "dependencies": ["FRD-001"]
+    },
+    {
+      "frdId": "FRD-005",
+      "title": "UI Review Flow",
+      "status": "not_started",
+      "priority": 5,
+      "path": "./frd-005-ui-review-flow.json",
+      "dependencies": ["FRD-003", "FRD-004"]
+    },
+    {
+      "frdId": "FRD-006",
+      "title": "Quality and Performance",
+      "status": "not_started",
+      "priority": 6,
+      "path": "./frd-006-quality-performance.json",
+      "dependencies": ["FRD-002", "FRD-003", "FRD-004", "FRD-005"]
+    }
+  ]
+}
