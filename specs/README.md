@@ -1,7 +1,7 @@
 # Specs Index
 
 - Owner: David
-- Status: Draft
+- Status: Approved
 - Last Updated: 2026-02-25
 - Depends On: None
 - Open Questions:
@@ -13,8 +13,8 @@ This folder defines the product and technical baseline for the FRD review applic
 ## Document Index
 | Document | Purpose | Status |
 | --- | --- | --- |
-| [product-vision.md](./product-vision.md) | Product mission, users, problems, success metrics, principles | Draft |
-| [mvp-frd-review-spec.md](./mvp-frd-review-spec.md) | MVP behavior, scope, acceptance criteria, and failure handling | Draft |
+| [product-vision.md](./product-vision.md) | Product mission, users, problems, success metrics, principles | Approved |
+| [mvp-frd-review-spec.md](./mvp-frd-review-spec.md) | MVP behavior, scope, acceptance criteria, and failure handling | Approved |
 | [architecture-overview.md](./architecture-overview.md) | Vite/React/TypeScript architecture, module boundaries, data flow | Draft |
 | [data-contracts.md](./data-contracts.md) | Canonical interfaces/types for schema review pipeline | Draft |
 | [ux-review-flow.md](./ux-review-flow.md) | Screen-by-screen review run UX and UI states | Draft |
