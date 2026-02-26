@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "frdId": "FRD-002",
+    "title": "Schema Intake and Validation Core",
+    "description": "Implement schema upload parsing, strict Ajv compilation, draft enforcement, and run-level schema issue handling.",
+    "status": "not_started",
+    "priority": 2,
+    "estimatedEffort": "large",
+    "dependencies": ["FRD-001"],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/data-contracts.md",
+      "specs/architecture-overview.md",
+      "specs/ux-review-flow.md"
+    ],
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-02-25"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-002-T1",
+      "title": "Implement schema upload and parse pipeline",
+      "description": "Read a user-selected schema file, parse JSON safely, and build SchemaBundle with declared/effective draft fields.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-001"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-002-T1-S1",
+          "title": "Build schema file ingestion adapter",
+          "description": "Convert browser File input into text and normalized schema ingestion payload.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/validation/loadSchemaFile.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-002-T1-S2",
+          "title": "Map parse errors into run issues",
+          "description": "Capture parse failures with actionable line and column metadata when parser diagnostics allow.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/validation/mapSchemaParseIssue.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-002-T1-V1",
+          "type": "integration",
+          "description": "Uploading malformed schema JSON yields runIssues and blocks FRD upload controls."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-002-T1-TR1",
+          "type": "integration",
+          "description": "Verify schema ingestion and parse error handling.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-002-T1-TR1-S1",
+              "type": "success",
+              "description": "User uploads valid schema JSON with explicit $schema draft 2020-12.",
+              "expectedOutcome": "SchemaBundle is created with declaredDraft and effectiveDraft set correctly."
+            },
+            {
+              "scenarioId": "FRD-002-T1-TR1-S2",
+              "type": "error",
+              "description": "User uploads syntactically invalid JSON schema file.",
+              "expectedOutcome": "Review run is blocked and run issue reports parse problem with location when available."
+            },
+            {
+              "scenarioId": "FRD-002-T1-TR1-S3",
+              "type": "edge",
+              "description": "User uploads valid schema JSON with no $schema field.",
+              "expectedOutcome": "Effective draft defaults to 2020-12 while declaredDraft remains null."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-002-T2",
+      "title": "Compile schema with strict Ajv and draft policy",
+      "description": "Compile schema in strict mode and reject unsupported drafts before FRD processing starts.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-002-T1"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-002-T2-S1",
+          "title": "Create Ajv compiler wrapper",
+          "description": "Instantiate Ajv with strict behavior and schema draft compatibility checks for 2020-12 only.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/validation/compileSchema.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-002-T2-S2",
+          "title": "Create unsupported draft detector",
+          "description": "Evaluate declared draft and produce deterministic run issue for non-2020-12 values.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/validation/detectUnsupportedDraft.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-002-T2-G1",
+          "severity": "critical",
+          "text": "Unsupported draft must fail fast before file processing to preserve deterministic run semantics."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-002-T2-V1",
+          "type": "test",
+          "description": "Strict compiler rejects unsupported draft and blocks downstream FRD validation."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-002-T2-TR1",
+          "type": "unit",
+          "description": "Validate strict compile path and draft handling rules.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-002-T2-TR1-S1",
+              "type": "success",
+              "description": "Draft 2020-12 schema compiles successfully in strict mode.",
+              "expectedOutcome": "Compiled validator function is returned and stored for review runs."
+            },
+            {
+              "scenarioId": "FRD-002-T2-TR1-S2",
+              "type": "error",
+              "description": "Schema declares draft-07.",
+              "expectedOutcome": "RunIssue emitted with expected draft 2020-12 and detected draft-07 value."
+            },
+            {
+              "scenarioId": "FRD-002-T2-TR1-S3",
+              "type": "edge",
+              "description": "Schema is syntactically valid but compile fails due to invalid keyword usage under strict mode.",
+              "expectedOutcome": "RunIssue contains compile-time details and run is blocked."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-002-T3",
+      "title": "Produce run-level issue model and blocking behavior",
+      "description": "Map schema failures to RunIssue contracts and enforce zero-file summary when run cannot start.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": ["FRD-002-T2"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-002-T3-S1",
+          "title": "Implement run-blocked result factory",
+          "description": "Generate ReviewRunResult for schema-level failures with empty files and zero counts.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/createRunBlockedResult.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-002-T3-S2",
+          "title": "Map schema errors to RunIssue fields",
+          "description": "Normalize parse, compile, and unsupported draft failures into RunIssue with SCHEMA_ERROR code.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/validation/mapRunIssue.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-002-T3-V1",
+          "type": "integration",
+          "description": "Blocked runs return files=[] and summary totals at zero with at least one run issue entry."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-002-T3-TR1",
+          "type": "integration",
+          "description": "Verify run-level blocking behavior and summary contract.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-002-T3-TR1-S1",
+              "type": "success",
+              "description": "Schema compiles and run proceeds to file-processing stage.",
+              "expectedOutcome": "No run-level blocking result is generated."
+            },
+            {
+              "scenarioId": "FRD-002-T3-TR1-S2",
+              "type": "error",
+              "description": "Compile failure occurs before FRD files are processed.",
+              "expectedOutcome": "ReviewRunResult has files empty and summary counts all zero."
+            },
+            {
+              "scenarioId": "FRD-002-T3-TR1-S3",
+              "type": "edge",
+              "description": "Multiple schema issues are detected from one compile attempt.",
+              "expectedOutcome": "All mapped run issues are preserved in deterministic order."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

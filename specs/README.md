@@ -21,6 +21,20 @@ This folder defines the product and technical baseline for the FRD review applic
 | [roadmap.md](./roadmap.md) | Milestones and post-MVP delivery plan | Approved |
 | [non-goals.md](./non-goals.md) | Explicit out-of-scope boundaries | Approved |
 
+## FRD Package
+Machine-consumable MVP FRD artifacts are located in `./frds/`.
+
+| File | Purpose |
+| --- | --- |
+| [frds/frd-schema.json](./frds/frd-schema.json) | Canonical JSON Schema for FRD authoring and validation |
+| [frds/index.json](./frds/index.json) | Manifest listing FRD order, dependencies, and file paths |
+| [frds/frd-001-foundation-contracts.json](./frds/frd-001-foundation-contracts.json) | Foundation module boundaries, canonical contracts, deterministic utilities |
+| [frds/frd-002-schema-intake-validation.json](./frds/frd-002-schema-intake-validation.json) | Schema ingestion, strict compile, draft enforcement, run-level schema issues |
+| [frds/frd-003-batch-review-pipeline.json](./frds/frd-003-batch-review-pipeline.json) | Multi-file ingestion, parse/validate pipeline, summary invariants |
+| [frds/frd-004-rendering-engine.json](./frds/frd-004-rendering-engine.json) | Schema-driven readable rendering model and semantic preservation |
+| [frds/frd-005-ui-review-flow.json](./frds/frd-005-ui-review-flow.json) | Review states, results views, run-issue panel, reset behavior |
+| [frds/frd-006-quality-performance.json](./frds/frd-006-quality-performance.json) | Unit/integration/e2e smoke requirements, worker fallback, responsiveness |
+
 ## Reading Order
 1. [product-vision.md](./product-vision.md)
 2. [mvp-frd-review-spec.md](./mvp-frd-review-spec.md)

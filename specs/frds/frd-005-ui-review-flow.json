@@ -1,0 +1,219 @@
+{
+  "metadata": {
+    "frdId": "FRD-005",
+    "title": "UI Review Flow",
+    "description": "Implement full review-run UI state flow, results overview, per-file detail views, and schema-reset interactions.",
+    "status": "not_started",
+    "priority": 5,
+    "estimatedEffort": "large",
+    "dependencies": ["FRD-003", "FRD-004"],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/ux-review-flow.md",
+      "specs/architecture-overview.md",
+      "specs/data-contracts.md"
+    ],
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-02-25"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-005-T1",
+      "title": "Implement review-run screen states",
+      "description": "Build Empty, Ready, Running, Complete, and Error UI states with correct enable/disable behavior for inputs.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-003"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-005-T1-S1",
+          "title": "Create state-driven page shell",
+          "description": "Map high-level run state to visible screen sections and CTA availability.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/state/deriveScreenState.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-005-T1-S2",
+          "title": "Implement schema-loaded and running controls",
+          "description": "Enable FRD upload only after valid schema and disable disruptive inputs during active runs.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/SchemaControlPanel.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-005-T1-V1",
+          "type": "manual",
+          "description": "UI transitions correctly across all five required run states."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-005-T1-TR1",
+          "type": "integration",
+          "description": "Validate screen state transitions and interaction gating.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-005-T1-TR1-S1",
+              "type": "success",
+              "description": "User uploads valid schema then FRD files.",
+              "expectedOutcome": "State changes Empty -> Ready -> Running -> Complete with expected controls."
+            },
+            {
+              "scenarioId": "FRD-005-T1-TR1-S2",
+              "type": "error",
+              "description": "User uploads invalid schema JSON.",
+              "expectedOutcome": "State enters Error and FRD upload remains disabled."
+            },
+            {
+              "scenarioId": "FRD-005-T1-TR1-S3",
+              "type": "edge",
+              "description": "User attempts to alter schema while run is processing.",
+              "expectedOutcome": "Interaction is blocked until run completes."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-005-T2",
+      "title": "Implement results overview and per-file detail panes",
+      "description": "Display batch summary, sorted file rows, issue list fields, and readable FRD tab for valid files.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-005-T1", "FRD-004"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-005-T2-S1",
+          "title": "Create summary and file result list components",
+          "description": "Render total/passed/failed/parseFailed metrics and file status badges in deterministic order.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/ReviewSummary.tsx",
+            "src/ui/components/FileResultList.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-005-T2-S2",
+          "title": "Create issues panel and readable view tabs",
+          "description": "Render issue table fields and conditionally show Readable FRD tab only for passed files.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/FileIssueTable.tsx",
+            "src/ui/components/ReadableFrdView.tsx",
+            "src/ui/components/FileDetailPanel.tsx"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-005-T2-G1",
+          "severity": "critical",
+          "text": "Parse-failed files must never expose a readable FRD tab."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-005-T2-V1",
+          "type": "integration",
+          "description": "Per-file detail panel always includes issues tab and conditionally includes readable tab by status."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-005-T2-TR1",
+          "type": "integration",
+          "description": "Verify overview math, sorting, and detail rendering contracts.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-005-T2-TR1-S1",
+              "type": "success",
+              "description": "User selects a passed file.",
+              "expectedOutcome": "Issues and Readable FRD tabs both render with expected content."
+            },
+            {
+              "scenarioId": "FRD-005-T2-TR1-S2",
+              "type": "error",
+              "description": "User selects parse_failed file with parse diagnostics.",
+              "expectedOutcome": "Issues tab renders parse issue; readable tab is absent."
+            },
+            {
+              "scenarioId": "FRD-005-T2-TR1-S3",
+              "type": "edge",
+              "description": "Two files have same source filename.",
+              "expectedOutcome": "List shows distinct display names and selection uses stable file id."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-005-T3",
+      "title": "Implement run-issue panel and immutable run reset behavior",
+      "description": "Render run-blocking schema issues and enforce reset semantics when schema is replaced.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": ["FRD-005-T1", "FRD-003"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-005-T3-S1",
+          "title": "Create run-issue panel UI",
+          "description": "Display schema-level errors above file results with code/message/path/line/column fields.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/RunIssuePanel.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-005-T3-S2",
+          "title": "Implement schema-replace reset action",
+          "description": "Replace-schema interaction clears prior run state and returns to ready empty-results baseline.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/state/reviewRunStore.ts",
+            "src/ui/components/SchemaControlPanel.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-005-T3-V1",
+          "type": "manual",
+          "description": "Replacing schema clears existing run results and keeps app responsive with no stale selections."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-005-T3-TR1",
+          "type": "integration",
+          "description": "Verify run-issue visibility and reset semantics.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-005-T3-TR1-S1",
+              "type": "success",
+              "description": "Schema validates and run completes with file results.",
+              "expectedOutcome": "Run-issue panel stays hidden when no run issues exist."
+            },
+            {
+              "scenarioId": "FRD-005-T3-TR1-S2",
+              "type": "error",
+              "description": "Schema compile failure occurs.",
+              "expectedOutcome": "Run-issue panel appears and file result rows do not render."
+            },
+            {
+              "scenarioId": "FRD-005-T3-TR1-S3",
+              "type": "edge",
+              "description": "User replaces schema after completed mixed-result run.",
+              "expectedOutcome": "Previous files, summary, and selection state are fully reset."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

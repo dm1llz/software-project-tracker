@@ -1,0 +1,218 @@
+{
+  "metadata": {
+    "frdId": "FRD-001",
+    "title": "Foundation and Contracts",
+    "description": "Establish baseline module structure, canonical domain contracts, and deterministic ordering utilities for all MVP review behavior.",
+    "status": "not_started",
+    "priority": 1,
+    "estimatedEffort": "medium",
+    "dependencies": [],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/data-contracts.md",
+      "specs/architecture-overview.md"
+    ],
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-02-25"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-001-T1",
+      "title": "Create app baseline and module boundaries",
+      "description": "Scaffold project structure and module ownership boundaries exactly as architecture-overview requires.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-001-T1-S1",
+          "title": "Create domain and UI module directories",
+          "description": "Define initial folder structure for ui, domain/review-run, domain/validation, domain/rendering, infra/workers, and types.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/.gitkeep",
+            "src/domain/review-run/.gitkeep",
+            "src/domain/validation/.gitkeep",
+            "src/domain/rendering/.gitkeep",
+            "src/infra/workers/.gitkeep",
+            "src/types/.gitkeep"
+          ]
+        },
+        {
+          "subtaskId": "FRD-001-T1-S2",
+          "title": "Document module ownership",
+          "description": "Capture module boundaries and allowed dependencies to prevent cross-layer coupling drift.",
+          "status": "not_started",
+          "filesToCreate": [
+            "docs/module-boundaries.md"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-001-T1-G1",
+          "severity": "warning",
+          "text": "Do not collapse all logic into UI components; domain modules must remain framework-agnostic."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-001-T1-V1",
+          "type": "manual",
+          "description": "Confirm created directories map one-to-one with architecture module list."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-001-T1-TR1",
+          "type": "integration",
+          "description": "Validate imports enforce planned layering and prevent invalid reverse dependencies.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-001-T1-TR1-S1",
+              "type": "success",
+              "description": "A UI module imports domain contracts from src/types and compiles.",
+              "expectedOutcome": "Build passes with valid directional dependency usage."
+            },
+            {
+              "scenarioId": "FRD-001-T1-TR1-S2",
+              "type": "error",
+              "description": "A domain module attempts to import a UI component.",
+              "expectedOutcome": "Static check or test fails and flags prohibited dependency direction."
+            },
+            {
+              "scenarioId": "FRD-001-T1-TR1-S3",
+              "type": "edge",
+              "description": "Worker module imports shared types while remaining isolated from React runtime code.",
+              "expectedOutcome": "Compilation succeeds and worker bundle excludes UI-only dependencies."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-001-T2",
+      "title": "Implement canonical type contracts",
+      "description": "Translate data-contracts document into code-level source of truth used by UI and domain modules.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-001-T1"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-001-T2-S1",
+          "title": "Add review domain type definitions",
+          "description": "Create typed contracts for schema bundles, run issues, file issues, review results, and rendering sections.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/types/reviewContracts.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-001-T2-S2",
+          "title": "Add contract invariants as executable guards",
+          "description": "Define helper predicates for status and summary invariants that can be reused by runtime checks and tests.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/types/reviewContractGuards.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-001-T2-V1",
+          "type": "build",
+          "description": "TypeScript build succeeds with strict mode and no implicit-any leaks in contract files."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-001-T2-TR1",
+          "type": "unit",
+          "description": "Verify contract invariants and helper guards align with data-contract rules.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-001-T2-TR1-S1",
+              "type": "success",
+              "description": "A status of parse_failed maps to parseOk=false and valid=false in guard checks.",
+              "expectedOutcome": "Guard functions return true for valid state combinations."
+            },
+            {
+              "scenarioId": "FRD-001-T2-TR1-S2",
+              "type": "error",
+              "description": "A status of passed is paired with valid=false.",
+              "expectedOutcome": "Guard or assertion reports invariant violation."
+            },
+            {
+              "scenarioId": "FRD-001-T2-TR1-S3",
+              "type": "edge",
+              "description": "Summary totals are zero during run-blocked schema errors.",
+              "expectedOutcome": "Invariant check accepts total=passed=failed=parseFailed=0."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-001-T3",
+      "title": "Build deterministic ordering helpers",
+      "description": "Provide reusable ordering logic for file result sorting and duplicate filename display naming.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": ["FRD-001-T2"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-001-T3-S1",
+          "title": "Create status sort priority utility",
+          "description": "Implement comparator that enforces parse_failed, validation_failed, passed ordering then uploadIndex tie-break.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/sortReviewResults.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-001-T3-S2",
+          "title": "Create display name disambiguation utility",
+          "description": "Generate stable user labels for duplicate filenames by upload order index.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/disambiguateDisplayName.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-001-T3-V1",
+          "type": "test",
+          "description": "Sorting and display-name helpers return deterministic output across repeated runs."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-001-T3-TR1",
+          "type": "unit",
+          "description": "Validate deterministic order and disambiguation behavior for duplicate names.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-001-T3-TR1-S1",
+              "type": "success",
+              "description": "Three files with mixed statuses are sorted by required status groups and upload index.",
+              "expectedOutcome": "Result order matches MVP contract exactly."
+            },
+            {
+              "scenarioId": "FRD-001-T3-TR1-S2",
+              "type": "error",
+              "description": "Comparator receives unknown status string from malformed state.",
+              "expectedOutcome": "Utility throws or returns explicit fallback error signal."
+            },
+            {
+              "scenarioId": "FRD-001-T3-TR1-S3",
+              "type": "edge",
+              "description": "Duplicate filename appears more than twice in one run.",
+              "expectedOutcome": "Display labels remain stable and uniquely numbered in upload order."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

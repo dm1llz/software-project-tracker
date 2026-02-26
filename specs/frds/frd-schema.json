@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://software-project-tracker.internal/schemas/frd-v1.json",
+  "title": "Functional Requirements Document",
+  "description": "Schema for Software Project Tracker FRD documents consumed by AI agents for incremental implementation",
+  "type": "object",
+  "required": ["metadata", "majorTasks"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "frdId",
+        "title",
+        "description",
+        "status",
+        "priority",
+        "estimatedEffort",
+        "dependencies",
+        "specReferences",
+        "createdAt",
+        "updatedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "frdId": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}$",
+          "description": "Unique FRD identifier (e.g., FRD-001)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable title for the FRD"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Brief description of what this FRD covers"
+        },
+        "status": {
+          "$ref": "#/$defs/status",
+          "description": "Current implementation status of the FRD"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16,
+          "description": "Implementation priority (1 = highest)"
+        },
+        "estimatedEffort": {
+          "type": "string",
+          "enum": ["small", "medium", "large", "xlarge"],
+          "description": "Estimated implementation effort"
+        },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^FRD-\\d{3}$"
+          },
+          "description": "FRD IDs that must be completed before this FRD can begin"
+        },
+        "specReferences": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "description": "References to spec documents for traceability"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the FRD was created"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the FRD was last updated"
+        }
+      }
+    },
+    "majorTasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/majorTask"
+      },
+      "description": "Ordered list of major implementation tasks"
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["not_started", "in_progress", "completed", "blocked", "skipped"]
+    },
+    "majorTask": {
+      "type": "object",
+      "required": [
+        "taskId",
+        "title",
+        "description",
+        "status",
+        "prLevel",
+        "dependencies",
+        "subtasks",
+        "verification",
+        "testRequirements"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}-T\\d+$",
+          "description": "Unique task identifier (e.g., FRD-001-T1)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "prLevel": {
+          "type": "boolean",
+          "description": "Whether this task represents a standalone PR"
+        },
+        "dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^FRD-\\d{3}(-T\\d+)?$"
+          },
+          "description": "Task or FRD IDs that must be completed before this task"
+        },
+        "subtasks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/subtask"
+          }
+        },
+        "gotchas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/gotcha"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "verification": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/verification"
+          }
+        },
+        "testRequirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/testRequirement"
+          }
+        }
+      }
+    },
+    "subtask": {
+      "type": "object",
+      "required": ["subtaskId", "title", "description", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "subtaskId": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}-T\\d+-S\\d+$",
+          "description": "Unique subtask identifier (e.g., FRD-001-T1-S1)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "filesToCreate": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "description": "File paths to create"
+        },
+        "filesToModify": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "description": "File paths to modify"
+        }
+      }
+    },
+    "gotcha": {
+      "type": "object",
+      "required": ["id", "severity", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}-T\\d+-G\\d+$"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "critical"]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}-T\\d+-V\\d+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["build", "test", "manual", "integration", "api"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "testScenario": {
+      "type": "object",
+      "required": ["scenarioId", "type", "description", "expectedOutcome"],
+      "additionalProperties": false,
+      "properties": {
+        "scenarioId": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}-T\\d+-TR\\d+-S\\d+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["success", "error", "edge"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expectedOutcome": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "testRequirement": {
+      "type": "object",
+      "required": ["id", "type", "description", "requiredScenarios"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^FRD-\\d{3}-T\\d+-TR\\d+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["unit", "integration", "e2e", "benchmark"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requiredScenarios": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/testScenario"
+          },
+          "description": "Concrete scenarios that must be tested, including success and error paths"
+        }
+      }
+    }
+  }
+}

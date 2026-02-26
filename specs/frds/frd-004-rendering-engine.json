@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "frdId": "FRD-004",
+    "title": "Rendering Engine",
+    "description": "Implement schema-driven readable rendering for valid FRDs across scalar, object, and array structures.",
+    "status": "not_started",
+    "priority": 4,
+    "estimatedEffort": "large",
+    "dependencies": ["FRD-001"],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/data-contracts.md",
+      "specs/architecture-overview.md",
+      "specs/ux-review-flow.md"
+    ],
+    "createdAt": "2026-02-25",
+    "updatedAt": "2026-02-25"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-004-T1",
+      "title": "Build section model generator",
+      "description": "Create renderer primitives that map FRD JSON nodes into RenderedSection contracts.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-001"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-004-T1-S1",
+          "title": "Implement scalar node mapping",
+          "description": "Map scalar JSON values to kind='scalar' rendered sections with path and title metadata.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/mapScalarSection.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-004-T1-S2",
+          "title": "Implement object node mapping",
+          "description": "Map object nodes to labeled fields and object content preserving schema field descriptions when available.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/mapObjectSection.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-004-T1-V1",
+          "type": "test",
+          "description": "Renderer output matches RenderedSection union types and JSON pointer path expectations."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-004-T1-TR1",
+          "type": "unit",
+          "description": "Validate base scalar/object section mapping behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-004-T1-TR1-S1",
+              "type": "success",
+              "description": "Simple object with scalar properties is rendered into one object section with labeled fields.",
+              "expectedOutcome": "All fields include expected keys, labels, paths, and values."
+            },
+            {
+              "scenarioId": "FRD-004-T1-TR1-S2",
+              "type": "error",
+              "description": "Renderer receives unsupported runtime value type for scalar mapper.",
+              "expectedOutcome": "Mapper throws controlled error or returns explicit failure object."
+            },
+            {
+              "scenarioId": "FRD-004-T1-TR1-S3",
+              "type": "edge",
+              "description": "Null scalar values are present.",
+              "expectedOutcome": "Null values are preserved and rendered without coercion."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-004-T2",
+      "title": "Handle arrays and nested structures",
+      "description": "Support arrays of objects, arrays of scalars, and nested sections without altering data semantics.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": ["FRD-004-T1"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-004-T2-S1",
+          "title": "Implement array of scalar mapping",
+          "description": "Render scalar arrays as list-like content with itemKind='scalar'.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/mapArrayScalarSection.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-004-T2-S2",
+          "title": "Implement array of object mapping",
+          "description": "Render object arrays as repeated structured blocks with stable item ids and titles.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/mapArrayObjectSection.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-004-T2-S3",
+          "title": "Implement nested object traversal",
+          "description": "Traverse nested objects/arrays recursively and produce path-correct section hierarchy.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/buildRenderedSections.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-004-T2-G1",
+          "severity": "critical",
+          "text": "Do not flatten nested structures in a way that loses JSON pointer traceability."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-004-T2-V1",
+          "type": "integration",
+          "description": "Nested and array-heavy FRDs render as readable sections with stable paths and titles."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-004-T2-TR1",
+          "type": "integration",
+          "description": "Validate nested and array rendering behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-004-T2-TR1-S1",
+              "type": "success",
+              "description": "FRD contains array of objects and array of scalars under one parent.",
+              "expectedOutcome": "Renderer emits array sections with correct itemKind and item payloads."
+            },
+            {
+              "scenarioId": "FRD-004-T2-TR1-S2",
+              "type": "error",
+              "description": "Runtime node marked as array contains mixed object/scalar item types unexpectedly.",
+              "expectedOutcome": "Renderer signals unsupported mixed-array condition with explicit failure."
+            },
+            {
+              "scenarioId": "FRD-004-T2-TR1-S3",
+              "type": "edge",
+              "description": "Deeply nested object path includes empty arrays.",
+              "expectedOutcome": "Section tree remains valid and empty arrays render as empty list sections."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-004-T3",
+      "title": "Enforce ordering and semantic preservation rules",
+      "description": "Apply deterministic field ordering and ensure rendered output does not alter FRD meaning.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": ["FRD-004-T2"],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-004-T3-S1",
+          "title": "Implement schema-first field ordering",
+          "description": "Use schema property order when available, otherwise preserve source key order.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/orderFields.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-004-T3-S2",
+          "title": "Add semantic preservation assertions",
+          "description": "Ensure displayed values reflect source JSON exactly without coercive rewriting.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/rendering/assertSemanticPreservation.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-004-T3-V1",
+          "type": "test",
+          "description": "Field order and value semantics match contract rules in data-contracts and MVP spec."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-004-T3-TR1",
+          "type": "unit",
+          "description": "Verify ordering fallback behavior and semantic-preservation checks.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-004-T3-TR1-S1",
+              "type": "success",
+              "description": "Schema property order is provided for object fields.",
+              "expectedOutcome": "Renderer outputs fields in schema-defined order."
+            },
+            {
+              "scenarioId": "FRD-004-T3-TR1-S2",
+              "type": "error",
+              "description": "Renderer attempts to coerce numeric string into number for display.",
+              "expectedOutcome": "Assertion fails because semantic transformation is not allowed."
+            },
+            {
+              "scenarioId": "FRD-004-T3-TR1-S3",
+              "type": "edge",
+              "description": "Schema omits property order metadata.",
+              "expectedOutcome": "Source JSON key order is preserved in rendered fields."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
