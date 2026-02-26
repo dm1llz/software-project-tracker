@@ -19,6 +19,7 @@ Prevent scope creep by explicitly listing decisions that are out of scope for MV
 6. No plugin ecosystem or extension APIs.
 7. No native desktop packaging in MVP.
 8. No multi-schema registry management UI.
+9. No support for legacy JSON Schema drafts (for example draft-07 or draft-06).
 
 ## Guardrails for Decision-Making
 - If a feature requires backend infrastructure, it is post-MVP by default.

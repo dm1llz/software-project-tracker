@@ -73,6 +73,9 @@ export type BatchReviewSummary = {
 - `parseOk=false` implies `valid=false`.
 - `sections` are present only for valid parsed files.
 - `BatchReviewSummary.total` must equal total uploaded FRD files in review run.
+- Accepted schema draft for MVP is `2020-12` only.
+- When `$schema` is absent, the system assumes `2020-12` in MVP.
+- Any non-`2020-12` `$schema` must fail before FRD validation starts.
 
 ## Mapping Guidance
 - Parse errors are represented as `ValidationIssue` with `level="error"` and best-effort `path`.
