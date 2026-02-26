@@ -5,7 +5,8 @@
 - Last Updated: 2026-02-25
 - Depends On: [mvp-frd-review-spec.md](./mvp-frd-review-spec.md), [data-contracts.md](./data-contracts.md)
 - Open Questions:
-  - Should issue panel support copy-to-clipboard in MVP?
+  - None blocking for MVP.
+  - Post-MVP backlog: Should issue panel support copy-to-clipboard.
 
 ## Purpose
 Define screen-by-screen behavior for one FRD review run from schema load to per-file inspection.
@@ -31,7 +32,7 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
 - Show review run summary:
   - total files
   - passed
-  - failed
+  - failed (validation failures only)
   - parse failed
 - Show per-file rows/cards with status badge.
 - Default sort order:
@@ -42,12 +43,14 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
 
 ## Screen 5: Per-File Detail
 - Two tabs/sections:
-  - Issues (all parse/validation issues)
+  - Issues (all file issues)
   - Readable FRD (only for valid files)
 - Issue row fields:
   - level
   - code
   - path
+  - line (if available)
+  - column (if available)
   - message
   - keyword (if available)
 - Parse-failed files show required fixes in the Issues view and do not show a Readable FRD tab.
@@ -55,6 +58,7 @@ Define screen-by-screen behavior for one FRD review run from schema load to per-
 ## Error and Edge States
 - Invalid schema JSON: block run and show actionable parse error.
 - Schema compile error: block run and show compile reason.
+- Unsupported schema draft: block run and show run issue with expected draft and detected value.
 - FRD parse failure: show parse issue and continue batch.
 - Duplicate file names: display indexed labels (example: `feature.json (2)`).
 

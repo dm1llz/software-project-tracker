@@ -5,7 +5,8 @@
 - Last Updated: 2026-02-25
 - Depends On: [mvp-frd-review-spec.md](./mvp-frd-review-spec.md), [product-vision.md](./product-vision.md)
 - Open Questions:
-  - Which post-MVP capability has highest ROI: history, export, or AI assistance?
+  - None blocking for MVP.
+  - Post-MVP backlog: Which capability has highest ROI (history, export, or AI assistance).
 
 ## Planning Model
 Roadmap uses milestone phases with explicit exit criteria.
