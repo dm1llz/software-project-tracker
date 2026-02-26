@@ -1,7 +1,7 @@
 # MVP FRD Review Spec
 
 - Owner: David
-- Status: Draft
+- Status: Approved
 - Last Updated: 2026-02-25
 - Depends On: [product-vision.md](./product-vision.md), [data-contracts.md](./data-contracts.md), [ux-review-flow.md](./ux-review-flow.md)
 - Open Questions:
