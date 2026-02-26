@@ -154,6 +154,8 @@ export type ReviewRunResult = {
 - `uploadIndex` is 0-based and preserves ingestion order.
 - `fileName` must always refer to the original uploaded file label.
 - `displayName` is the user-facing label and is used to disambiguate duplicate file names.
+- For every `FileIssue` in a `ReviewResult`, `FileIssue.fileId` must equal `ReviewResult.id`.
+- For every `FileIssue` in a `ReviewResult`, `FileIssue.fileName` must equal `ReviewResult.fileName`.
 - `path` must be JSON pointer format where available.
 - For document-level parse errors where no pointer exists, use `path="/"`.
 - `line` and `column` are optional but should be included for parse/schema errors when parser output provides them.
@@ -167,6 +169,10 @@ export type ReviewRunResult = {
 - `BatchReviewSummary.parseFailed` counts only `status="parse_failed"` files.
 - `BatchReviewSummary.passed` counts only `status="passed"` files.
 - `BatchReviewSummary.total = passed + failed + parseFailed`.
+- If review run is blocked before FRD file processing (for example schema parse/compile/draft failure):
+  - `files=[]`
+  - `summary={ total: 0, passed: 0, failed: 0, parseFailed: 0 }`
+  - `runIssues` contains one or more `RunIssue` entries.
 - Accepted schema draft for MVP is `2020-12` only.
 - When `$schema` is absent, the system assumes `2020-12` in MVP.
 - Any non-`2020-12` `$schema` must fail before FRD validation starts.
