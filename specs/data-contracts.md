@@ -10,56 +10,61 @@
 ## Purpose
 This document freezes canonical TypeScript contracts for the FRD review run domain. These names are normative across UI and domain modules.
 
+## Type System Standard
+- Favor `type` aliases for domain/data contracts.
+- Use `interface` only when explicit extension/implementation behavior is required.
+- Avoid declaration merging for core FRD contracts to keep schemas and code aligned.
+
 ## Canonical Contracts
 ```ts
-export interface SchemaBundle {
+export type SchemaBundle = {
   id: string;
   name: string;
   raw: Record<string, unknown>;
   draft: string | null;
-}
+};
 
-export interface ReviewInputFile {
+export type ReviewInputFile = {
   fileName: string;
   text: string;
-}
+};
 
-export interface ReviewInput {
+export type ReviewInput = {
   schema: SchemaBundle;
   files: ReviewInputFile[];
-}
+};
 
-export interface ValidationIssue {
+export type ValidationIssue = {
   level: "error" | "warning";
   fileName: string;
   path: string; // JSON pointer, e.g. "/features/0/name"
   message: string;
   keyword?: string;
-}
+};
 
 export type RenderedSectionKind = "object" | "array" | "scalar";
 
-export interface RenderedSection {
+export type RenderedSection = {
   id: string;
   title: string;
   kind: RenderedSectionKind;
   content: unknown; // normalized render model consumed by UI
-}
+};
 
-export interface ReviewResult {
+export type ReviewResult = {
   fileName: string;
   parseOk: boolean;
   valid: boolean;
   issues: ValidationIssue[];
   sections?: RenderedSection[];
-}
+};
 
-export interface BatchReviewSummary {
+export type BatchReviewSummary = {
   total: number;
   passed: number;
   failed: number;
   parseFailed: number;
-}
+};
 ```
 
 ## Contract Rules
