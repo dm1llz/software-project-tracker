@@ -6,7 +6,7 @@ Do exactly one PR bundle per run.
 ## Inputs
 - `specs/frds/index.json`
 - `specs/frds/frd-schema.json`
-- all `specs/frds/frd-*.json`
+- all `specs/frds/frd-[0-9][0-9][0-9]-*.json`
 
 ## Task selection rules
 1. Load FRDs in `index.json` order.
@@ -48,8 +48,8 @@ Do exactly one PR bundle per run.
 ## Validation
 - Run tests/checks required by selected tasks.
 - Validate FRDs with Ajv:
-  - `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-*.json\"`
-  - If glob handling is inconsistent in your shell/runner, expand files explicitly, for example: `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json $(find specs/frds -maxdepth 1 -type f -name 'frd-*.json' | sort | sed 's/^/-d /')`
+  - `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-[0-9][0-9][0-9]-*.json\"`
+  - If glob handling is inconsistent in your shell/runner, expand files explicitly, for example: `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json $(find specs/frds -maxdepth 1 -type f -name 'frd-[0-9][0-9][0-9]-*.json' | sort | sed 's/^/-d /')`
 
 ## FRD status updates
 - Mark completed tasks/subtasks as `completed`.
