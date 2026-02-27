@@ -46,11 +46,13 @@ Do exactly one PR bundle per run.
 7. End with all selected tasks implemented and committed.
 
 ## Strict CI validation gates (required)
-1. Every `verification` entry in every selected task must have at least one executed command.
+1. Every `verification` entry in every selected task must have at least one executed command, or be explicitly marked `manual_verified` with human evidence.
 2. Every selected task that has `testRequirements` must have executed test commands.
 3. If any required verification/test command fails, stop and report failure (do not mark tasks completed).
 4. Do not claim success without command evidence.
-5. If an expected tool is unavailable, treat as failure and report remediation.
+5. If an expected tool is unavailable, treat as failure and report remediation unless the verification is explicitly `manual_verified` with evidence.
+6. Verification entries that cannot be executed automatically (for example visual/UI checks or documentation clarity checks) may be marked `manual_verified` and must include a brief human-performed evidence string in `RUN_SUMMARY.json`.
+7. Treat `manual_verified` entries as valid only when evidence text is present; fail the run if the label is missing or evidence is empty.
 
 ## Validation commands
 - Run tests/checks required by selected tasks.
@@ -77,7 +79,7 @@ Include at minimum:
 - `commits`: [{"hash": string, "message": string}]
 - `filesChanged`: string[]
 - `validationResults`: [{"name": string, "command": string, "exitCode": number, "status": "passed"|"failed", "outputSummary": string}]
-- `verificationEvidence`: [{"taskId": string, "verificationId": string, "commands": string[], "status": "passed"|"failed"}]
+- `verificationEvidence`: [{"taskId": string, "verificationId": string, "commands": string[], "status": "passed"|"failed"|"manual_verified", "humanEvidence": string|null}]
 - `nextBoundaryTaskId`: string | null
 - `overallStatus`: "passed" | "failed"
 
