@@ -54,7 +54,7 @@
       "taskId": "FRD-001-T4",
       "title": "Set up toolchain and dependency baseline",
       "description": "Define environment prerequisites and install core runtime, validation, and test dependencies before feature implementation starts.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-001-T0"
@@ -64,7 +64,7 @@
           "subtaskId": "FRD-001-T4-S1",
           "title": "Define Node and package-manager baseline",
           "description": "Pick the package manager used by the repo, pin Node version, and document setup commands for local development and CI.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "docs/development-setup.md",
             ".nvmrc"
@@ -77,7 +77,7 @@
           "subtaskId": "FRD-001-T4-S2",
           "title": "Install schema validation dependencies",
           "description": "Add Ajv v8 and ajv-formats as explicit dependencies to support strict schema compilation and date format checks.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json"
           ]
@@ -86,7 +86,7 @@
           "subtaskId": "FRD-001-T4-S3",
           "title": "Install test framework dependencies",
           "description": "Add Vitest, Testing Library, and Playwright dependency set required by FRD-006 quality tasks.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json"
           ]
@@ -95,7 +95,7 @@
           "subtaskId": "FRD-001-T4-S4",
           "title": "Add standard scripts for validation and tests",
           "description": "Define package scripts for build, unit, integration, e2e, and schema validation so downstream FRDs can reference stable commands.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json"
           ]
