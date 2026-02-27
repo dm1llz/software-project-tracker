@@ -36,10 +36,10 @@ Do exactly one PR bundle per run.
 1. Use conventional commits.
 2. Make multiple commits when it improves reviewability (logical checkpoints).
 3. Commit format:
-   - `<type>(frd): <short summary>`
+   - `<type>(frd-###): <short summary>`
 4. Allowed types:
    - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
-5. Scope should include FRD/task context when possible, e.g.:
+5. Scope must use an FRD/task-specific identifier, e.g.:
    - `feat(frd-002): add strict schema compile pipeline`
    - `test(frd-003): add mixed-batch validation coverage`
 6. Do not squash during this run unless explicitly requested.
