@@ -13,7 +13,7 @@ Do exactly one PR bundle per run.
 2. Within each FRD, use `majorTasks` order as canonical.
 3. A task is eligible if:
    - `status` is `not_started`
-   - all dependencies are satisfied (`completed` or `skipped`, or included earlier in current bundle)
+   - all dependencies are satisfied (`completed` or `skipped`, or included earlier in current bundle). Note: Tasks within the same bundle may depend on other tasks only if those dependencies appear earlier in the bundle order (no circular forward references).
 4. Find the first eligible task `T`.
 5. Build bundle:
    - always include `T`
