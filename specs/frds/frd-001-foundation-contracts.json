@@ -20,7 +20,7 @@
       "taskId": "FRD-001-T0",
       "title": "Add baseline ignore rules",
       "description": "Create a default project .gitignore before any tooling or feature work so generated artifacts do not pollute commits, including Codex PR outputs.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [],
       "subtasks": [
@@ -28,7 +28,7 @@
           "subtaskId": "FRD-001-T0-S1",
           "title": "Create Node-focused .gitignore",
           "description": "Add standard Node.js ignore rules covering dependencies, logs, build/test artifacts, caches, local environment files, and `.codex/pr/` outputs.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             ".gitignore"
           ]
