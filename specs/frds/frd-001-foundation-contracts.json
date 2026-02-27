@@ -19,7 +19,7 @@
     {
       "taskId": "FRD-001-T0",
       "title": "Add baseline ignore rules",
-      "description": "Create a default project .gitignore before any tooling or feature work so generated artifacts do not pollute commits.",
+      "description": "Create a default project .gitignore before any tooling or feature work so generated artifacts do not pollute commits, including Codex PR outputs.",
       "status": "not_started",
       "prLevel": true,
       "dependencies": [],
@@ -27,7 +27,7 @@
         {
           "subtaskId": "FRD-001-T0-S1",
           "title": "Create Node-focused .gitignore",
-          "description": "Add standard Node.js ignore rules covering dependencies, logs, build/test artifacts, caches, and local environment files.",
+          "description": "Add standard Node.js ignore rules covering dependencies, logs, build/test artifacts, caches, local environment files, and `.codex/pr/` outputs.",
           "status": "not_started",
           "filesToCreate": [
             ".gitignore"
@@ -45,7 +45,7 @@
         {
           "id": "FRD-001-T0-V1",
           "type": "manual",
-          "description": "Confirm git status no longer shows standard local Node artifacts after install/test runs."
+          "description": "Confirm git status no longer shows standard local Node artifacts or `.codex/pr/` outputs after install/test runs."
         }
       ],
       "testOmissionReason": "This task is repository hygiene configuration and is validated through git-status behavior rather than executable tests."
