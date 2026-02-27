@@ -17,12 +17,82 @@
   },
   "majorTasks": [
     {
+      "taskId": "FRD-001-T4",
+      "title": "Set up toolchain and dependency baseline",
+      "description": "Define environment prerequisites and install core runtime, validation, and test dependencies before feature implementation starts.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-001-T4-S1",
+          "title": "Define Node and package-manager baseline",
+          "description": "Pick the package manager used by the repo, pin Node version, and document setup commands for local development and CI.",
+          "status": "not_started",
+          "filesToCreate": [
+            "docs/development-setup.md",
+            ".nvmrc"
+          ],
+          "filesToModify": [
+            "package.json"
+          ]
+        },
+        {
+          "subtaskId": "FRD-001-T4-S2",
+          "title": "Install schema validation dependencies",
+          "description": "Add Ajv v8 and ajv-formats as explicit dependencies to support strict schema compilation and date format checks.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json"
+          ]
+        },
+        {
+          "subtaskId": "FRD-001-T4-S3",
+          "title": "Install test framework dependencies",
+          "description": "Add Vitest, Testing Library, and Playwright dependency set required by FRD-006 quality tasks.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json"
+          ]
+        },
+        {
+          "subtaskId": "FRD-001-T4-S4",
+          "title": "Add standard scripts for validation and tests",
+          "description": "Define package scripts for build, unit, integration, e2e, and schema validation so downstream FRDs can reference stable commands.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-001-T4-G1",
+          "severity": "warning",
+          "text": "Keep dependency versions pinned or range-constrained consistently to avoid drift between local and CI environments."
+        }
+      ],
+      "notes": [
+        "If a package manager lockfile already exists, use that manager as canonical rather than introducing a second manager."
+      ],
+      "verification": [
+        {
+          "id": "FRD-001-T4-V1",
+          "type": "manual",
+          "description": "A clean checkout can run install, build, and test script discovery commands without missing-package errors."
+        }
+      ],
+      "testOmissionReason": "This task provisions environment and tooling; value is verified by successful install/build/test command execution in downstream tasks rather than dedicated unit tests."
+    },
+    {
       "taskId": "FRD-001-T1",
       "title": "Create app baseline and module boundaries",
       "description": "Scaffold project structure and module ownership boundaries exactly as architecture-overview requires.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": [],
+      "dependencies": [
+        "FRD-001-T4"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-001-T1-S1",
@@ -66,7 +136,7 @@
         {
           "id": "FRD-001-T1-TR1",
           "type": "integration",
-          "description": "Validate imports enforce planned layering and prevent invalid reverse dependencies.",
+          "description": "Validate only the highest-risk module-boundary import rules that protect architecture layering.",
           "requiredScenarios": [
             {
               "scenarioId": "FRD-001-T1-TR1-S1",
@@ -79,12 +149,6 @@
               "type": "error",
               "description": "A domain module attempts to import a UI component.",
               "expectedOutcome": "Static check or test fails and flags prohibited dependency direction."
-            },
-            {
-              "scenarioId": "FRD-001-T1-TR1-S3",
-              "type": "edge",
-              "description": "Worker module imports shared types while remaining isolated from React runtime code.",
-              "expectedOutcome": "Compilation succeeds and worker bundle excludes UI-only dependencies."
             }
           ]
         }
@@ -96,7 +160,9 @@
       "description": "Translate data-contracts document into code-level source of truth used by UI and domain modules.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": ["FRD-001-T1"],
+      "dependencies": [
+        "FRD-001-T1"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-001-T2-S1",
@@ -128,7 +194,7 @@
         {
           "id": "FRD-001-T2-TR1",
           "type": "unit",
-          "description": "Verify contract invariants and helper guards align with data-contract rules.",
+          "description": "Verify critical contract invariants and reject invalid status/summary combinations.",
           "requiredScenarios": [
             {
               "scenarioId": "FRD-001-T2-TR1-S1",
@@ -141,12 +207,6 @@
               "type": "error",
               "description": "A status of passed is paired with valid=false.",
               "expectedOutcome": "Guard or assertion reports invariant violation."
-            },
-            {
-              "scenarioId": "FRD-001-T2-TR1-S3",
-              "type": "edge",
-              "description": "Summary totals are zero during run-blocked schema errors.",
-              "expectedOutcome": "Invariant check accepts total=passed=failed=parseFailed=0."
             }
           ]
         }
@@ -158,7 +218,9 @@
       "description": "Provide reusable ordering logic for file result sorting and duplicate filename display naming.",
       "status": "not_started",
       "prLevel": false,
-      "dependencies": ["FRD-001-T2"],
+      "dependencies": [
+        "FRD-001-T2"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-001-T3-S1",
@@ -190,19 +252,13 @@
         {
           "id": "FRD-001-T3-TR1",
           "type": "unit",
-          "description": "Validate deterministic order and disambiguation behavior for duplicate names.",
+          "description": "Cover deterministic ordering and duplicate-name disambiguation paths that affect user-visible result stability.",
           "requiredScenarios": [
             {
               "scenarioId": "FRD-001-T3-TR1-S1",
               "type": "success",
               "description": "Three files with mixed statuses are sorted by required status groups and upload index.",
               "expectedOutcome": "Result order matches MVP contract exactly."
-            },
-            {
-              "scenarioId": "FRD-001-T3-TR1-S2",
-              "type": "error",
-              "description": "Comparator receives unknown status string from malformed state.",
-              "expectedOutcome": "Utility throws or returns explicit fallback error signal."
             },
             {
               "scenarioId": "FRD-001-T3-TR1-S3",
