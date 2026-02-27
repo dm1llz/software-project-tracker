@@ -13,16 +13,52 @@
       "specs/architecture-overview.md"
     ],
     "createdAt": "2026-02-25",
-    "updatedAt": "2026-02-25"
+    "updatedAt": "2026-02-27"
   },
   "majorTasks": [
+    {
+      "taskId": "FRD-001-T0",
+      "title": "Add baseline ignore rules",
+      "description": "Create a default project .gitignore before any tooling or feature work so generated artifacts do not pollute commits.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-001-T0-S1",
+          "title": "Create Node-focused .gitignore",
+          "description": "Add standard Node.js ignore rules covering dependencies, logs, build/test artifacts, caches, and local environment files.",
+          "status": "not_started",
+          "filesToCreate": [
+            ".gitignore"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-001-T0-G1",
+          "severity": "warning",
+          "text": "Do not ignore lockfiles or source files required for reproducible builds."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-001-T0-V1",
+          "type": "manual",
+          "description": "Confirm git status no longer shows standard local Node artifacts after install/test runs."
+        }
+      ],
+      "testOmissionReason": "This task is repository hygiene configuration and is validated through git-status behavior rather than executable tests."
+    },
     {
       "taskId": "FRD-001-T4",
       "title": "Set up toolchain and dependency baseline",
       "description": "Define environment prerequisites and install core runtime, validation, and test dependencies before feature implementation starts.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": [],
+      "dependencies": [
+        "FRD-001-T0"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-001-T4-S1",
