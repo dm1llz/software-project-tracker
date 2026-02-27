@@ -111,10 +111,16 @@
       ],
       "anyOf": [
         {
-          "required": ["testRequirements"]
+          "required": ["testRequirements"],
+          "properties": {
+            "testRequirements": {}
+          }
         },
         {
-          "required": ["testOmissionReason"]
+          "required": ["testOmissionReason"],
+          "properties": {
+            "testOmissionReason": {}
+          }
         }
       ],
       "additionalProperties": false,
