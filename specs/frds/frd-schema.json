@@ -67,7 +67,9 @@
           "minItems": 1,
           "uniqueItems": true,
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\s*$).+"
           },
           "description": "References to spec documents for traceability"
         },
@@ -220,7 +222,9 @@
           "type": "array",
           "uniqueItems": true,
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\s*$).+"
           },
           "description": "File paths to create"
         },
@@ -228,7 +232,9 @@
           "type": "array",
           "uniqueItems": true,
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!\\s*$).+"
           },
           "description": "File paths to modify"
         }
