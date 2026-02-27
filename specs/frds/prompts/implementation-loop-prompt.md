@@ -7,6 +7,24 @@ Do exactly one PR bundle per run.
 - `specs/frds/index.json`
 - `specs/frds/frd-schema.json`
 - all `specs/frds/frd-[0-9][0-9][0-9]-*.json`
+- `.codex/NOTES.md` (if present)
+
+## Cross-run memory (required)
+1. Use `.codex/NOTES.md` as persistent run memory across chats/contexts.
+2. At run start, read `.codex/NOTES.md` if it exists and apply relevant guidance.
+3. At run end, append a new note only when there is durable new information (snag, remediation, decision, reusable command/check, or implementation caveat).
+4. Do not append duplicate notes; compare against recent entries first.
+5. Never store secrets, tokens, credentials, or personal data.
+6. Use this append format:
+   ```md
+   ### <YYYY-MM-DD> <short context, e.g. FRD-001-T4>
+   - Situation:
+   - Learning:
+   - Action/Decision:
+   - Reusable check/command:
+   - Applicability:
+   ```
+7. If no new durable learning exists, leave `.codex/NOTES.md` unchanged and record `no_change` in run summary.
 
 ## Task selection rules
 1. Load FRDs in `index.json` order.
@@ -76,6 +94,7 @@ For the `.codex/pr/RUN_SUMMARY.json` output above, use the following fields and 
 - `commits`: array of objects with `{ "hash": string, "message": string }`
 - `filesChanged`: string[]
 - `validationResults`: array of objects with `{ "name": string, "command": string, "exitCode": number, "status": "passed" | "failed" }`
+- `memoryUpdate`: object with `{ "file": string, "status": "appended" | "no_change", "summary": string }`
 - `nextBoundaryTaskId`: string | null
 
 ## Final output (required)
@@ -85,8 +104,9 @@ Return:
 3. Commit list (hash + message)
 4. Files changed
 5. Validation/test results
-6. Next boundary task ID (next `prLevel: true` not implemented)
-7. A PR body in Markdown using this template:
+6. Memory update summary (`appended` or `no_change`, plus short note)
+7. Next boundary task ID (next `prLevel: true` not implemented)
+8. A PR body in Markdown using this template:
 
 ### PR Title
 `<conventional-commit-style summary for bundle>`
