@@ -69,6 +69,15 @@ Do exactly one PR bundle per run.
 4. Overwrite `.codex/pr/PR_BODY.md` and `.codex/pr/RUN_SUMMARY.json` on each run.
 5. Also print the PR body in terminal output.
 
+## RUN_SUMMARY.json schema (recommended fields)
+For the `.codex/pr/RUN_SUMMARY.json` output above, use the following fields and types:
+- `selectedBundleTaskIds`: string[]
+- `branchName`: string
+- `commits`: array of objects with `{ "hash": string, "message": string }`
+- `filesChanged`: string[]
+- `validationResults`: array of objects with `{ "name": string, "command": string, "exitCode": number, "status": "passed" | "failed" }`
+- `nextBoundaryTaskId`: string | null
+
 ## Final output (required)
 Return:
 1. Selected bundle task IDs
