@@ -107,8 +107,15 @@
         "prLevel",
         "dependencies",
         "subtasks",
-        "verification",
-        "testRequirements"
+        "verification"
+      ],
+      "anyOf": [
+        {
+          "required": ["testRequirements"]
+        },
+        {
+          "required": ["testOmissionReason"]
+        }
       ],
       "additionalProperties": false,
       "properties": {
@@ -172,7 +179,13 @@
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/testRequirement"
-          }
+          },
+          "description": "Include only high-value tests that exercise meaningful behavior and failure handling."
+        },
+        "testOmissionReason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Use when tests are intentionally omitted for this task, with a concrete rationale."
         }
       }
     },
@@ -299,7 +312,7 @@
           "items": {
             "$ref": "#/$defs/testScenario"
           },
-          "description": "Concrete scenarios that must be tested, including success and error paths"
+          "description": "Concrete scenarios that must be tested. Use only scenarios that add signal; no fixed success/error/edge mix is required and repeated types are allowed when justified."
         }
       }
     }
