@@ -7,6 +7,24 @@ Do exactly one PR bundle per run.
 - `specs/frds/index.json`
 - `specs/frds/frd-schema.json`
 - all `specs/frds/frd-[0-9][0-9][0-9]-*.json`
+- `.codex/NOTES.md` (if present)
+
+## Cross-run memory (required)
+1. Use `.codex/NOTES.md` as persistent run memory across chats/contexts.
+2. At run start, read `.codex/NOTES.md` if it exists and apply relevant guidance before selecting/implementing tasks.
+3. At run end, append a new note only when there is durable new information (snag, remediation, decision, reusable command/check, or implementation caveat).
+4. Do not append duplicate notes; compare against recent entries first.
+5. Never store secrets, tokens, credentials, or personal data.
+6. Use this append format:
+   ```md
+   ### <YYYY-MM-DD> <short context, e.g. FRD-001-T4>
+   - Situation:
+   - Learning:
+   - Action/Decision:
+   - Reusable check/command:
+   - Applicability:
+   ```
+7. If no new durable learning exists, leave `.codex/NOTES.md` unchanged and record `no_change` in `RUN_SUMMARY.json`.
 
 ## Task selection rules
 1. Load FRDs in `index.json` order.
@@ -80,6 +98,7 @@ Include at minimum:
 - `filesChanged`: string[]
 - `validationResults`: [{"name": string, "command": string, "exitCode": number, "status": "passed"|"failed", "outputSummary": string}]
 - `verificationEvidence`: [{"taskId": string, "verificationId": string, "commands": string[], "status": "passed"|"failed"|"manual_verified", "humanEvidence": string|null}]
+- `memoryUpdate`: {"file": string, "status": "appended"|"no_change", "summary": string}
 - `nextBoundaryTaskId`: string | null
 - `overallStatus`: "passed" | "failed"
 
@@ -91,8 +110,9 @@ Return:
 4. Files changed
 5. Validation/test results
 6. Verification evidence coverage summary (which verification IDs were satisfied)
-7. Next boundary task ID (next `prLevel: true` not implemented)
-8. A PR body in Markdown using this template:
+7. Memory update summary (`appended` or `no_change`, plus short note)
+8. Next boundary task ID (next `prLevel: true` not implemented)
+9. A PR body in Markdown using this template:
 
 ### PR Title
 `<conventional-commit-style summary for bundle>`
