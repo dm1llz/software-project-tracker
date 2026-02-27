@@ -48,7 +48,8 @@ Do exactly one PR bundle per run.
 ## Validation
 - Run tests/checks required by selected tasks.
 - Validate FRDs with Ajv:
-  - `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d specs/frds/frd-001-foundation-contracts.json -d specs/frds/frd-002-schema-intake-validation.json -d specs/frds/frd-003-batch-review-pipeline.json -d specs/frds/frd-004-rendering-engine.json -d specs/frds/frd-005-ui-review-flow.json -d specs/frds/frd-006-quality-performance.json`
+  - `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-*.json\"`
+  - If glob handling is inconsistent in your shell/runner, expand files explicitly, for example: `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json $(find specs/frds -maxdepth 1 -type f -name 'frd-*.json' | sort | sed 's/^/-d /')`
 
 ## FRD status updates
 - Mark completed tasks/subtasks as `completed`.
