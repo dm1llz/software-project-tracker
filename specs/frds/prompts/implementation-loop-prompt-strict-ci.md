@@ -8,6 +8,7 @@ Do exactly one PR bundle per run.
 - `specs/frds/frd-schema.json`
 - all `specs/frds/frd-[0-9][0-9][0-9]-*.json`
 - `.codex/NOTES.md` (if present)
+- remote claim refs in `refs/heads/codex/claim/*` (when remote access is available)
 
 ## Cross-run memory (required)
 1. Use `.codex/NOTES.md` as persistent run memory across chats/contexts.
@@ -32,6 +33,7 @@ Do exactly one PR bundle per run.
 3. A task is eligible if:
    - `status` is `not_started`
    - all dependencies are satisfied (`completed` or `skipped`, or included earlier in current bundle)
+   - task is not currently claimed by another agent via `codex/claim/<taskId>`
 4. Find the first eligible task `T`.
 5. Build bundle:
    - always include `T`
@@ -43,6 +45,20 @@ Do exactly one PR bundle per run.
 - Create branch with prefix `codex/`, e.g.:
   - `codex/<frdId>-<startTaskId>-bundle`
 - If working tree is dirty with unrelated changes, stop and report.
+
+## Parallel agent coordination (required when using multiple worktrees)
+1. Use remote branch claims instead of editing one shared file.
+2. Claim namespace: `refs/heads/codex/claim/<taskId>`.
+3. Before selecting a task, refresh and read active claims:
+   - `git fetch origin --prune`
+   - `git ls-remote --heads origin \"refs/heads/codex/claim/*\"`
+4. When first candidate task `T` is found, try to claim it atomically:
+   - `git push origin \"HEAD:refs/heads/codex/claim/<taskId>\"`
+5. If claim push fails because the claim branch already exists (or another agent wins race), treat that task as unavailable, continue scanning for the next eligible unclaimed task, and retry claim.
+6. Keep the claim branch active for that task until the implementation branch is merged; this prevents duplicate work while PR is pending review.
+7. Claim cleanup happens after merge (or explicit cancellation):
+   - `git push origin --delete \"codex/claim/<taskId>\"`
+8. If remote claim refs are unavailable (offline/no permission), use a local fallback file `.codex/claims-local/<taskId>.json` and report that coordination is best-effort only in the final output.
 
 ## Implementation rules
 - Implement selected tasks/subtasks fully.
@@ -104,6 +120,7 @@ Include at minimum:
 - `filesChanged`: string[]
 - `validationResults`: [{"name": string, "command": string, "exitCode": number, "status": "passed"|"failed", "outputSummary": string}]
 - `verificationEvidence`: [{"taskId": string, "verificationId": string, "commands": string[], "status": "passed"|"failed"|"manual_verified", "humanEvidence": string|null}]
+- `taskClaim`: {"taskId": string | null, "claimRef": string | null, "status": "claimed"|"already_claimed"|"fallback_local"|"not_used", "details": string}
 - `memoryUpdate`: {"file": string, "status": "appended"|"no_change", "summary": string}
 - `nextBoundaryTaskId`: string | null
 - `overallStatus`: "passed" | "failed"
@@ -116,9 +133,10 @@ Return:
 4. Files changed
 5. Validation/test results
 6. Verification evidence coverage summary (which verification IDs were satisfied)
-7. Memory update summary (`appended` or `no_change`, plus short note)
-8. Next boundary task ID (next `prLevel: true` not implemented)
-9. A PR body in Markdown using this template:
+7. Task claim summary (claim ref used, and whether claim succeeded or fallback was used)
+8. Memory update summary (`appended` or `no_change`, plus short note)
+9. Next boundary task ID (next `prLevel: true` not implemented)
+10. A PR body in Markdown using this template:
 
 ### PR Title
 `<conventional-commit-style summary for bundle>`
