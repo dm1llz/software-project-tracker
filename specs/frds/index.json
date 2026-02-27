@@ -6,7 +6,7 @@
     {
       "frdId": "FRD-001",
       "title": "Foundation and Contracts",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 1,
       "path": "./frd-001-foundation-contracts.json",
       "dependencies": []

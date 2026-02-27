@@ -3,7 +3,7 @@
     "frdId": "FRD-001",
     "title": "Foundation and Contracts",
     "description": "Establish baseline module structure, canonical domain contracts, and deterministic ordering utilities for all MVP review behavior.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 1,
     "estimatedEffort": "medium",
     "dependencies": [],
