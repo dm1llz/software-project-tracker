@@ -12,7 +12,7 @@ Do exactly one PR bundle per run.
 ## Cross-run memory (required)
 1. Use `.codex/NOTES.md` as persistent run memory across chats/contexts.
 2. At run start, read `.codex/NOTES.md` if it exists and apply relevant guidance.
-3. At run end, append a new note only when there is durable new information (snag, remediation, decision, reusable command/check, or implementation caveat).
+3. At run end, append a new note only when there is durable new information, including but not limited to: snag, remediation, decision, reusable command/check, or implementation caveat.
 4. Do not append duplicate notes; compare against recent entries first.
 5. Never store secrets, tokens, credentials, or personal data.
 6. Use this append format:
@@ -72,7 +72,13 @@ Do exactly one PR bundle per run.
 ## FRD status updates
 - Mark completed tasks/subtasks as `completed`.
 - Leave future tasks unchanged.
-- Update `updatedAt` in changed FRD files.
+- While actively implementing tasks in an FRD, set that FRD `metadata.status` to `in_progress` when work starts (unless it is already `completed`).
+- Before committing, recompute each changed FRD `metadata.status` using this order:
+  - `completed`: all `majorTasks[*].status` are `completed` or `skipped`.
+  - `blocked`: not completed, at least one `majorTasks[*].status` is `blocked`, and none are `in_progress`.
+  - `in_progress`: not completed/blocked, and at least one task is `in_progress`, `completed`, or `skipped`.
+  - `not_started`: all tasks are `not_started`.
+- Update `updatedAt` in every changed FRD file after status reconciliation.
 
 ## PR output files (required)
 1. Create `.codex/pr` if missing.
