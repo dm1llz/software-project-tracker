@@ -6,7 +6,13 @@
     "status": "not_started",
     "priority": 6,
     "estimatedEffort": "medium",
-    "dependencies": ["FRD-002", "FRD-003", "FRD-004", "FRD-005"],
+    "dependencies": [
+      "FRD-002",
+      "FRD-003",
+      "FRD-004",
+      "FRD-005",
+      "FRD-001"
+    ],
     "specReferences": [
       "specs/mvp-frd-review-spec.md",
       "specs/roadmap.md",
@@ -23,7 +29,12 @@
       "description": "Add deterministic unit tests for contracts, mapping, sorting, and invariant helpers in domain modules.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": ["FRD-002", "FRD-003", "FRD-004"],
+      "dependencies": [
+        "FRD-002",
+        "FRD-003",
+        "FRD-004",
+        "FRD-001-T4"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-006-T1-S1",
@@ -34,6 +45,19 @@
             "src/domain/review-run/__tests__/reviewRunUtils.test.ts",
             "src/domain/validation/__tests__/schemaValidation.test.ts",
             "src/domain/rendering/__tests__/renderingUtils.test.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-006-T1-S2",
+          "title": "Configure reusable test runner setup and scripts",
+          "description": "Add shared Vitest setup files and explicit npm scripts so unit and integration suites run consistently across local and CI.",
+          "status": "not_started",
+          "filesToCreate": [
+            "vitest.config.ts",
+            "src/test/setupTests.ts"
+          ],
+          "filesToModify": [
+            "package.json"
           ]
         }
       ],
@@ -78,7 +102,10 @@
       "description": "Exercise schema load, file processing, failure continuation, and summary invariants through integration harnesses.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": ["FRD-006-T1", "FRD-005"],
+      "dependencies": [
+        "FRD-006-T1",
+        "FRD-005"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-006-T2-S1",
@@ -145,7 +172,9 @@
       "description": "Implement lightweight e2e tests to prove first-run usability, responsiveness, and no-network assumptions.",
       "status": "not_started",
       "prLevel": false,
-      "dependencies": ["FRD-006-T2"],
+      "dependencies": [
+        "FRD-006-T2"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-006-T3-S1",
@@ -163,6 +192,16 @@
           "status": "not_started",
           "filesToCreate": [
             "tests/e2e/network-and-responsiveness.spec.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-006-T3-S3",
+          "title": "Document Playwright browser install and CI bootstrap",
+          "description": "Add explicit command requirements for Playwright browser installation so e2e runs are reproducible in clean environments.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json",
+            "docs/development-setup.md"
           ]
         }
       ],

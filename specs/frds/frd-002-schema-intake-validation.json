@@ -6,7 +6,9 @@
     "status": "not_started",
     "priority": 2,
     "estimatedEffort": "large",
-    "dependencies": ["FRD-001"],
+    "dependencies": [
+      "FRD-001"
+    ],
     "specReferences": [
       "specs/mvp-frd-review-spec.md",
       "specs/data-contracts.md",
@@ -23,7 +25,9 @@
       "description": "Read a user-selected schema file, parse JSON safely, and build SchemaBundle with declared/effective draft fields.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": ["FRD-001"],
+      "dependencies": [
+        "FRD-001"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-002-T1-S1",
@@ -85,7 +89,10 @@
       "description": "Compile schema in strict mode and reject unsupported drafts before FRD processing starts.",
       "status": "not_started",
       "prLevel": true,
-      "dependencies": ["FRD-002-T1"],
+      "dependencies": [
+        "FRD-002-T1",
+        "FRD-001-T4"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-002-T2-S1",
@@ -103,6 +110,16 @@
           "status": "not_started",
           "filesToCreate": [
             "src/domain/validation/detectUnsupportedDraft.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-002-T2-S3",
+          "title": "Wire Ajv format support in validator setup",
+          "description": "Ensure Ajv compiler setup loads ajv-formats so schema format keywords like date are validated in strict mode.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/domain/validation/compileSchema.ts",
+            "package.json"
           ]
         }
       ],
@@ -124,7 +141,7 @@
         {
           "id": "FRD-002-T2-TR1",
           "type": "unit",
-          "description": "Validate strict compile path and draft handling rules.",
+          "description": "Validate draft gating and strict compile behavior, including required format-plugin wiring.",
           "requiredScenarios": [
             {
               "scenarioId": "FRD-002-T2-TR1-S1",
@@ -140,9 +157,9 @@
             },
             {
               "scenarioId": "FRD-002-T2-TR1-S3",
-              "type": "edge",
-              "description": "Schema is syntactically valid but compile fails due to invalid keyword usage under strict mode.",
-              "expectedOutcome": "RunIssue contains compile-time details and run is blocked."
+              "type": "error",
+              "description": "Schema uses format=date but ajv-formats is not registered in compiler setup.",
+              "expectedOutcome": "Compile path reports actionable strict-mode format error until plugin registration is added."
             }
           ]
         }
@@ -154,7 +171,9 @@
       "description": "Map schema failures to RunIssue contracts and enforce zero-file summary when run cannot start.",
       "status": "not_started",
       "prLevel": false,
-      "dependencies": ["FRD-002-T2"],
+      "dependencies": [
+        "FRD-002-T2"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-002-T3-S1",
