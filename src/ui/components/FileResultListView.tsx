@@ -1,6 +1,6 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 
-import type { FileResultListModel, FileResultRow } from "./FileResultList";
+import type { FileResultListModel, FileResultRow as FileResultRowType } from "./FileResultList";
 
 type FileResultListViewProps = {
   model: FileResultListModel;
@@ -11,39 +11,45 @@ type FileResultRowProps = {
   id: string;
   displayName: string;
   selected: boolean;
-  status: FileResultRow["status"];
+  status: FileResultRowType["status"];
   onSelectFile: (fileId: string) => void;
 };
 
-const FileResultRow = memo(({
+const FileResultRowView = memo(({
   id,
   displayName,
   selected,
   status,
   onSelectFile,
-}: FileResultRowProps) => (
-  <li
-    className="flex items-center justify-between gap-2 rounded-lg border border-slate-700/70 bg-slate-950/50 p-2"
-  >
-    <button
-      type="button"
-      aria-pressed={selected}
-      className={
-        selected
-          ? "rounded-md px-2 py-1 text-left text-sm font-semibold text-amber-200 ring-1 ring-amber-400/70"
-          : "rounded-md px-2 py-1 text-left text-sm text-slate-200 hover:bg-slate-800/80"
-      }
-      onClick={() => onSelectFile(id)}
-    >
-      {displayName}
-    </button>
-    <span className="rounded-md border border-slate-700 px-2 py-0.5 text-xs uppercase tracking-wide text-slate-300">
-      {status}
-    </span>
-  </li>
-));
+}: FileResultRowProps) => {
+  const handleClick = useCallback(() => {
+    onSelectFile(id);
+  }, [id, onSelectFile]);
 
-FileResultRow.displayName = "FileResultRow";
+  return (
+    <li
+      className="flex items-center justify-between gap-2 rounded-lg border border-slate-700/70 bg-slate-950/50 p-2"
+    >
+      <button
+        type="button"
+        aria-pressed={selected}
+        className={
+          selected
+            ? "rounded-md px-2 py-1 text-left text-sm font-semibold text-amber-200 ring-1 ring-amber-400/70"
+            : "rounded-md px-2 py-1 text-left text-sm text-slate-200 hover:bg-slate-800/80"
+        }
+        onClick={handleClick}
+      >
+        {displayName}
+      </button>
+      <span className="rounded-md border border-slate-700 px-2 py-0.5 text-xs uppercase tracking-wide text-slate-300">
+        {status}
+      </span>
+    </li>
+  );
+});
+
+FileResultRowView.displayName = "FileResultRowView";
 
 export const FileResultListView = memo(({ model, onSelectFile }: FileResultListViewProps) => (
   <section
@@ -53,7 +59,7 @@ export const FileResultListView = memo(({ model, onSelectFile }: FileResultListV
     <h2 className="text-base font-semibold text-slate-100">Files</h2>
     <ul className="mt-3 space-y-2">
       {model.rows.map((row) => (
-        <FileResultRow
+        <FileResultRowView
           key={row.id}
           id={row.id}
           displayName={row.displayName}

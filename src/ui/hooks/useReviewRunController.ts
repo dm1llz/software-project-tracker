@@ -33,6 +33,7 @@ import {
 } from "../state/reviewRunErrorMapping";
 
 const PROGRESS_BATCH_SIZE = 5;
+const FILE_PROCESS_CONCURRENCY = 4;
 
 const toUploadIndexFromFileId = (fileId: string, fallbackIndex: number): number => {
   const match = fileId.match(/^frd-(\d+)-/);
@@ -69,7 +70,7 @@ const readFileText = async (file: File): Promise<string> => {
     const reader = new FileReader();
     reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
     reader.onerror = () => reject(reader.error ?? new Error("Failed to read file text."));
-    reader.readAsText(file);
+    reader.readAsText(file, "utf-8");
   });
 };
 
@@ -196,54 +197,77 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         return;
       }
 
-      const results: ReviewResult[] = [];
-      for (const [index, file] of mapped.files.entries()) {
-        if (!isCurrentRequest(requestVersionRef, requestVersion)) {
-          return;
-        }
-        const displayName = mapped.displayNameById[file.id] ?? file.fileName;
-        const parseResult = parseFrdFile(file);
-        const validationIssues = parseResult.ok
-          ? validateFrdFile({
-              fileId: file.id,
-              fileName: file.fileName,
-              parsed: parseResult.parsed,
-              validator,
-            })
-          : [];
+      const processedResults = new Array<ReviewResult>(mapped.files.length);
+      let nextFileIndex = 0;
+      let completedCount = 0;
+      const workerCount = Math.max(
+        1,
+        Math.min(FILE_PROCESS_CONCURRENCY, mapped.files.length || FILE_PROCESS_CONCURRENCY),
+      );
 
-        const hasErrorIssues = validationIssues.some((issue) => issue.level === "error");
-        let sections: ReviewResult["sections"];
-        if (parseResult.ok && !hasErrorIssues) {
-          sections = buildRenderedSections({
-            id: `${file.id}-root`,
-            title: displayName,
-            path: "/",
-            value: parseResult.parsed,
-            schema: schemaBundle.raw,
-          });
-        }
+      const workers = Array.from({ length: workerCount }, async () => {
+        while (nextFileIndex < mapped.files.length) {
+          if (!isCurrentRequest(requestVersionRef, requestVersion)) {
+            return;
+          }
 
-        results.push(
-          buildReviewResult({
+          const fileIndex = nextFileIndex;
+          nextFileIndex += 1;
+          await Promise.resolve();
+
+          const file = mapped.files[fileIndex];
+          if (!file) {
+            throw new Error(`Missing mapped file at index ${fileIndex}`);
+          }
+          const displayName = mapped.displayNameById[file.id] ?? file.fileName;
+          const parseResult = parseFrdFile(file);
+          const validationIssues = parseResult.ok
+            ? validateFrdFile({
+                fileId: file.id,
+                fileName: file.fileName,
+                parsed: parseResult.parsed,
+                validator,
+              })
+            : [];
+
+          const hasErrorIssues = validationIssues.some((issue) => issue.level === "error");
+          let sections: ReviewResult["sections"];
+          if (parseResult.ok && !hasErrorIssues) {
+            sections = buildRenderedSections({
+              id: `${file.id}-root`,
+              title: displayName,
+              path: "/",
+              value: parseResult.parsed,
+              schema: schemaBundle.raw,
+            });
+          }
+
+          processedResults[fileIndex] = buildReviewResult({
             file,
             displayName,
             parseResult,
             validationIssues,
             ...(sections ? { sections } : {}),
-          }),
-        );
+          });
 
-        const processedCount = index + 1;
-        if (processedCount === mapped.files.length || processedCount % PROGRESS_BATCH_SIZE === 0) {
-          setProcessedFiles(processedCount);
+          completedCount += 1;
+          if (!isCurrentRequest(requestVersionRef, requestVersion)) {
+            return;
+          }
+          if (completedCount === mapped.files.length || completedCount % PROGRESS_BATCH_SIZE === 0) {
+            setProcessedFiles(completedCount);
+          }
         }
+      });
+
+      await Promise.all(workers);
+
+      if (!isCurrentRequest(requestVersionRef, requestVersion)) {
+        return;
       }
 
+      const results = [...processedResults];
       for (const [index, issue] of mapped.fileIssues.entries()) {
-        if (!isCurrentRequest(requestVersionRef, requestVersion)) {
-          return;
-        }
         results.push(
           mapReadFailureToReviewResult(
             issue,
@@ -271,7 +295,6 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         return;
       }
       setStore(toErrorStoreState([mapUnexpectedRunIssue(error)]));
-      setTotalFiles(0);
       // Keep preferred tab unchanged on error; success/schema-reset paths are responsible
       // for explicitly resetting tab state to "issues" through resetRuntimeState.
       resetRuntimeState(requestVersion);

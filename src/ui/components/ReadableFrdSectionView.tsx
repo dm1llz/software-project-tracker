@@ -7,7 +7,7 @@ type ReadableFrdSectionViewProps = {
 };
 
 const formatFieldValue = (value: string | number | boolean | null | Array<string | number | boolean | null>): string =>
-  Array.isArray(value) ? value.join(", ") : String(value);
+  Array.isArray(value) ? value.map((item) => String(item)).join(", ") : String(value);
 
 const RenderSectionContent = memo(({ section }: { section: RenderedSection }) => {
   if (section.kind === "scalar") {
