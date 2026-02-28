@@ -86,4 +86,20 @@ describe("ui review run screen states", () => {
     expect(schemaPanel.controls.canUploadSchema).toBe(false);
     expect(schemaPanel.controls.canReplaceSchema).toBe(false);
   });
+
+  it("normalizes progress counters to non-negative and bounded values", () => {
+    const state = deriveReviewRunPageModel({
+      schemaName: "schema.json",
+      isRunning: true,
+      hasCompletedRun: false,
+      runIssues: [],
+      processedFiles: 10,
+      totalFiles: -2,
+    });
+
+    expect(state.progress).toEqual({
+      processedFiles: 0,
+      totalFiles: 0,
+    });
+  });
 });

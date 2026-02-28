@@ -39,6 +39,8 @@ export const deriveReviewRunPageModel = ({
   totalFiles,
 }: ReviewRunPageInput): ReviewRunPageModel => {
   const schemaLoaded = schemaName !== null;
+  const normalizedTotalFiles = Math.max(totalFiles, 0);
+  const normalizedProcessedFiles = Math.min(Math.max(processedFiles, 0), normalizedTotalFiles);
   const screenState = deriveScreenState({
     schemaLoaded,
     isRunning,
@@ -60,8 +62,8 @@ export const deriveReviewRunPageModel = ({
       errorPanel: screenState === "error",
     },
     progress: {
-      processedFiles,
-      totalFiles,
+      processedFiles: normalizedProcessedFiles,
+      totalFiles: normalizedTotalFiles,
     },
   };
 };
