@@ -66,3 +66,10 @@ Template:
 - Action/Decision: Added `parseFrdFile`, `validateFrdFile`, `buildReviewResult`, and `summarizeBatchReview`, plus integration/unit coverage for mixed-quality batches, warning-only diagnostics, and summary invariant enforcement.
 - Reusable check/command: `npm run build && npm run test:unit && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for future file-processing pipelines that require deterministic partial-failure handling and strict contract checks.
+
+### 2026-02-27 FRD-004-T1
+- Situation: Rendering foundation needed scalar/object section mappers that strictly preserve value semantics and JSON pointer paths.
+- Learning: Restricting object-field rendering to scalars/arrays-of-scalars keeps T1 scope tight while guaranteeing union-contract correctness.
+- Action/Decision: Added `mapScalarSection` and `mapObjectSection` with controlled unsupported-type errors plus unit tests for object field mapping, null scalar preservation, and path/label output.
+- Reusable check/command: `npm run build && npm run test:unit && npm run validate:schema`
+- Applicability: Reuse for future rendering tasks before nested-array traversal is introduced.

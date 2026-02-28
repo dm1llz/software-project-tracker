@@ -3,7 +3,7 @@
     "frdId": "FRD-004",
     "title": "Rendering Engine",
     "description": "Implement schema-driven readable rendering for valid FRDs across scalar, object, and array structures.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 4,
     "estimatedEffort": "large",
     "dependencies": ["FRD-001"],
@@ -14,14 +14,14 @@
       "specs/ux-review-flow.md"
     ],
     "createdAt": "2026-02-25",
-    "updatedAt": "2026-02-25"
+    "updatedAt": "2026-02-28"
   },
   "majorTasks": [
     {
       "taskId": "FRD-004-T1",
       "title": "Build section model generator",
       "description": "Create renderer primitives that map FRD JSON nodes into RenderedSection contracts.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": ["FRD-001"],
       "subtasks": [
@@ -29,7 +29,7 @@
           "subtaskId": "FRD-004-T1-S1",
           "title": "Implement scalar node mapping",
           "description": "Map scalar JSON values to kind='scalar' rendered sections with path and title metadata.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/mapScalarSection.ts"
           ]
@@ -38,7 +38,7 @@
           "subtaskId": "FRD-004-T1-S2",
           "title": "Implement object node mapping",
           "description": "Map object nodes to labeled fields and object content preserving schema field descriptions when available.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/mapObjectSection.ts"
           ]
