@@ -3,10 +3,12 @@
     "frdId": "FRD-004",
     "title": "Rendering Engine",
     "description": "Implement schema-driven readable rendering for valid FRDs across scalar, object, and array structures.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 4,
     "estimatedEffort": "large",
-    "dependencies": ["FRD-001"],
+    "dependencies": [
+      "FRD-001"
+    ],
     "specReferences": [
       "specs/mvp-frd-review-spec.md",
       "specs/data-contracts.md",
@@ -23,7 +25,9 @@
       "description": "Create renderer primitives that map FRD JSON nodes into RenderedSection contracts.",
       "status": "completed",
       "prLevel": true,
-      "dependencies": ["FRD-001"],
+      "dependencies": [
+        "FRD-001"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-004-T1-S1",
@@ -83,15 +87,17 @@
       "taskId": "FRD-004-T2",
       "title": "Handle arrays and nested structures",
       "description": "Support arrays of objects, arrays of scalars, and nested sections without altering data semantics.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
-      "dependencies": ["FRD-004-T1"],
+      "dependencies": [
+        "FRD-004-T1"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-004-T2-S1",
           "title": "Implement array of scalar mapping",
           "description": "Render scalar arrays as list-like content with itemKind='scalar'.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/mapArrayScalarSection.ts"
           ]
@@ -100,7 +106,7 @@
           "subtaskId": "FRD-004-T2-S2",
           "title": "Implement array of object mapping",
           "description": "Render object arrays as repeated structured blocks with stable item ids and titles.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/mapArrayObjectSection.ts"
           ]
@@ -109,7 +115,7 @@
           "subtaskId": "FRD-004-T2-S3",
           "title": "Implement nested object traversal",
           "description": "Traverse nested objects/arrays recursively and produce path-correct section hierarchy.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/buildRenderedSections.ts"
           ]
@@ -161,15 +167,17 @@
       "taskId": "FRD-004-T3",
       "title": "Enforce ordering and semantic preservation rules",
       "description": "Apply deterministic field ordering and ensure rendered output does not alter FRD meaning.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
-      "dependencies": ["FRD-004-T2"],
+      "dependencies": [
+        "FRD-004-T2"
+      ],
       "subtasks": [
         {
           "subtaskId": "FRD-004-T3-S1",
           "title": "Implement schema-first field ordering",
           "description": "Use schema property order when available, otherwise preserve source key order.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/orderFields.ts"
           ]
@@ -178,7 +186,7 @@
           "subtaskId": "FRD-004-T3-S2",
           "title": "Add semantic preservation assertions",
           "description": "Ensure displayed values reflect source JSON exactly without coercive rewriting.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/rendering/assertSemanticPreservation.ts"
           ]

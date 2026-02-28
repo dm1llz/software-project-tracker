@@ -73,3 +73,10 @@ Template:
 - Action/Decision: Added `mapScalarSection` and `mapObjectSection` with controlled unsupported-type errors plus unit tests for object field mapping, null scalar preservation, and path/label output.
 - Reusable check/command: `npm run build && npm run test:unit && npm run validate:schema`
 - Applicability: Reuse for future rendering tasks before nested-array traversal is introduced.
+
+### 2026-02-28 FRD-004-T2-T3
+- Situation: Recursive rendering needed nested array sections while preserving object field semantics and strict TypeScript optional-property checks.
+- Learning: In recursive object traversal, treat all arrays as nested sections (not object scalar-array fields) to keep array rendering explicit; with `exactOptionalPropertyTypes`, optional nested schema params should be typed as `schema?: T | undefined` when forwarding possibly-undefined values.
+- Action/Decision: Added `buildRenderedSections` recursion with dedicated array mappers, plus `orderFields` and `assertSemanticPreservation` to enforce deterministic ordering and no coercive transforms.
+- Reusable check/command: `npm run build && npm run test:unit && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse for future renderer extensions that traverse mixed nested data while preserving contract-level semantics.

@@ -2,10 +2,12 @@ import type {
   RenderedObjectField,
   RenderedSection,
 } from "../../types/reviewContracts";
-import type { RenderedScalarValue } from "../../types/reviewContracts";
-import { isRenderedScalarValue } from "./guards";
+import { mapScalarFieldValue } from "./mapScalarFieldValue";
+import { orderFields } from "./orderFields";
+import { joinJsonPointerPath } from "./pathUtils";
+import { pickDisplayTitle } from "./textUtils";
 
-type ObjectFieldSchema = {
+export type ObjectFieldSchema = {
   description?: string;
   title?: string;
 };
@@ -18,31 +20,6 @@ type MapObjectSectionInput = {
   fieldSchemas?: Record<string, ObjectFieldSchema | undefined>;
 };
 
-const mapFieldValue = (value: unknown): RenderedScalarValue | RenderedScalarValue[] => {
-  if (isRenderedScalarValue(value)) {
-    return value;
-  }
-
-  if (Array.isArray(value) && value.every((item) => isRenderedScalarValue(item))) {
-    return value;
-  }
-
-  throw new Error("Object mapper only supports scalar values or arrays of scalars for fields.");
-};
-
-const toLabel = (key: string, title?: string): string => {
-  if (title && title.trim().length > 0) {
-    return title;
-  }
-
-  return key;
-};
-
-const escapeJsonPointerKey = (key: string): string => key.replace(/~/g, "~0").replace(/\//g, "~1");
-
-const normalizePath = (parentPath: string, key: string): string =>
-  parentPath === "/" ? `/${escapeJsonPointerKey(key)}` : `${parentPath}/${escapeJsonPointerKey(key)}`;
-
 export const mapObjectSection = ({
   id,
   title,
@@ -50,13 +27,19 @@ export const mapObjectSection = ({
   value,
   fieldSchemas = {},
 }: MapObjectSectionInput): Extract<RenderedSection, { kind: "object" }> => {
-  const fields: RenderedObjectField[] = Object.entries(value).map(([key, rawValue]) => {
+  const orderedKeys = orderFields({ value, fieldSchemas });
+  const fields: RenderedObjectField[] = orderedKeys.map((key) => {
+    const rawValue = value[key];
     const schema = fieldSchemas[key];
     return {
       key,
-      label: toLabel(key, schema?.title),
-      path: normalizePath(path, key),
-      value: mapFieldValue(rawValue),
+      label: pickDisplayTitle(key, schema?.title),
+      path: joinJsonPointerPath(path, key),
+      value: mapScalarFieldValue(
+        rawValue,
+        `object field (${path}/${key})`,
+        "Object mapper only supports scalar values or arrays of scalars for fields.",
+      ),
       ...(schema?.description ? { description: schema.description } : {}),
     };
   });
