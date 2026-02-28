@@ -242,9 +242,15 @@ export const ReviewRunPage = () => {
       if (!isCurrentRequest(requestVersion)) {
         return;
       }
-      setStore((previous) =>
-        replaceSchemaFromReviewRunPage(previous, pageModel.screenState, file.name),
-      );
+      setStore((previous) => {
+        const currentScreenState = deriveScreenState({
+          schemaLoaded: previous.schemaName !== null,
+          isRunning: previous.isRunning,
+          hasCompletedRun: previous.hasCompletedRun,
+          runIssues: previous.runIssues,
+        });
+        return replaceSchemaFromReviewRunPage(previous, currentScreenState, file.name);
+      });
       setSchemaBundle(null);
       setValidator(null);
       resetRuntimeState(requestVersion);
