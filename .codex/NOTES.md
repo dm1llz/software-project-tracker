@@ -38,3 +38,10 @@ Template:
 - Action/Decision: Updated local helpers to rely on inference while preserving explicit signatures for boundary functions.
 - Reusable check/command: `rg -n "\\):\\s*.*=>" src tests`
 - Applicability: Apply during refactors and new module additions to keep APIs explicit and internals concise.
+
+### 2026-02-27 FRD-002-T1
+- Situation: Schema-ingestion task needed parse-failure run issues with line/column when JSON parser exposes byte position.
+- Learning: Parsing `JSON.parse` error messages for `position <n>` and deriving line/column from source text provides reliable location metadata without extra parser dependencies.
+- Action/Decision: Added `loadSchemaFile` and `mapSchemaParseIssue` to produce blocked results with `SCHEMA_ERROR` issues, including draft defaults (`declaredDraft=null`, `effectiveDraft=2020-12`).
+- Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse for file-ingestion paths that must convert parse exceptions into contract-level issues.
