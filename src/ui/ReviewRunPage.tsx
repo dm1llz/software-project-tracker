@@ -177,6 +177,7 @@ const mapReadFailureToReviewResult = (
   uploadIndex: toUploadIndexFromFileId(issue.fileId),
   fileName: issue.fileName,
   displayName: displayNameById[issue.fileId] ?? issue.fileName,
+  // Read failures map to parse_failed to keep existing ReviewResult status contracts.
   status: "parse_failed" as const,
   parseOk: false,
   valid: false,
@@ -230,13 +231,7 @@ export const ReviewRunPage = () => {
       return;
     }
     setPreferredTab("issues");
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setProcessedFiles(0);
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setTotalFiles(0);
   };
 
@@ -250,13 +245,7 @@ export const ReviewRunPage = () => {
       setStore((previous) =>
         replaceSchemaFromReviewRunPage(previous, pageModel.screenState, file.name),
       );
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setSchemaBundle(null);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setValidator(null);
       resetRuntimeState(requestVersion);
     }
@@ -274,13 +263,7 @@ export const ReviewRunPage = () => {
         return;
       }
       setSchemaBundle(null);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setValidator(null);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setStore(toErrorStoreState(loaded.runIssues));
       resetRuntimeState(requestVersion);
       return;
@@ -295,13 +278,7 @@ export const ReviewRunPage = () => {
         return;
       }
       setSchemaBundle(null);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setValidator(null);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setStore(toErrorStoreState(compiled.runIssues));
       resetRuntimeState(requestVersion);
       return;
@@ -311,13 +288,7 @@ export const ReviewRunPage = () => {
       return;
     }
     setSchemaBundle(loaded.schema);
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setValidator(() => compiled.validator);
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setStore(createReviewRunStoreState(loaded.schema.name));
     resetRuntimeState(requestVersion);
   };
@@ -332,13 +303,7 @@ export const ReviewRunPage = () => {
       return;
     }
     setStore((previous) => startReviewRun(previous));
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setTotalFiles(files.length);
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setProcessedFiles(0);
 
     const mapped = await mapReviewInputFiles(
@@ -388,9 +353,6 @@ export const ReviewRunPage = () => {
       });
 
       results.push(nextResult);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
       setProcessedFiles(index + 1);
     }
 
@@ -405,9 +367,6 @@ export const ReviewRunPage = () => {
       return;
     }
     const summary = summarizeBatchReview(results);
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setStore((previous) =>
       completeReviewRun(previous, {
         runIssues: [],
@@ -415,13 +374,7 @@ export const ReviewRunPage = () => {
         files: results,
       }),
     );
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setPreferredTab("issues");
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
     setProcessedFiles(files.length);
   };
 
