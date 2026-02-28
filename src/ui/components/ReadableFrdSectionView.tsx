@@ -6,15 +6,15 @@ type ReadableFrdSectionViewProps = {
 
 const renderSection = (section: RenderedSection) => {
   if (section.kind === "scalar") {
-    return <p>{String(section.content.value)}</p>;
+    return <p className="rounded-lg bg-slate-950/60 p-3 text-sm text-slate-200">{String(section.content.value)}</p>;
   }
 
   if (section.kind === "object") {
     return (
-      <ul>
+      <ul className="space-y-2 text-sm text-slate-200">
         {section.content.fields.map((field) => (
-          <li key={field.path}>
-            <strong>{field.label}</strong>
+          <li key={field.path} className="rounded-lg bg-slate-950/60 p-3">
+            <strong className="text-slate-100">{field.label}</strong>
             {": "}
             {Array.isArray(field.value) ? field.value.join(", ") : String(field.value)}
           </li>
@@ -25,22 +25,24 @@ const renderSection = (section: RenderedSection) => {
 
   if (section.content.itemKind === "scalar") {
     return (
-      <ul>
+      <ul className="space-y-2 text-sm text-slate-200">
         {section.content.items.map((item, index) => (
-          <li key={`${section.id}-scalar-${index}`}>{String(item)}</li>
+          <li key={`${section.id}-scalar-${index}`} className="rounded-lg bg-slate-950/60 p-3">
+            {String(item)}
+          </li>
         ))}
       </ul>
     );
   }
 
   return (
-    <ul>
+    <ul className="space-y-3 text-sm text-slate-200">
       {section.content.items.map((item) => (
-        <li key={item.id}>
-          <strong>{item.title}</strong>
-          <ul>
+        <li key={item.id} className="rounded-xl border border-slate-700/70 bg-slate-950/60 p-3">
+          <strong className="text-slate-100">{item.title}</strong>
+          <ul className="mt-2 space-y-2">
             {item.fields.map((field) => (
-              <li key={field.path}>
+              <li key={field.path} className="rounded-md bg-slate-900/70 p-2">
                 {field.label}
                 {": "}
                 {Array.isArray(field.value) ? field.value.join(", ") : String(field.value)}
@@ -54,12 +56,15 @@ const renderSection = (section: RenderedSection) => {
 };
 
 export const ReadableFrdSectionView = ({ sections }: ReadableFrdSectionViewProps) => (
-  <section aria-label="Readable FRD">
-    <h3>Readable FRD</h3>
+  <section
+    aria-label="Readable FRD"
+    className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+  >
+    <h3 className="text-base font-semibold text-slate-100">Readable FRD</h3>
     {sections.map((section) => (
-      <article key={section.id}>
-        <h4>{section.title}</h4>
-        <p>{section.path}</p>
+      <article key={section.id} className="mt-3 rounded-xl border border-slate-700/70 bg-slate-900/50 p-4">
+        <h4 className="text-sm font-semibold text-slate-100">{section.title}</h4>
+        <p className="mt-1 text-xs text-slate-400">{section.path}</p>
         {renderSection(section)}
       </article>
     ))}
