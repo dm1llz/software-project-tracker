@@ -323,11 +323,10 @@ export const ReviewRunPage = () => {
   };
 
   const handleFrdUpload = async (files: File[]): Promise<void> => {
-    const requestVersion = beginRequest();
-
     if (!schemaBundle || !validator || files.length === 0) {
       return;
     }
+    const requestVersion = beginRequest();
 
     if (!isCurrentRequest(requestVersion)) {
       return;
