@@ -1,13 +1,11 @@
 import type { SupportedSchemaDraft } from "../../types/reviewContracts";
 
-export const SUPPORTED_SCHEMA_DRAFTS: readonly SupportedSchemaDraft[] = ["2020-12"];
+export const SUPPORTED_SCHEMA_DRAFTS: readonly [
+  SupportedSchemaDraft,
+  ...SupportedSchemaDraft[],
+] = ["2020-12"];
 
-const [firstSupportedDraft] = SUPPORTED_SCHEMA_DRAFTS;
-if (!firstSupportedDraft) {
-  throw new Error("SUPPORTED_SCHEMA_DRAFTS must define at least one draft.");
-}
-
-export const DEFAULT_SCHEMA_DRAFT: SupportedSchemaDraft = firstSupportedDraft;
+export const DEFAULT_SCHEMA_DRAFT: SupportedSchemaDraft = SUPPORTED_SCHEMA_DRAFTS[0];
 
 const SCHEMA_DRAFT_ALIASES: Readonly<Record<string, SupportedSchemaDraft>> = {
   "2020-12": "2020-12",
