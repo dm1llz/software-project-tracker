@@ -52,8 +52,10 @@ export const assertImportAllowed = (importerPath: string, importTargetPath: stri
   if (!isImportAllowed(importerPath, importTargetPath)) {
     const importerSegment = classifyModulePath(importerPath);
     const importTargetSegment = classifyModulePath(importTargetPath);
+    const importerLabel = importerSegment ?? `unclassified: ${importerPath}`;
+    const importTargetLabel = importTargetSegment ?? `unclassified: ${importTargetPath}`;
     throw new Error(
-      `Module boundary violation: ${importerSegment} must not import ${importTargetSegment}.`,
+      `Module boundary violation in assertImportAllowed (isImportAllowed/classifyModulePath): ${importerLabel} must not import ${importTargetLabel}.`,
     );
   }
 };
