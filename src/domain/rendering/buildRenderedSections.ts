@@ -5,6 +5,8 @@ import { mapArrayScalarSection } from "./mapArrayScalarSection";
 import { mapObjectSection, type ObjectFieldSchema } from "./mapObjectSection";
 import { mapScalarSection } from "./mapScalarSection";
 import { orderFields } from "./orderFields";
+import { joinJsonPointerPath } from "./pathUtils";
+import { pickDisplayTitle } from "./textUtils";
 
 type SchemaNode = {
   title?: string;
@@ -19,18 +21,6 @@ type BuildRenderedSectionsInput = {
   path: string;
   value: unknown;
   schema?: SchemaNode | undefined;
-};
-
-const escapeJsonPointerKey = (key: string): string => key.replace(/~/g, "~0").replace(/\//g, "~1");
-
-const joinPath = (parentPath: string, key: string): string =>
-  parentPath === "/" ? `/${escapeJsonPointerKey(key)}` : `${parentPath}/${escapeJsonPointerKey(key)}`;
-
-const toTitle = (fallbackKey: string, schema?: SchemaNode): string => {
-  if (schema?.title && schema.title.trim().length > 0) {
-    return schema.title;
-  }
-  return fallbackKey;
 };
 
 const toFieldSchemas = (schema?: SchemaNode): Record<string, ObjectFieldSchema | undefined> => {
@@ -97,11 +87,11 @@ const renderNode = ({
           return;
         }
 
-        const nextPath = joinPath(joinPath(path, String(index)), key);
+        const nextPath = joinJsonPointerPath(joinJsonPointerPath(path, String(index)), key);
         nestedSections.push(
           ...renderNode({
             id: joinId(id, `${index}-${key}`),
-            title: toTitle(key, schema?.items?.properties?.[key]),
+            title: pickDisplayTitle(key, schema?.items?.properties?.[key]?.title),
             path: nextPath,
             value: nestedValue,
             schema: schema?.items?.properties?.[key],
@@ -131,7 +121,7 @@ const renderNode = ({
         return;
       }
 
-      throw new Error(`Unsupported runtime value at path ${joinPath(path, key)}.`);
+      throw new Error(`Unsupported runtime value at path ${joinJsonPointerPath(path, key)}.`);
     });
 
     const objectSection = mapObjectSection({
@@ -145,8 +135,8 @@ const renderNode = ({
     const nestedSections = nestedEntries.flatMap((entry) =>
       renderNode({
         id: joinId(id, entry.key),
-        title: toTitle(entry.key, schema?.properties?.[entry.key]),
-        path: joinPath(path, entry.key),
+        title: pickDisplayTitle(entry.key, schema?.properties?.[entry.key]?.title),
+        path: joinJsonPointerPath(path, entry.key),
         value: entry.value,
         schema: schema?.properties?.[entry.key],
       }),
