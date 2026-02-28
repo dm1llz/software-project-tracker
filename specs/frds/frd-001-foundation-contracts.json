@@ -3,7 +3,7 @@
     "frdId": "FRD-001",
     "title": "Foundation and Contracts",
     "description": "Establish baseline module structure, canonical domain contracts, and deterministic ordering utilities for all MVP review behavior.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 1,
     "estimatedEffort": "medium",
     "dependencies": [],
@@ -194,7 +194,7 @@
       "taskId": "FRD-001-T2",
       "title": "Implement canonical type contracts",
       "description": "Translate data-contracts document into code-level source of truth used by UI and domain modules.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-001-T1"
@@ -204,7 +204,7 @@
           "subtaskId": "FRD-001-T2-S1",
           "title": "Add review domain type definitions",
           "description": "Create typed contracts for schema bundles, run issues, file issues, review results, and rendering sections.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/types/reviewContracts.ts"
           ]
@@ -213,7 +213,7 @@
           "subtaskId": "FRD-001-T2-S2",
           "title": "Add contract invariants as executable guards",
           "description": "Define helper predicates for status and summary invariants that can be reused by runtime checks and tests.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/types/reviewContractGuards.ts"
           ]
@@ -252,7 +252,7 @@
       "taskId": "FRD-001-T3",
       "title": "Build deterministic ordering helpers",
       "description": "Provide reusable ordering logic for file result sorting and duplicate filename display naming.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-001-T2"
@@ -262,7 +262,7 @@
           "subtaskId": "FRD-001-T3-S1",
           "title": "Create status sort priority utility",
           "description": "Implement comparator that enforces parse_failed, validation_failed, passed ordering then uploadIndex tie-break.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/sortReviewResults.ts"
           ]
@@ -271,7 +271,7 @@
           "subtaskId": "FRD-001-T3-S2",
           "title": "Create display name disambiguation utility",
           "description": "Generate stable user labels for duplicate filenames by upload order index.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/disambiguateDisplayName.ts"
           ]
