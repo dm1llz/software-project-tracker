@@ -1,0 +1,237 @@
+{
+  "metadata": {
+    "frdId": "FRD-007",
+    "title": "React/Vite Runtime and UI Wiring",
+    "description": "Implement concrete React + Vite runtime bootstrap and wire UI view-model components to rendered DOM interactions.",
+    "status": "not_started",
+    "priority": 6,
+    "estimatedEffort": "large",
+    "dependencies": [
+      "FRD-003",
+      "FRD-004",
+      "FRD-005",
+      "FRD-001"
+    ],
+    "specReferences": [
+      "specs/architecture-overview.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/ux-review-flow.md",
+      "specs/data-contracts.md"
+    ],
+    "createdAt": "2026-02-28",
+    "updatedAt": "2026-02-28"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-007-T1",
+      "title": "Bootstrap Vite/React runtime entrypoints",
+      "description": "Create concrete Vite and React app entrypoints so UI modules can render in browser and test environments.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-001"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-007-T1-S1",
+          "title": "Create runtime entry files",
+          "description": "Add Vite app shell and React mount entry with strict TypeScript compatibility.",
+          "status": "not_started",
+          "filesToCreate": [
+            "index.html",
+            "vite.config.ts",
+            "src/main.tsx",
+            "src/App.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-007-T1-S2",
+          "title": "Align scripts and TS settings for runtime",
+          "description": "Add dev/build/preview scripts and TS config needed for Vite runtime without breaking existing quality gates.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json",
+            "tsconfig.json"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-007-T1-V1",
+          "type": "build",
+          "description": "Vite production build succeeds and application mounts without runtime bootstrap errors."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-007-T1-TR1",
+          "type": "integration",
+          "description": "Verify runtime bootstrap and build behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-007-T1-TR1-S1",
+              "type": "success",
+              "description": "App starts with valid runtime config and renders root container.",
+              "expectedOutcome": "Runtime initializes with no bootstrap exceptions and initial UI appears."
+            },
+            {
+              "scenarioId": "FRD-007-T1-TR1-S2",
+              "type": "error",
+              "description": "Root mount target is missing from HTML shell.",
+              "expectedOutcome": "Startup fails with a controlled error message that identifies missing root container."
+            },
+            {
+              "scenarioId": "FRD-007-T1-TR1-S3",
+              "type": "edge",
+              "description": "TypeScript build and Vite build are run back-to-back in CI.",
+              "expectedOutcome": "Both commands pass with consistent module resolution and no JSX/tsconfig conflicts."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-007-T2",
+      "title": "Render concrete review-run UI components",
+      "description": "Implement actual React components for review summary, file list, issue table, readable view, and run issues using existing view-model contracts.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-007-T1",
+        "FRD-005"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-007-T2-S1",
+          "title": "Implement visual components",
+          "description": "Create React component renderers for all FRD-005 view-models with accessible labels and deterministic structure.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/ReviewSummaryView.tsx",
+            "src/ui/components/FileResultListView.tsx",
+            "src/ui/components/FileIssueTableView.tsx",
+            "src/ui/components/ReadableFrdSectionView.tsx",
+            "src/ui/components/RunIssuePanelView.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-007-T2-S2",
+          "title": "Wire detail and tab interactions",
+          "description": "Render issues/readable tabs using stable file IDs and status-based gating from FileDetailPanel model.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-007-T2-G1",
+          "severity": "critical",
+          "text": "Parse-failed files must never render readable FRD content in the DOM."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-007-T2-V1",
+          "type": "integration",
+          "description": "Rendered UI reflects summary math, deterministic list order, and conditional detail tab visibility."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-007-T2-TR1",
+          "type": "integration",
+          "description": "Validate rendered UI behavior for passed/failed/mixed files.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-007-T2-TR1-S1",
+              "type": "success",
+              "description": "User selects a passed file result.",
+              "expectedOutcome": "Issues and readable sections both render with matching contract data."
+            },
+            {
+              "scenarioId": "FRD-007-T2-TR1-S2",
+              "type": "error",
+              "description": "User selects parse_failed file.",
+              "expectedOutcome": "Issues render and readable content is absent."
+            },
+            {
+              "scenarioId": "FRD-007-T2-TR1-S3",
+              "type": "edge",
+              "description": "Two files share the same source filename.",
+              "expectedOutcome": "Display names remain distinct and selection uses file IDs."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-007-T3",
+      "title": "Wire upload interactions and run lifecycle in React",
+      "description": "Connect schema/FRD upload controls, run execution state, progress updates, and schema-replace reset behavior to concrete React state.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": [
+        "FRD-007-T2",
+        "FRD-003",
+        "FRD-005-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-007-T3-S1",
+          "title": "Connect upload and run actions",
+          "description": "Wire schema ingestion and FRD processing pipeline into React handlers with running-state gating.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/components/SchemaControlPanel.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-007-T3-S2",
+          "title": "Implement replace-schema UX flow",
+          "description": "Expose replace-schema action in rendered UI and confirm full state reset in interactive flow.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-007-T3-V1",
+          "type": "manual",
+          "description": "Interactive UI transitions through Empty/Ready/Running/Complete/Error and replacement reset without stale artifacts."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-007-T3-TR1",
+          "type": "integration",
+          "description": "Verify run lifecycle interactions in rendered React flow.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-007-T3-TR1-S1",
+              "type": "success",
+              "description": "Valid schema + FRD set processed from upload to complete view.",
+              "expectedOutcome": "Progress and results UI update correctly with enabled/disabled control transitions."
+            },
+            {
+              "scenarioId": "FRD-007-T3-TR1-S2",
+              "type": "error",
+              "description": "Schema parse/compile failure during upload.",
+              "expectedOutcome": "Error view and run-issue panel render, FRD upload remains blocked."
+            },
+            {
+              "scenarioId": "FRD-007-T3-TR1-S3",
+              "type": "edge",
+              "description": "User replaces schema after mixed-result run and active selection.",
+              "expectedOutcome": "Previous summary/files/issues/selection clear and UI returns to ready baseline for new schema."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
