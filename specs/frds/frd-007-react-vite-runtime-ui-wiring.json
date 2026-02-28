@@ -3,7 +3,7 @@
     "frdId": "FRD-007",
     "title": "React/Vite Runtime and UI Wiring",
     "description": "Implement concrete React + Vite runtime bootstrap and wire UI view-model components to rendered DOM interactions.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 6,
     "estimatedEffort": "large",
     "dependencies": [
@@ -107,7 +107,7 @@
       "taskId": "FRD-007-T2",
       "title": "Render concrete review-run UI components",
       "description": "Implement actual React components for review summary, file list, issue table, readable view, and run issues using existing view-model contracts.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-007-T1",
@@ -118,7 +118,7 @@
           "subtaskId": "FRD-007-T2-S1",
           "title": "Implement visual components",
           "description": "Create React component renderers for all FRD-005 view-models with accessible labels and deterministic structure.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/components/ReviewSummaryView.tsx",
             "src/ui/components/FileResultListView.tsx",
@@ -131,7 +131,7 @@
           "subtaskId": "FRD-007-T2-S2",
           "title": "Wire detail and tab interactions",
           "description": "Render issues/readable tabs using stable file IDs and status-based gating from FileDetailPanel model.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx"
           ]
@@ -183,7 +183,7 @@
       "taskId": "FRD-007-T3",
       "title": "Wire upload interactions and run lifecycle in React",
       "description": "Connect schema/FRD upload controls, run execution state, progress updates, and schema-replace reset behavior to concrete React state.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-007-T2",
@@ -195,7 +195,7 @@
           "subtaskId": "FRD-007-T3-S1",
           "title": "Connect upload and run actions",
           "description": "Wire schema ingestion and FRD processing pipeline into React handlers with running-state gating.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx",
             "src/ui/components/SchemaControlPanel.tsx"
@@ -205,7 +205,7 @@
           "subtaskId": "FRD-007-T3-S2",
           "title": "Implement replace-schema UX flow",
           "description": "Expose replace-schema action in rendered UI and confirm full state reset in interactive flow.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx"
           ]
