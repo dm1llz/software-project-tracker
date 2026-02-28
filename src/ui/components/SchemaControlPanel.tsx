@@ -68,5 +68,5 @@ export const applyReplaceSchemaAction = ({
     return state;
   }
 
-  return replaceSchemaAndResetRunState(state, nextSchemaName);
+  return replaceSchemaAndResetRunState(nextSchemaName);
 };

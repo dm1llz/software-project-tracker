@@ -211,6 +211,7 @@ describe("ui results overview, detail panel, and schema reset behavior", () => {
       failed: 0,
       parseFailed: 0,
     });
+    expect(reset.isRunning).toBe(false);
     expect(reset.hasCompletedRun).toBe(false);
   });
 

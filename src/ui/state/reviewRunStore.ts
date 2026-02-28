@@ -82,9 +82,6 @@ export const selectReviewFile = (
   };
 };
 
-export const replaceSchemaAndResetRunState = (
-  state: ReviewRunStoreState,
-  nextSchemaName: string,
-): ReviewRunStoreState => ({
+export const replaceSchemaAndResetRunState = (nextSchemaName: string): ReviewRunStoreState => ({
   ...createReviewRunStoreState(nextSchemaName),
 });

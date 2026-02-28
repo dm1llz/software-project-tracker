@@ -1,4 +1,3 @@
-import { sortReviewResults } from "../../domain/review-run/sortReviewResults";
 import type { ReviewResult } from "../../types/reviewContracts";
 
 export type FileResultRow = {
@@ -21,9 +20,9 @@ export const deriveFileResultListModel = ({
   files,
   selectedFileId,
 }: FileResultListInput): FileResultListModel => {
-  const ordered = sortReviewResults(files);
+  // reviewRunStore.completeReviewRun persists files in canonical order.
   return {
-    rows: ordered.map((file) => ({
+    rows: files.map((file) => ({
       id: file.id,
       displayName: file.displayName,
       status: file.status,
