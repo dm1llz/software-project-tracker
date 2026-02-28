@@ -24,7 +24,7 @@
     {
       "frdId": "FRD-003",
       "title": "Batch Review Pipeline",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 3,
       "path": "./frd-003-batch-review-pipeline.json",
       "dependencies": [
