@@ -1,8 +1,9 @@
 import type {
   RenderedObjectField,
-  RenderedScalarValue,
   RenderedSection,
 } from "../../types/reviewContracts";
+import type { RenderedScalarValue } from "../../types/reviewContracts";
+import { isRenderedScalarValue } from "./guards";
 
 type ObjectFieldSchema = {
   description?: string;
@@ -16,12 +17,6 @@ type MapObjectSectionInput = {
   value: Record<string, unknown>;
   fieldSchemas?: Record<string, ObjectFieldSchema | undefined>;
 };
-
-const isRenderedScalarValue = (value: unknown): value is RenderedScalarValue =>
-  value === null ||
-  typeof value === "string" ||
-  typeof value === "number" ||
-  typeof value === "boolean";
 
 const mapFieldValue = (value: unknown): RenderedScalarValue | RenderedScalarValue[] => {
   if (isRenderedScalarValue(value)) {

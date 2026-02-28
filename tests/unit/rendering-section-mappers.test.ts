@@ -37,6 +37,40 @@ describe("rendering section mappers", () => {
     ]);
   });
 
+  it("maps arrays of scalars as object field values", () => {
+    const section = mapObjectSection({
+      id: "obj-tags",
+      title: "Tags",
+      path: "/",
+      value: {
+        tags: ["a", "b"],
+      },
+    });
+
+    expect(section.kind).toBe("object");
+    expect(section.content.fields).toEqual([
+      {
+        key: "tags",
+        label: "tags",
+        path: "/tags",
+        value: ["a", "b"],
+      },
+    ]);
+  });
+
+  it("normalizes field paths when parent path is non-root", () => {
+    const section = mapObjectSection({
+      id: "obj-parent",
+      title: "Parent",
+      path: "/parent",
+      value: {
+        name: "Acme",
+      },
+    });
+
+    expect(section.content.fields[0]?.path).toBe("/parent/name");
+  });
+
   it("throws controlled error when scalar mapper receives unsupported runtime value", () => {
     expect(() =>
       mapScalarSection({
@@ -46,6 +80,30 @@ describe("rendering section mappers", () => {
         value: { not: "scalar" },
       }),
     ).toThrow(/unsupported scalar value/i);
+  });
+
+  it("throws when object mapper receives nested object values", () => {
+    expect(() =>
+      mapObjectSection({
+        id: "obj-nested",
+        title: "Nested",
+        path: "/",
+        value: {
+          nested: { k: "v" },
+        },
+      }),
+    ).toThrow(/only supports scalar values or arrays of scalars/i);
+
+    expect(() =>
+      mapObjectSection({
+        id: "obj-array-nested",
+        title: "Array Nested",
+        path: "/",
+        value: {
+          nestedArray: [{ k: "v" }],
+        },
+      }),
+    ).toThrow(/only supports scalar values or arrays of scalars/i);
   });
 
   it("preserves null scalar values without coercion", () => {

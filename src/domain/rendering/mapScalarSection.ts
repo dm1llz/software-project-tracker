@@ -1,4 +1,5 @@
-import type { RenderedScalarValue, RenderedSection } from "../../types/reviewContracts";
+import type { RenderedSection } from "../../types/reviewContracts";
+import { isRenderedScalarValue } from "./guards";
 
 type MapScalarSectionInput = {
   id: string;
@@ -6,12 +7,6 @@ type MapScalarSectionInput = {
   path: string;
   value: unknown;
 };
-
-const isRenderedScalarValue = (value: unknown): value is RenderedScalarValue =>
-  value === null ||
-  typeof value === "string" ||
-  typeof value === "number" ||
-  typeof value === "boolean";
 
 export const mapScalarSection = ({
   id,
