@@ -124,6 +124,31 @@
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx"
           ]
+        },
+        {
+          "subtaskId": "FRD-009-T2-S3",
+          "title": "Consolidate screen-state derivation helpers",
+          "description": "Extract a single helper for deriving review screen-state inputs from store snapshots and replace repeated inline mappings.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/state/reviewRunScreenStateHelpers.ts"
+          ],
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/state/deriveScreenState.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T2-S4",
+          "title": "Introduce distinct runtime/orchestration run-issue code",
+          "description": "Differentiate unexpected runtime/orchestration failures from schema failures in run-issue contracts and mapping logic.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/types/reviewContracts.ts",
+            "src/ui/state/reviewRunErrorMapping.ts",
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/components/RunIssuePanel.tsx"
+          ]
         }
       ],
       "gotchas": [
