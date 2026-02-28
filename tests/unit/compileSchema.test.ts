@@ -1,16 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compileSchema } from "../../src/domain/validation/compileSchema";
-import { DEFAULT_SCHEMA_DRAFT } from "../../src/domain/validation/schemaDraftSupport";
-import type { SchemaBundle } from "../../src/types/reviewContracts";
-
-const makeSchemaBundle = (raw: Record<string, unknown>, declaredDraft: string | null): SchemaBundle => ({
-  id: "schema-1",
-  name: "schema.json",
-  raw,
-  declaredDraft,
-  effectiveDraft: DEFAULT_SCHEMA_DRAFT,
-});
+import { makeSchemaBundle } from "../helpers/schemaBundleHelper";
 
 describe("compileSchema", () => {
   it("compiles a 2020-12 schema in strict mode", () => {
@@ -48,6 +39,7 @@ describe("compileSchema", () => {
       expect(result.runIssues).toHaveLength(1);
       const [issue] = result.runIssues;
       expect(issue.code).toBe("SCHEMA_ERROR");
+      expect(issue.path).toBe("/$schema");
       expect(issue.message).toContain("expected 2020-12");
       expect(issue.message).toContain("draft-07");
     }
@@ -71,6 +63,7 @@ describe("compileSchema", () => {
       expect(result.runIssues).toHaveLength(1);
       const [issue] = result.runIssues;
       expect(issue.code).toBe("SCHEMA_ERROR");
+      expect(issue.path).toBe("/");
       expect(issue.message.toLowerCase()).toContain("format");
       expect(issue.message.toLowerCase()).toContain("date");
     }
