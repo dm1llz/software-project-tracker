@@ -408,8 +408,16 @@ export const ReviewRunPage = () => {
   };
 
   return (
-    <main>
-      <h1>Software Project Tracker</h1>
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <header className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl shadow-slate-950/40">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
+          Software Project Tracker
+        </h1>
+        <p className="mt-2 max-w-3xl text-sm text-slate-300">
+          Upload a JSON schema, review FRD files in batch, and inspect issues or readable sections in a responsive workspace.
+        </p>
+      </header>
+
       <SchemaControlPanel
         model={pageModel.schemaPanel}
         onSchemaUpload={(file) => {
@@ -423,52 +431,80 @@ export const ReviewRunPage = () => {
         }}
       />
 
-      {pageModel.visibleSections.emptyHint ? <p>Upload schema first.</p> : null}
-      {pageModel.visibleSections.readyHint ? <p>Schema ready for FRD upload.</p> : null}
+      {pageModel.visibleSections.emptyHint ? (
+        <p className="mt-4 rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
+          Upload schema first.
+        </p>
+      ) : null}
+      {pageModel.visibleSections.readyHint ? (
+        <p className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          Schema ready for FRD upload.
+        </p>
+      ) : null}
       {pageModel.visibleSections.runningProgress ? (
-        <p>
+        <p className="mt-4 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
           Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
         </p>
       ) : null}
 
-      <RunIssuePanelView model={contentModel.runIssuePanel} />
+      <div className="mt-5 space-y-5">
+        <RunIssuePanelView model={contentModel.runIssuePanel} />
 
-      {contentModel.showFileRows ? (
-        <>
-          <ReviewSummaryView model={contentModel.summary} />
-          <FileResultListView
-            model={contentModel.fileList}
-            onSelectFile={(fileId) => {
-              setStore((previous) => selectFileFromReviewRunPage(previous, fileId));
-              setPreferredTab("issues");
-            }}
-          />
-        </>
-      ) : null}
+        {contentModel.showFileRows || contentModel.detailPanel.fileId !== null ? (
+          <section className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <div className="space-y-5">
+              {contentModel.showFileRows ? (
+                <>
+                  <ReviewSummaryView model={contentModel.summary} />
+                  <FileResultListView
+                    model={contentModel.fileList}
+                    onSelectFile={(fileId) => {
+                      setStore((previous) => selectFileFromReviewRunPage(previous, fileId));
+                      setPreferredTab("issues");
+                    }}
+                  />
+                </>
+              ) : null}
+            </div>
 
-      {contentModel.detailPanel.fileId !== null ? (
-        <section aria-label="File detail">
-          <h2>File detail</h2>
-          <div>
-            {contentModel.detailPanel.availableTabs.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                aria-pressed={contentModel.detailPanel.activeTab === tab}
-                onClick={() => setPreferredTab(tab)}
-              >
-                {tab === "issues" ? "Issues" : "Readable FRD"}
-              </button>
-            ))}
-          </div>
+            <div className="space-y-5">
+              {contentModel.detailPanel.fileId !== null ? (
+                <section
+                  aria-label="File detail"
+                  className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+                >
+                  <h2 className="text-base font-semibold text-slate-100">File detail</h2>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {contentModel.detailPanel.availableTabs.map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        aria-pressed={contentModel.detailPanel.activeTab === tab}
+                        className={
+                          contentModel.detailPanel.activeTab === tab
+                            ? "rounded-md border border-amber-400/70 bg-amber-500/20 px-3 py-1.5 text-sm font-semibold text-amber-100"
+                            : "rounded-md border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800/80"
+                        }
+                        onClick={() => setPreferredTab(tab)}
+                      >
+                        {tab === "issues" ? "Issues" : "Readable FRD"}
+                      </button>
+                    ))}
+                  </div>
 
-          {contentModel.detailPanel.activeTab === "issues" ? (
-            <FileIssueTableView model={contentModel.detailPanel.issueTable} />
-          ) : (
-            <ReadableFrdSectionView sections={contentModel.detailPanel.readableView.sections} />
-          )}
-        </section>
-      ) : null}
+                  <div className="mt-4">
+                    {contentModel.detailPanel.activeTab === "issues" ? (
+                      <FileIssueTableView model={contentModel.detailPanel.issueTable} />
+                    ) : (
+                      <ReadableFrdSectionView sections={contentModel.detailPanel.readableView.sections} />
+                    )}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+      </div>
     </main>
   );
 };
