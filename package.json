@@ -8,7 +8,7 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "build": "node -e \"console.log('Build pipeline scaffold is configured.')\"",
+    "build": "tsc --noEmit -p tsconfig.json",
     "test": "npm run test:unit",
     "test:unit": "vitest run --passWithNoTests",
     "test:integration": "vitest run --passWithNoTests --dir tests/integration",
@@ -26,6 +26,8 @@
     "@testing-library/user-event": "^14.0.0",
     "ajv-cli": "5.0.0",
     "jsdom": "^24.0.0",
+    "typescript": "^5.6.3",
+    "typescript": "^5.6.3",
     "vitest": "^1.6.0"
   }
 }
