@@ -37,7 +37,8 @@ export const isImportAllowed = (importerPath: string, importTargetPath: string):
   const importTargetSegment = classifyModulePath(importTargetPath);
 
   if (!importerSegment || !importTargetSegment) {
-    return true;
+    // Enforce boundaries strictly: unclassified paths are treated as violations.
+    return false;
   }
 
   if (importerSegment === importTargetSegment) {
