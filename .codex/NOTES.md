@@ -142,3 +142,10 @@ Template:
 - Action/Decision: Added `scripts/profile-review-run.mjs`, npm script `profile:review-run`, and baseline documentation with measured scenario metrics.
 - Reusable check/command: `npm run profile:review-run && cat .codex/pr/profile-review-run.json`
 - Applicability: Reuse for future benchmark gates where we need deterministic local profiling with minimal dependencies.
+
+### 2026-02-28 FRD-009-T2-T3
+- Situation: Refactoring `ReviewRunPage` orchestration while preserving stale-request guards and schema-replacement semantics required minimizing behavioral drift across many interaction paths.
+- Learning: Moving request-version guards and runtime error mapping into dedicated helpers/hooks, then batching progress updates (for example every 5 files + final flush), reduces render churn without changing result contracts.
+- Action/Decision: Added `useReviewRunController` with extracted request/screen/error helpers, introduced `RUNTIME_ERROR` run-issue code for unexpected orchestration failures, parallelized FRD source reads with deterministic output order, and memoized file/result rendering boundaries.
+- Reusable check/command: `npm run build && npm run test:integration && npm run profile:review-run`
+- Applicability: Reuse for future UI-controller refactors where behavior parity and performance improvements must be demonstrated together.
