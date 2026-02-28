@@ -1,0 +1,4 @@
+{
+  "title": "Add review pipeline coverage",
+  "description": "Validate mixed batches and rendering output."
+}

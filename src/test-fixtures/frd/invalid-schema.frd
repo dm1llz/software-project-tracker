@@ -1,0 +1,4 @@
+{
+  "description": "Missing required title and not allowed extra shape",
+  "extra": true
+}
