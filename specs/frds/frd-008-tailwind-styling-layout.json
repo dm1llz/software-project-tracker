@@ -3,7 +3,7 @@
     "frdId": "FRD-008",
     "title": "Tailwind Styling and Layout Foundation",
     "description": "Introduce Tailwind CSS in the Vite runtime, apply baseline styling to existing UI elements, and establish a responsive page layout shell for the review workflow.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 8,
     "estimatedEffort": "medium",
     "dependencies": [
@@ -24,7 +24,7 @@
       "taskId": "FRD-008-T1",
       "title": "Install and configure Tailwind in the runtime pipeline",
       "description": "Add Tailwind/PostCSS dependencies and runtime configuration so utility classes compile in both dev and production builds.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-007"
@@ -34,7 +34,7 @@
           "subtaskId": "FRD-008-T1-S1",
           "title": "Add Tailwind and PostCSS dependencies",
           "description": "Install Tailwind CSS, PostCSS, and Autoprefixer in the existing npm toolchain.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json",
             "package-lock.json"
@@ -44,7 +44,7 @@
           "subtaskId": "FRD-008-T1-S2",
           "title": "Create Tailwind configuration and stylesheet entry",
           "description": "Create Tailwind/PostCSS config and wire a base stylesheet into the runtime entrypoint.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "tailwind.config.ts",
             "postcss.config.cjs",
