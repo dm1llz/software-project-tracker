@@ -45,7 +45,7 @@
     {
       "frdId": "FRD-005",
       "title": "UI Review Flow",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 5,
       "path": "./frd-005-ui-review-flow.json",
       "dependencies": [
