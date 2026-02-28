@@ -60,4 +60,17 @@ describe("rendering section mappers", () => {
     expect(section.path).toBe("/nullable");
     expect(section.content.value).toBeNull();
   });
+
+  it("escapes object field keys in JSON pointer paths per RFC 6901", () => {
+    const section = mapObjectSection({
+      id: "obj-escape",
+      title: "Escaped",
+      path: "/",
+      value: {
+        "a/b~c": "value",
+      },
+    });
+
+    expect(section.content.fields[0]?.path).toBe("/a~1b~0c");
+  });
 });

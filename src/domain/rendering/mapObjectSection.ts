@@ -43,8 +43,10 @@ const toLabel = (key: string, title?: string): string => {
   return key;
 };
 
+const escapeJsonPointerKey = (key: string): string => key.replace(/~/g, "~0").replace(/\//g, "~1");
+
 const normalizePath = (parentPath: string, key: string): string =>
-  parentPath === "/" ? `/${key}` : `${parentPath}/${key}`;
+  parentPath === "/" ? `/${escapeJsonPointerKey(key)}` : `${parentPath}/${escapeJsonPointerKey(key)}`;
 
 export const mapObjectSection = ({
   id,
