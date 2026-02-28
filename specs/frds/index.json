@@ -35,7 +35,7 @@
     {
       "frdId": "FRD-004",
       "title": "Rendering Engine",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 4,
       "path": "./frd-004-rendering-engine.json",
       "dependencies": [
