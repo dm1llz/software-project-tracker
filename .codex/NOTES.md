@@ -130,7 +130,7 @@ Template:
 - Applicability: Reuse for future Tailwind baseline tasks in this repo until a deliberate v4 migration is planned.
 
 ### 2026-02-28 FRD-008-T2-T3
-- Situation: Styling schema upload controls by adding helper text inside `<label>` blocks caused `getByLabelText("Schema file")` integration checks to fail due changed accessible label text.
+- Situation: Styling schema upload controls by adding helper text inside `<label>` blocks caused `getByLabelText("Schema file")` integration checks to fail due to changed accessible label text.
 - Learning: When integration tests use exact label text, keep helper copy outside label text path or add explicit `aria-label` on the form controls to preserve query stability.
 - Action/Decision: Added explicit `aria-label` values for schema/FRD/replace file inputs and retained existing control names while applying Tailwind styling/layout.
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx`

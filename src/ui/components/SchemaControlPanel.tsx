@@ -101,7 +101,7 @@ export const SchemaControlPanel = ({
     <p className="mt-1 text-xs text-slate-400">{model.schemaName ?? "No active schema"}</p>
 
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200">
+      <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-amber-300/80 focus-within:ring-2 focus-within:ring-amber-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
         Schema file
         <span className="inline-flex w-fit items-center rounded-md border border-amber-500/60 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-200">
           Choose schema
@@ -121,7 +121,7 @@ export const SchemaControlPanel = ({
       />
       </label>
 
-      <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200">
+      <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-teal-300/80 focus-within:ring-2 focus-within:ring-teal-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
         FRD files
         <span className="inline-flex w-fit items-center rounded-md border border-teal-500/60 bg-teal-500/15 px-3 py-1.5 text-xs font-semibold text-teal-200">
           Choose one or more FRDs
@@ -144,7 +144,7 @@ export const SchemaControlPanel = ({
     </div>
 
     {model.controls.canReplaceSchema ? (
-      <label className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200">
+      <label className="mt-3 flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-rose-300/80 focus-within:ring-2 focus-within:ring-rose-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
         Replace schema file
         <span className="inline-flex w-fit items-center rounded-md border border-rose-400/60 bg-rose-400/15 px-3 py-1.5 text-xs font-semibold text-rose-200">
           Replace active schema

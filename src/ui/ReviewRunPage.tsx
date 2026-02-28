@@ -450,58 +450,60 @@ export const ReviewRunPage = () => {
       <div className="mt-5 space-y-5">
         <RunIssuePanelView model={contentModel.runIssuePanel} />
 
-        <section className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
-          <div className="space-y-5">
-            {contentModel.showFileRows ? (
-              <>
-                <ReviewSummaryView model={contentModel.summary} />
-                <FileResultListView
-                  model={contentModel.fileList}
-                  onSelectFile={(fileId) => {
-                    setStore((previous) => selectFileFromReviewRunPage(previous, fileId));
-                    setPreferredTab("issues");
-                  }}
-                />
-              </>
-            ) : null}
-          </div>
+        {contentModel.showFileRows || contentModel.detailPanel.fileId !== null ? (
+          <section className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <div className="space-y-5">
+              {contentModel.showFileRows ? (
+                <>
+                  <ReviewSummaryView model={contentModel.summary} />
+                  <FileResultListView
+                    model={contentModel.fileList}
+                    onSelectFile={(fileId) => {
+                      setStore((previous) => selectFileFromReviewRunPage(previous, fileId));
+                      setPreferredTab("issues");
+                    }}
+                  />
+                </>
+              ) : null}
+            </div>
 
-          <div className="space-y-5">
-            {contentModel.detailPanel.fileId !== null ? (
-              <section
-                aria-label="File detail"
-                className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
-              >
-                <h2 className="text-base font-semibold text-slate-100">File detail</h2>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {contentModel.detailPanel.availableTabs.map((tab) => (
-                    <button
-                      key={tab}
-                      type="button"
-                      aria-pressed={contentModel.detailPanel.activeTab === tab}
-                      className={
-                        contentModel.detailPanel.activeTab === tab
-                          ? "rounded-md border border-amber-400/70 bg-amber-500/20 px-3 py-1.5 text-sm font-semibold text-amber-100"
-                          : "rounded-md border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800/80"
-                      }
-                      onClick={() => setPreferredTab(tab)}
-                    >
-                      {tab === "issues" ? "Issues" : "Readable FRD"}
-                    </button>
-                  ))}
-                </div>
+            <div className="space-y-5">
+              {contentModel.detailPanel.fileId !== null ? (
+                <section
+                  aria-label="File detail"
+                  className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+                >
+                  <h2 className="text-base font-semibold text-slate-100">File detail</h2>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {contentModel.detailPanel.availableTabs.map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        aria-pressed={contentModel.detailPanel.activeTab === tab}
+                        className={
+                          contentModel.detailPanel.activeTab === tab
+                            ? "rounded-md border border-amber-400/70 bg-amber-500/20 px-3 py-1.5 text-sm font-semibold text-amber-100"
+                            : "rounded-md border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800/80"
+                        }
+                        onClick={() => setPreferredTab(tab)}
+                      >
+                        {tab === "issues" ? "Issues" : "Readable FRD"}
+                      </button>
+                    ))}
+                  </div>
 
-                <div className="mt-4">
-                  {contentModel.detailPanel.activeTab === "issues" ? (
-                    <FileIssueTableView model={contentModel.detailPanel.issueTable} />
-                  ) : (
-                    <ReadableFrdSectionView sections={contentModel.detailPanel.readableView.sections} />
-                  )}
-                </div>
-              </section>
-            ) : null}
-          </div>
-        </section>
+                  <div className="mt-4">
+                    {contentModel.detailPanel.activeTab === "issues" ? (
+                      <FileIssueTableView model={contentModel.detailPanel.issueTable} />
+                    ) : (
+                      <ReadableFrdSectionView sections={contentModel.detailPanel.readableView.sections} />
+                    )}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );
