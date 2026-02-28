@@ -14,8 +14,18 @@ export type RunIssuePanelModel = {
   rows: RunIssueRow[];
 };
 
-const toCategory = (code: RunIssue["code"]): RunIssueRow["category"] =>
-  code === "RUNTIME_ERROR" ? "runtime" : "schema";
+const toCategory = (code: RunIssue["code"]): RunIssueRow["category"] => {
+  switch (code) {
+    case "RUNTIME_ERROR":
+      return "runtime";
+    case "SCHEMA_ERROR":
+      return "schema";
+    default: {
+      const exhaustive: never = code;
+      throw new Error(`Unhandled run issue code: ${exhaustive}`);
+    }
+  }
+};
 
 export const deriveRunIssuePanelModel = (runIssues: readonly RunIssue[]): RunIssuePanelModel => ({
   visible: runIssues.length > 0,

@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import type { FileResultListModel } from "./FileResultList";
+import type { FileResultListModel, FileResultRow } from "./FileResultList";
 
 type FileResultListViewProps = {
   model: FileResultListModel;
@@ -11,7 +11,7 @@ type FileResultRowProps = {
   id: string;
   displayName: string;
   selected: boolean;
-  status: string;
+  status: FileResultRow["status"];
   onSelectFile: (fileId: string) => void;
 };
 

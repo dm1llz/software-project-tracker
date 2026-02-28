@@ -271,6 +271,9 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         return;
       }
       setStore(toErrorStoreState([mapUnexpectedRunIssue(error)]));
+      setTotalFiles(0);
+      // Keep preferred tab unchanged on error; success/schema-reset paths are responsible
+      // for explicitly resetting tab state to "issues" through resetRuntimeState.
       resetRuntimeState(requestVersion);
     }
   }, [resetRuntimeState, schemaBundle, validator]);

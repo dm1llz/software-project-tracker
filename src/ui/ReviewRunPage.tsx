@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import type { RunIssue } from "../types/reviewContracts";
 import {
@@ -161,22 +161,6 @@ export const ReviewRunPage = () => {
     [preferredTab, store],
   );
 
-  const onSelectFile = useCallback((fileId: string) => {
-    selectFile(fileId);
-  }, [selectFile]);
-
-  const onSchemaUpload = useCallback((file: File) => {
-    void handleSchemaUpload(file);
-  }, [handleSchemaUpload]);
-
-  const onFrdUpload = useCallback((files: File[]) => {
-    void handleFrdUpload(files);
-  }, [handleFrdUpload]);
-
-  const onReplaceSchemaUpload = useCallback((file: File) => {
-    void handleSchemaUpload(file, true);
-  }, [handleSchemaUpload]);
-
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl shadow-slate-950/40">
@@ -190,9 +174,15 @@ export const ReviewRunPage = () => {
 
       <SchemaControlPanel
         model={pageModel.schemaPanel}
-        onSchemaUpload={onSchemaUpload}
-        onFrdUpload={onFrdUpload}
-        onReplaceSchemaUpload={onReplaceSchemaUpload}
+        onSchemaUpload={(file) => {
+          void handleSchemaUpload(file);
+        }}
+        onFrdUpload={(files) => {
+          void handleFrdUpload(files);
+        }}
+        onReplaceSchemaUpload={(file) => {
+          void handleSchemaUpload(file, true);
+        }}
       />
 
       {pageModel.visibleSections.emptyHint ? (
@@ -222,7 +212,7 @@ export const ReviewRunPage = () => {
                   <ReviewSummaryView model={contentModel.summary} />
                   <FileResultListView
                     model={contentModel.fileList}
-                    onSelectFile={onSelectFile}
+                    onSelectFile={selectFile}
                   />
                 </>
               ) : null}

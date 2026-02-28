@@ -6,6 +6,9 @@ type ReadableFrdSectionViewProps = {
   sections: RenderedSection[];
 };
 
+const formatFieldValue = (value: string | number | boolean | null | Array<string | number | boolean | null>): string =>
+  Array.isArray(value) ? value.join(", ") : String(value);
+
 const RenderSectionContent = memo(({ section }: { section: RenderedSection }) => {
   if (section.kind === "scalar") {
     return <p className="rounded-lg bg-slate-950/60 p-3 text-sm text-slate-200">{String(section.content.value)}</p>;
@@ -18,7 +21,7 @@ const RenderSectionContent = memo(({ section }: { section: RenderedSection }) =>
           <li key={field.path} className="rounded-lg bg-slate-950/60 p-3">
             <strong className="text-slate-100">{field.label}</strong>
             {": "}
-            {Array.isArray(field.value) ? field.value.join(", ") : String(field.value)}
+            {formatFieldValue(field.value)}
           </li>
         ))}
       </ul>
@@ -47,7 +50,7 @@ const RenderSectionContent = memo(({ section }: { section: RenderedSection }) =>
               <li key={field.path} className="rounded-md bg-slate-900/70 p-2">
                 {field.label}
                 {": "}
-                {Array.isArray(field.value) ? field.value.join(", ") : String(field.value)}
+                {formatFieldValue(field.value)}
               </li>
             ))}
           </ul>

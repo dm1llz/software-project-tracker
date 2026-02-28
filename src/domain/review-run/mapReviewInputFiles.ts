@@ -50,20 +50,23 @@ export const mapReviewInputFiles = async (
 
   const settled = await Promise.all(
     sources.map(async (source, uploadIndex) => {
-      const fileId = createFileId(source.name, uploadIndex);
+      const target = displayTargets[uploadIndex];
+      if (!target) {
+        throw new Error(`Missing display target for upload index ${uploadIndex}.`);
+      }
       try {
         const text = await readSourceText(source);
         const file: ReviewInputFile = {
-          id: fileId,
-          fileName: source.name,
-          uploadIndex,
+          id: target.id,
+          fileName: target.fileName,
+          uploadIndex: target.uploadIndex,
           text,
         };
         return { ok: true as const, file };
       } catch (error) {
         return {
           ok: false as const,
-          issue: mapReadFailureIssue(fileId, source.name, error),
+          issue: mapReadFailureIssue(target.id, target.fileName, error),
         };
       }
     }),
