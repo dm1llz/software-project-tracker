@@ -13,7 +13,7 @@
       "specs/architecture-overview.md"
     ],
     "createdAt": "2026-02-25",
-    "updatedAt": "2026-02-27"
+    "updatedAt": "2026-02-28"
   },
   "majorTasks": [
     {
@@ -124,7 +124,7 @@
       "taskId": "FRD-001-T1",
       "title": "Create app baseline and module boundaries",
       "description": "Scaffold project structure and module ownership boundaries exactly as architecture-overview requires.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-001-T4"
@@ -134,7 +134,7 @@
           "subtaskId": "FRD-001-T1-S1",
           "title": "Create domain and UI module directories",
           "description": "Define initial folder structure for ui, domain/review-run, domain/validation, domain/rendering, infra/workers, and types.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/.gitkeep",
             "src/domain/review-run/.gitkeep",
@@ -148,7 +148,7 @@
           "subtaskId": "FRD-001-T1-S2",
           "title": "Document module ownership",
           "description": "Capture module boundaries and allowed dependencies to prevent cross-layer coupling drift.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "docs/module-boundaries.md"
           ]
