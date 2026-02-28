@@ -12,12 +12,7 @@ export const compareReviewResults = (left: ReviewResult, right: ReviewResult): n
     return statusPriorityDelta;
   }
 
-  const uploadIndexDelta = left.uploadIndex - right.uploadIndex;
-  if (uploadIndexDelta !== 0) {
-    return uploadIndexDelta;
-  }
-
-  return left.id.localeCompare(right.id);
+  return left.uploadIndex - right.uploadIndex;
 };
 
 export const sortReviewResults = (results: readonly ReviewResult[]): ReviewResult[] =>
