@@ -54,32 +54,36 @@ Do exactly one PR bundle per run.
 ## Parallel agent coordination (required when using multiple worktrees)
 1. Use remote branch claims instead of editing one shared file.
 2. Claim namespace: `refs/heads/codex/claim/<taskId>`.
-3. Before selecting a task, refresh and read active claims:
+3. Remote claim metadata schema (required for `refs/heads/codex/claim/<taskId>`):
+   - JSON payload with required fields: `createdAt` (ISO-8601), `expiresAt` (ISO-8601), `ownerId` (agent unique id).
+   - optional fields: `ownerInfo` (for example hostname/pid) and `version`.
+4. Before selecting a task, refresh and read active claims:
    - `git fetch origin --prune`
    - `git ls-remote --heads origin \"refs/heads/codex/claim/*\"`
-4. When first candidate task `T` is found, try to claim it atomically:
-   - `git push origin \"HEAD:refs/heads/codex/claim/<taskId>\"`
-5. If claim push fails because the claim branch already exists (or another agent wins race), treat that task as unavailable, continue scanning for the next eligible unclaimed task, and retry claim.
-6. Keep the claim branch active for that task until the implementation branch is merged; this prevents duplicate work while PR is pending review.
-7. Claim cleanup happens after merge (or explicit cancellation):
+   - read claim metadata payload and use `expiresAt`/`ownerId` for availability checks and stale detection.
+5. When first candidate task `T` is found, try to claim it atomically:
+   - write/update claim metadata (`createdAt`, `expiresAt`, `ownerId`, optional `ownerInfo`/`version`) and push to `refs/heads/codex/claim/<taskId>`.
+6. If claim push fails because the claim branch already exists (or another agent wins race), treat that task as unavailable, continue scanning for the next eligible unclaimed task, and retry claim.
+7. Keep the claim branch active for that task until the implementation branch is merged; this prevents duplicate work while PR is pending review.
+8. Claim cleanup happens after merge (or explicit cancellation):
    - `git push origin --delete \"codex/claim/<taskId>\"`
-8. Remote claim lease lifecycle:
-   - treat `refs/heads/codex/claim/<taskId>` as a lease with `createdAt` and `expiresAt` (default TTL: 24 hours).
-   - refresh lease heartbeat at run start and run end when the same task remains claimed by the current agent.
-   - if a remote lease is expired, allow reclaim and record takeover details in `RUN_SUMMARY.json`.
-9. Remote stale-claim cleanup:
-   - on startup (during step 3 remote refresh), detect expired remote leases.
-   - when reclaiming an expired remote lease succeeds in step 4, continue with the reclaimed task and report the reclaim event.
-10. For reliable TTL semantics, avoid using arbitrary branch tip timestamps as lease time. Prefer claim metadata commits (or equivalent metadata) that explicitly store `createdAt` and `expiresAt`.
-11. If remote claim refs are unavailable (offline/no permission), use a local fallback file `.codex/claims-local/<taskId>.json` and report that coordination is best-effort only in the final output.
-12. Local fallback lifecycle for `.codex/claims-local/<taskId>.json`:
+9. Remote claim lease lifecycle:
+   - treat `refs/heads/codex/claim/<taskId>` as a lease with `createdAt`, `expiresAt`, and `ownerId` (default TTL: 24 hours).
+   - refresh lease heartbeat at run start and run end when the same task remains claimed by the current agent by writing updated metadata with a new `expiresAt`.
+   - if a remote lease is expired, allow reclaim and record takeover details (`ownerId`, `previousExpiresAt`, `takeoverAt`) in `RUN_SUMMARY.json`.
+10. Remote stale-claim cleanup:
+   - on startup (during step 4 remote refresh), detect expired remote leases using metadata `expiresAt`.
+   - when reclaiming an expired remote lease succeeds in step 5, continue with the reclaimed task and report the reclaim event.
+11. For reliable TTL semantics, implementations must use metadata timestamps (`createdAt`/`expiresAt`) and not branch-tip timestamps.
+12. If remote claim refs are unavailable (offline/no permission), use a local fallback file `.codex/claims-local/<taskId>.json` and report that coordination is best-effort only in the final output.
+13. Local fallback lifecycle for `.codex/claims-local/<taskId>.json`:
    - include `createdAt` (ISO-8601 timestamp) in the file content.
    - treat local claim files as stale after 24 hours (or when an explicit `expiresAt` has passed).
-13. Local fallback cleanup rules:
-   - on startup (before step 3 remote refresh), delete stale files in `.codex/claims-local/`.
-   - when remote claims become available and step 4 remote claim succeeds for the same task, delete `.codex/claims-local/<taskId>.json`.
+14. Local fallback cleanup rules:
+   - on startup (before step 4 remote refresh), delete stale files in `.codex/claims-local/`.
+   - when remote claims become available and step 5 remote claim succeeds for the same task, delete `.codex/claims-local/<taskId>.json`.
    - on task completion or explicit cancellation, delete `.codex/claims-local/<taskId>.json`.
-14. If remote claims are unavailable and a non-stale `.codex/claims-local/<taskId>.json` already exists for a task, treat that task as claimed/unavailable.
+15. If remote claims are unavailable and a non-stale `.codex/claims-local/<taskId>.json` already exists for a task, treat that task as claimed/unavailable.
 
 ## Project portability and hygiene (required)
 1. Detect project ecosystem before making tooling decisions (for example: `package.json`, `pnpm-lock.yaml`, `yarn.lock`, `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`, `Gemfile`).
@@ -164,7 +168,7 @@ For the `.codex/pr/RUN_SUMMARY.json` output above, use the following fields and 
 - `filesChanged`: string[]
 - `validationResults`: array of objects with `{ "name": string, "command": string, "exitCode": number, "status": "passed" | "failed", "outputSummary": string }`
 - `preflightChecks`: array of objects with `{ "name": string, "status": "passed" | "failed", "details": string }`
-- `taskClaim`: object with `{ "taskId": string | null, "claimRef": string | null, "status": "claimed" | "already_claimed" | "fallback_local" | "not_used", "details": string }`
+- `taskClaim`: object with `{ "taskId": string | null, "claimRef": string | null, "status": "claimed" | "already_claimed" | "fallback_local" | "not_used", "details": string, "takeover": { "ownerId": string, "previousExpiresAt": string, "takeoverAt": string } | null }`
 - `memoryUpdate`: object with `{ "file": string, "status": "appended" | "no_change", "summary": string }`
 - `nextBoundaryTaskId`: string | null
 - `verificationEvidence`: array of objects with `{ "taskId": string, "verificationId": string, "commands": string[], "status": "passed" | "failed" | "manual_verified", "humanEvidence": string | null }`
