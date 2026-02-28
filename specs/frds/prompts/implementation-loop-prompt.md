@@ -65,6 +65,16 @@ Do exactly one PR bundle per run.
    - `git push origin --delete \"codex/claim/<taskId>\"`
 8. If remote claim refs are unavailable (offline/no permission), use a local fallback file `.codex/claims-local/<taskId>.json` and report that coordination is best-effort only in the final output.
 
+## Project portability and hygiene (required)
+1. Detect project ecosystem before making tooling decisions (for example: `package.json`, `pnpm-lock.yaml`, `yarn.lock`, `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`, `Gemfile`).
+2. Reuse the repo's existing package/runtime toolchain; do not introduce a second package manager or parallel dependency system unless explicitly required.
+3. Check for ignore files (`.gitignore` and, when relevant, `.dockerignore`, `.eslintignore`, `.prettierignore`) before generating artifacts.
+4. If an ignore file exists, append narrowly scoped entries instead of replacing content; preserve user comments/order when feasible.
+5. If `.gitignore` is missing and the selected task generates artifacts, create a minimal `.gitignore` that excludes only generated/local files required by the task.
+6. Never add patterns that ignore lockfiles or source code by default.
+7. Ensure run outputs are ignored when applicable (including `.codex/pr/` artifacts and tool-generated temp/build/test outputs).
+8. Do not commit secrets or local credentials (`.env`, private keys, tokens, machine-specific config).
+
 ## Implementation rules
 - Implement selected tasks/subtasks fully.
 - Follow `filesToCreate`, `filesToModify`, `verification`, `notes`, and `gotchas`.
@@ -86,9 +96,11 @@ Do exactly one PR bundle per run.
 
 ## Validation
 - Run tests/checks required by selected tasks.
-- Validate FRDs with Ajv:
-  - `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-[0-9][0-9][0-9]-*.json\"`
-  - If glob handling is inconsistent in your shell/runner, expand files explicitly, for example: `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json $(find specs/frds -maxdepth 1 -type f -name 'frd-[0-9][0-9][0-9]-*.json' | sort | sed 's/^/-d /')`
+- Validate FRDs with Ajv using deterministic local tooling first:
+  - Preferred: `npm run validate:schema` (if script exists).
+  - Alternate: `./node_modules/.bin/ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-[0-9][0-9][0-9]-*.json\"` (if local binary exists).
+  - Fallback only if local tooling is unavailable: `npx --yes -p ajv-cli@5.0.0 -p ajv-formats ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-[0-9][0-9][0-9]-*.json\"`.
+  - If glob handling is inconsistent in your shell/runner, expand files explicitly, for example: `$(find specs/frds -maxdepth 1 -type f -name 'frd-[0-9][0-9][0-9]-*.json' | sort | sed 's/^/-d /')`.
 
 ## FRD status updates
 - Mark completed tasks/subtasks as `completed`.
@@ -121,6 +133,7 @@ For the `.codex/pr/RUN_SUMMARY.json` output above, use the following fields and 
 - `commits`: array of objects with `{ "hash": string, "message": string }`
 - `filesChanged`: string[]
 - `validationResults`: array of objects with `{ "name": string, "command": string, "exitCode": number, "status": "passed" | "failed" }`
+- `preflightChecks`: array of objects with `{ "name": string, "status": "passed" | "failed", "details": string }`
 - `taskClaim`: object with `{ "taskId": string | null, "claimRef": string | null, "status": "claimed" | "already_claimed" | "fallback_local" | "not_used", "details": string }`
 - `memoryUpdate`: object with `{ "file": string, "status": "appended" | "no_change", "summary": string }`
 - `nextBoundaryTaskId`: string | null
