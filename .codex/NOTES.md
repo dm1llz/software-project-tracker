@@ -121,3 +121,10 @@ Template:
 - Action/Decision: Switched integration fixture loading to raw-module imports, added `src/types/vite-raw-modules.d.ts`, and updated `tsconfig` include to cover `.d.ts` declarations.
 - Reusable check/command: `npm run build && npx vitest run --config vitest.config.ts src/domain/review-run/__tests__/reviewRun.integration.test.ts src/infra/workers/__tests__/workerFallback.integration.test.ts`
 - Applicability: Reuse whenever browser-oriented repos keep `src/**` tests type-checked but avoid Node type dependencies.
+
+### 2026-02-28 FRD-008-T1
+- Situation: Tailwind setup task required classic Tailwind/PostCSS config files (`tailwind.config.ts` + `postcss.config.cjs`) and immediate compatibility with existing Vite 5 pipeline.
+- Learning: Pinning Tailwind to `3.4.x` preserves expected `@tailwind` directive + PostCSS plugin flow without adopting Tailwind v4 config changes mid-stream.
+- Action/Decision: Installed `tailwindcss@3.4.17`, `postcss`, and `autoprefixer`, added config files, and imported `src/styles/tailwind.css` in `src/main.tsx`.
+- Reusable check/command: `npm run build && npm run build:app && npm run dev -- --host 127.0.0.1 --port 4173 --strictPort`
+- Applicability: Reuse for future Tailwind baseline tasks in this repo until a deliberate v4 migration is planned.
