@@ -3,7 +3,7 @@
     "frdId": "FRD-008",
     "title": "Tailwind Styling and Layout Foundation",
     "description": "Introduce Tailwind CSS in the Vite runtime, apply baseline styling to existing UI elements, and establish a responsive page layout shell for the review workflow.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 8,
     "estimatedEffort": "medium",
     "dependencies": [
@@ -94,7 +94,7 @@
       "taskId": "FRD-008-T2",
       "title": "Apply baseline utility styling to review UI components",
       "description": "Style the existing review page controls, summary, lists, and detail panels with a consistent Tailwind utility baseline.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-008-T1",
@@ -105,7 +105,7 @@
           "subtaskId": "FRD-008-T2-S1",
           "title": "Style top-level shell and control panel",
           "description": "Add baseline spacing, typography, and control styles to App/ReviewRunPage and schema upload controls.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/App.tsx",
             "src/ui/ReviewRunPage.tsx",
@@ -116,7 +116,7 @@
           "subtaskId": "FRD-008-T2-S2",
           "title": "Style result, issue, and readable detail views",
           "description": "Apply consistent table/list/card treatments across summary, file results, issue tables, and readable sections.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/ReviewSummaryView.tsx",
             "src/ui/components/FileResultListView.tsx",
@@ -172,7 +172,7 @@
       "taskId": "FRD-008-T3",
       "title": "Create a responsive page layout shell",
       "description": "Introduce a basic responsive layout that organizes controls, run summary, file list, and detail panel for desktop and mobile.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-008-T2"
@@ -182,7 +182,7 @@
           "subtaskId": "FRD-008-T3-S1",
           "title": "Define layout structure and breakpoints",
           "description": "Add grid/flex layout utilities and section wrappers so content adapts cleanly between narrow and wide screens.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx"
           ]
@@ -191,7 +191,7 @@
           "subtaskId": "FRD-008-T3-S2",
           "title": "Align detail panel placement with file-list navigation",
           "description": "Ensure detail panel placement remains predictable and readable when switching between files or tabs.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/FileResultListView.tsx",
             "src/ui/components/ReadableFrdSectionView.tsx",

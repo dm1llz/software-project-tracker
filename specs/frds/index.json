@@ -84,7 +84,7 @@
     {
       "frdId": "FRD-008",
       "title": "Tailwind Styling and Layout Foundation",
-      "status": "in_progress",
+      "status": "completed",
       "priority": 8,
       "path": "./frd-008-tailwind-styling-layout.json",
       "dependencies": [
