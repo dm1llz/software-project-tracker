@@ -9,6 +9,7 @@
 
 1. `nvm use` (or install Node `22.11.0` first)
 2. `npm install`
+3. Install Playwright browser binaries: `npm run test:e2e:install`
 
 ## Standard Commands
 
@@ -21,3 +22,4 @@
 ## Notes
 
 - Use `npm` consistently so lockfile resolution stays deterministic in local and CI runs.
+- E2E uses Playwright config in `playwright.config.ts`, which auto-starts Vite dev server at `http://127.0.0.1:4173`.
