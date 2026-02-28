@@ -4,14 +4,15 @@
     "title": "Quality and Performance",
     "description": "Define and implement quality gates across unit, integration, and e2e smoke tests, including worker fallback and responsiveness expectations.",
     "status": "not_started",
-    "priority": 6,
+    "priority": 7,
     "estimatedEffort": "medium",
     "dependencies": [
       "FRD-002",
       "FRD-003",
       "FRD-004",
       "FRD-005",
-      "FRD-001"
+      "FRD-001",
+      "FRD-007"
     ],
     "specReferences": [
       "specs/mvp-frd-review-spec.md",
@@ -20,7 +21,7 @@
       "specs/ux-review-flow.md"
     ],
     "createdAt": "2026-02-25",
-    "updatedAt": "2026-02-25"
+    "updatedAt": "2026-02-28"
   },
   "majorTasks": [
     {

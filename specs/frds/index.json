@@ -54,17 +54,31 @@
       ]
     },
     {
+      "frdId": "FRD-007",
+      "title": "React/Vite Runtime and UI Wiring",
+      "status": "not_started",
+      "priority": 6,
+      "path": "./frd-007-react-vite-runtime-ui-wiring.json",
+      "dependencies": [
+        "FRD-003",
+        "FRD-004",
+        "FRD-005",
+        "FRD-001"
+      ]
+    },
+    {
       "frdId": "FRD-006",
       "title": "Quality and Performance",
       "status": "not_started",
-      "priority": 6,
+      "priority": 7,
       "path": "./frd-006-quality-performance.json",
       "dependencies": [
         "FRD-002",
         "FRD-003",
         "FRD-004",
         "FRD-005",
-        "FRD-001"
+        "FRD-001",
+        "FRD-007"
       ]
     }
   ]
