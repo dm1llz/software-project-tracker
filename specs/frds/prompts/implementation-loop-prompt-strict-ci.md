@@ -43,7 +43,12 @@ Do exactly one PR bundle per run.
 
 ## Branching
 - Create branch with prefix `codex/`, e.g.:
-  - `codex/<frdId>-<startTaskId>-bundle`
+  - `codex/f###-t#` (single-task bundle, compact canonical form)
+  - `codex/f###-t#-b` (multi-task bundle)
+  - `codex/f###-t#-a#` (parallel agent suffix when needed)
+- Derive compact IDs deterministically:
+  - `FRD-001` -> `f001`
+  - `FRD-001-T4` -> `t4`
 - If working tree is dirty with unrelated changes, stop and report.
 
 ## Parallel agent coordination (required when using multiple worktrees)
