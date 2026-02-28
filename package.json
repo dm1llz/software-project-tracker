@@ -10,8 +10,8 @@
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.json",
     "test": "npm run test:unit",
-    "test:unit": "vitest run --passWithNoTests",
-    "test:integration": "vitest run --passWithNoTests --dir tests/integration",
+    "test:unit": "vitest run --config vitest.config.ts --passWithNoTests --dir src/domain && vitest run --config vitest.config.ts --passWithNoTests --dir tests/unit",
+    "test:integration": "vitest run --config vitest.config.ts --passWithNoTests --dir tests/integration",
     "test:e2e": "playwright test --pass-with-no-tests",
     "validate:schema": "ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-[0-9][0-9][0-9]-*.json\"",
     "dev": "vite",

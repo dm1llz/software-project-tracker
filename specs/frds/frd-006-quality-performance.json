@@ -3,7 +3,7 @@
     "frdId": "FRD-006",
     "title": "Quality and Performance",
     "description": "Define and implement quality gates across unit, integration, and e2e smoke tests, including worker fallback and responsiveness expectations.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 7,
     "estimatedEffort": "medium",
     "dependencies": [
@@ -28,7 +28,7 @@
       "taskId": "FRD-006-T1",
       "title": "Establish unit-test quality gates",
       "description": "Add deterministic unit tests for contracts, mapping, sorting, and invariant helpers in domain modules.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-002",
@@ -41,7 +41,7 @@
           "subtaskId": "FRD-006-T1-S1",
           "title": "Create unit test suites for domain helpers",
           "description": "Cover parsing mappers, validation issue mapping, summary invariants, and deterministic sorting utilities.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/__tests__/reviewRunUtils.test.ts",
             "src/domain/validation/__tests__/schemaValidation.test.ts",
@@ -52,7 +52,7 @@
           "subtaskId": "FRD-006-T1-S2",
           "title": "Configure reusable test runner setup and scripts",
           "description": "Add shared Vitest setup files and explicit npm scripts so unit and integration suites run consistently across local and CI.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "vitest.config.ts",
             "src/test/setupTests.ts"
