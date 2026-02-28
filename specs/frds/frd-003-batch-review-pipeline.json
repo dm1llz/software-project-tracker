@@ -3,7 +3,7 @@
     "frdId": "FRD-003",
     "title": "Batch Review Pipeline",
     "description": "Implement FRD multi-file ingestion, per-file parse and validation, duplicate name handling, and summary/status invariants.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 3,
     "estimatedEffort": "large",
     "dependencies": ["FRD-001", "FRD-002"],
@@ -83,7 +83,7 @@
       "taskId": "FRD-003-T2",
       "title": "Execute per-file parse and strict validation with continue-on-error",
       "description": "Process each FRD independently, mapping parse and validation diagnostics to FileIssue entries.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": ["FRD-003-T1"],
       "subtasks": [
@@ -91,7 +91,7 @@
           "subtaskId": "FRD-003-T2-S1",
           "title": "Implement FRD parse stage",
           "description": "Parse FRD JSON and map parse failures to PARSE_ERROR with path '/'.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/parseFrdFile.ts"
           ]
@@ -100,7 +100,7 @@
           "subtaskId": "FRD-003-T2-S2",
           "title": "Implement schema validation stage",
           "description": "Invoke compiled validator and map errors/warnings to VALIDATION_ERROR issues.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/validateFrdFile.ts"
           ]
@@ -109,7 +109,7 @@
           "subtaskId": "FRD-003-T2-S3",
           "title": "Implement per-file result reducer",
           "description": "Build ReviewResult status and valid/parseOk flags from collected diagnostics.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/buildReviewResult.ts"
           ]
@@ -161,7 +161,7 @@
       "taskId": "FRD-003-T3",
       "title": "Aggregate batch summary and deterministic output ordering",
       "description": "Compute ReviewRunResult summary counts and produce sorted per-file output list.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": ["FRD-003-T2"],
       "subtasks": [
@@ -169,7 +169,7 @@
           "subtaskId": "FRD-003-T3-S1",
           "title": "Implement summary aggregation",
           "description": "Count passed, failed, and parseFailed according to status-to-bucket rules.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/summarizeBatchReview.ts"
           ]
@@ -178,7 +178,7 @@
           "subtaskId": "FRD-003-T3-S2",
           "title": "Integrate deterministic result sort",
           "description": "Apply contract order parse_failed -> validation_failed -> passed and tie-break by uploadIndex.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/domain/review-run/sortReviewResults.ts"
           ]
