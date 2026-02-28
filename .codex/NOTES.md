@@ -107,3 +107,10 @@ Template:
 - Action/Decision: Updated `setValidator(compiled.validator)` to `setValidator(() => compiled.validator)` in `ReviewRunPage`, restoring FRD processing and DOM lifecycle flows.
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx`
 - Applicability: Reuse anywhere hooks persist callbacks/validators/strategies as state values.
+
+### 2026-02-28 FRD-006-T1
+- Situation: Unit/integration script scoping was ambiguous once shared Vitest config was introduced, and Vitest CLI accepts only a single `--dir` value.
+- Learning: For deterministic scope separation, chain two Vitest invocations in `test:unit` (one per directory) and keep `test:integration` on a dedicated `--dir` target.
+- Action/Decision: Added `vitest.config.ts` + setup file and updated npm scripts so unit runs `src/domain` then `tests/unit`, while integration runs only `tests/integration`.
+- Reusable check/command: `npm run test:unit && npm run test:integration`
+- Applicability: Reuse whenever mixed test layouts need strict CI partitioning without introducing a Vitest workspace.
