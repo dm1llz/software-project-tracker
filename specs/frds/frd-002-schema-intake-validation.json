@@ -3,7 +3,7 @@
     "frdId": "FRD-002",
     "title": "Schema Intake and Validation Core",
     "description": "Implement schema upload parsing, strict Ajv compilation, draft enforcement, and run-level schema issue handling.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 2,
     "estimatedEffort": "large",
     "dependencies": [
@@ -16,14 +16,14 @@
       "specs/ux-review-flow.md"
     ],
     "createdAt": "2026-02-25",
-    "updatedAt": "2026-02-25"
+    "updatedAt": "2026-02-28"
   },
   "majorTasks": [
     {
       "taskId": "FRD-002-T1",
       "title": "Implement schema upload and parse pipeline",
       "description": "Read a user-selected schema file, parse JSON safely, and build SchemaBundle with declared/effective draft fields.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-001"
@@ -33,7 +33,7 @@
           "subtaskId": "FRD-002-T1-S1",
           "title": "Build schema file ingestion adapter",
           "description": "Convert browser File input into text and normalized schema ingestion payload.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/validation/loadSchemaFile.ts"
           ]
@@ -42,7 +42,7 @@
           "subtaskId": "FRD-002-T1-S2",
           "title": "Map parse errors into run issues",
           "description": "Capture parse failures with actionable line and column metadata when parser diagnostics allow.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/validation/mapSchemaParseIssue.ts"
           ]
