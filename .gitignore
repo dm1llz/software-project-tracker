@@ -44,3 +44,4 @@ Thumbs.db
 
 # Codex PR artifacts
 .codex/pr/
+.codex/claims-local/
