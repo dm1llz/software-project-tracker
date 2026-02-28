@@ -11,6 +11,11 @@ describe("mapReviewInputFiles", () => {
     ]);
 
     expect(result.files).toHaveLength(3);
+    expect(result.files.map((file) => file.id)).toEqual([
+      "frd-0-a.json",
+      "frd-1-b.json",
+      "frd-2-c.json",
+    ]);
     expect(new Set(result.files.map((file) => file.id)).size).toBe(3);
     expect(result.files.map((file) => file.uploadIndex)).toEqual([0, 1, 2]);
     expect(result.fileIssues).toHaveLength(0);
