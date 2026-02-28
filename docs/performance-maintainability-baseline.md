@@ -38,3 +38,4 @@ This command writes machine-readable metrics to `.codex/pr/profile-review-run.js
 
 - T2 should extract orchestration from `ReviewRunPage` first to reduce change risk before optimization work.
 - T3 should prioritize measured improvements in render/update behavior while preserving deterministic result ordering and status contracts.
+- Note: profiler numbers include per-iteration schema compile cost, so compare T2/T3 results with this compile-time overhead in mind rather than attributing all measured time to runtime orchestration work.

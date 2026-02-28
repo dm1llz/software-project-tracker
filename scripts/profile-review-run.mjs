@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 
@@ -41,6 +41,19 @@ const makeLargeValidFrd = (index) =>
 
 const measureScenario = (name, fileTexts) => {
   const perIteration = [];
+  const warmupAjv = new Ajv2020({ strict: true, allErrors: true, validateFormats: true });
+  addFormats(warmupAjv);
+  const warmupValidator = warmupAjv.compile(validSchema);
+  const warmupSample = fileTexts
+    .map((text) => {
+      try {
+        return JSON.parse(text);
+      } catch {
+        return null;
+      }
+    })
+    .find((value) => value !== null) ?? {};
+  warmupValidator(warmupSample);
 
   for (let i = 0; i < iterations; i += 1) {
     const t0 = performance.now();
@@ -153,7 +166,9 @@ const output = {
 };
 
 if (outPath) {
-  await writeFile(path.resolve(process.cwd(), outPath), JSON.stringify(output, null, 2));
+  const resolvedOutputPath = path.resolve(process.cwd(), outPath);
+  await mkdir(path.dirname(resolvedOutputPath), { recursive: true });
+  await writeFile(resolvedOutputPath, JSON.stringify(output, null, 2));
 }
 
 const lines = [];
