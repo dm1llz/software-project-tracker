@@ -14,6 +14,7 @@
     "test:integration": "vitest run --config vitest.config.ts --passWithNoTests --dir tests/integration",
     "test:e2e": "playwright test --config playwright.config.ts --pass-with-no-tests",
     "test:e2e:install": "playwright install chromium",
+    "profile:review-run": "node scripts/profile-review-run.mjs --iterations 5 --out .codex/pr/profile-review-run.json",
     "validate:schema": "ajv validate -c ajv-formats --spec=draft2020 --strict=true -s specs/frds/frd-schema.json -d \"specs/frds/frd-[0-9][0-9][0-9]-*.json\"",
     "dev": "vite",
     "build:app": "vite build",
