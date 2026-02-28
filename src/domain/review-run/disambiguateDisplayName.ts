@@ -40,3 +40,22 @@ export const buildDisplayNameMap = (
 
   return map;
 };
+
+export type DisplayNameRow = {
+  id: string;
+  fileName: string;
+  uploadIndex: number;
+  displayName: string;
+};
+
+export const buildDisplayNameRows = (files: readonly DisplayNameTarget[]): DisplayNameRow[] => {
+  const displayNameById = buildDisplayNameMap(files);
+  return [...files]
+    .sort((left, right) => left.uploadIndex - right.uploadIndex)
+    .map((file) => ({
+      id: file.id,
+      fileName: file.fileName,
+      uploadIndex: file.uploadIndex,
+      displayName: displayNameById[file.id] ?? file.fileName,
+    }));
+};
