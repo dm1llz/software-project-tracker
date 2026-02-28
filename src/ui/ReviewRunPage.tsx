@@ -153,8 +153,6 @@ const toUploadIndexFromFileId = (fileId: string, fallbackIndex: number): number 
   return Number.isNaN(parsed) ? fallbackIndex : parsed;
 };
 
-const toSchemaNode = (rawSchema: Record<string, unknown>): Record<string, unknown> => rawSchema;
-
 const readFileText = async (file: File): Promise<string> => {
   const withText = file as File & { text?: () => Promise<string> };
   if (typeof withText.text === "function") {
@@ -275,9 +273,6 @@ export const ReviewRunPage = () => {
       }
 
       if (!loaded.ok) {
-        if (!isCurrentRequest(requestVersion)) {
-          return;
-        }
         setSchemaBundle(null);
         setValidator(null);
         setStore(toErrorStoreState(loaded.runIssues));
@@ -290,9 +285,6 @@ export const ReviewRunPage = () => {
         return;
       }
       if (!compiled.ok) {
-        if (!isCurrentRequest(requestVersion)) {
-          return;
-        }
         setSchemaBundle(null);
         setValidator(null);
         setStore(toErrorStoreState(compiled.runIssues));
@@ -364,7 +356,7 @@ export const ReviewRunPage = () => {
             title: displayName,
             path: "/",
             value: parseResult.parsed,
-            schema: toSchemaNode(schemaBundle.raw),
+            schema: schemaBundle.raw,
           });
         }
 
@@ -410,8 +402,6 @@ export const ReviewRunPage = () => {
       if (!isCurrentRequest(requestVersion)) {
         return;
       }
-      setSchemaBundle(null);
-      setValidator(null);
       setStore(toErrorStoreState([toUnexpectedRunIssue(error)]));
       resetRuntimeState(requestVersion);
     }
