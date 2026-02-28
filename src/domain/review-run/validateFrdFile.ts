@@ -34,15 +34,18 @@ const mapWarningDiagnostic = (
   fileId: string,
   fileName: string,
   warning: WarningDiagnostic,
-): FileIssue => ({
-  fileId,
-  level: "warning",
-  code: "VALIDATION_ERROR",
-  fileName,
-  path: warning.path,
-  message: warning.message,
-  ...(warning.keyword === undefined ? {} : { keyword: warning.keyword }),
-});
+): FileIssue => {
+  const path = warning.path === "" ? "/" : warning.path;
+  return {
+    fileId,
+    level: "warning",
+    code: "VALIDATION_ERROR",
+    fileName,
+    path,
+    message: warning.message,
+    ...(warning.keyword === undefined ? {} : { keyword: warning.keyword }),
+  };
+};
 
 export const validateFrdFile = ({
   fileId,
