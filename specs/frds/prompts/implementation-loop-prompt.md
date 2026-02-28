@@ -25,7 +25,7 @@ Do exactly one PR bundle per run.
    - Reusable check/command:
    - Applicability:
    ```
-7. If no new durable learning exists, leave `.codex/NOTES.md` unchanged and record `no_change` in run summary.
+7. If no new durable learning exists, leave `.codex/NOTES.md` unchanged and record `no_change` in `RUN_SUMMARY.json`.
 
 ## Task selection rules
 1. Load FRDs in `index.json` order.
@@ -63,7 +63,23 @@ Do exactly one PR bundle per run.
 6. Keep the claim branch active for that task until the implementation branch is merged; this prevents duplicate work while PR is pending review.
 7. Claim cleanup happens after merge (or explicit cancellation):
    - `git push origin --delete \"codex/claim/<taskId>\"`
-8. If remote claim refs are unavailable (offline/no permission), use a local fallback file `.codex/claims-local/<taskId>.json` and report that coordination is best-effort only in the final output.
+8. Remote claim lease lifecycle:
+   - treat `refs/heads/codex/claim/<taskId>` as a lease with `createdAt` and `expiresAt` (default TTL: 24 hours).
+   - refresh lease heartbeat at run start and run end when the same task remains claimed by the current agent.
+   - if a remote lease is expired, allow reclaim and record takeover details in `RUN_SUMMARY.json`.
+9. Remote stale-claim cleanup:
+   - on startup (during step 3 remote refresh), detect expired remote leases.
+   - when reclaiming an expired remote lease succeeds in step 4, continue with the reclaimed task and report the reclaim event.
+10. For reliable TTL semantics, avoid using arbitrary branch tip timestamps as lease time. Prefer claim metadata commits (or equivalent metadata) that explicitly store `createdAt` and `expiresAt`.
+11. If remote claim refs are unavailable (offline/no permission), use a local fallback file `.codex/claims-local/<taskId>.json` and report that coordination is best-effort only in the final output.
+12. Local fallback lifecycle for `.codex/claims-local/<taskId>.json`:
+   - include `createdAt` (ISO-8601 timestamp) in the file content.
+   - treat local claim files as stale after 24 hours (or when an explicit `expiresAt` has passed).
+13. Local fallback cleanup rules:
+   - on startup (before step 3 remote refresh), delete stale files in `.codex/claims-local/`.
+   - when remote claims become available and step 4 remote claim succeeds for the same task, delete `.codex/claims-local/<taskId>.json`.
+   - on task completion or explicit cancellation, delete `.codex/claims-local/<taskId>.json`.
+14. If remote claims are unavailable and a non-stale `.codex/claims-local/<taskId>.json` already exists for a task, treat that task as claimed/unavailable.
 
 ## Project portability and hygiene (required)
 1. Detect project ecosystem before making tooling decisions (for example: `package.json`, `pnpm-lock.yaml`, `yarn.lock`, `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`, `Gemfile`).
@@ -72,7 +88,7 @@ Do exactly one PR bundle per run.
 4. If an ignore file exists, append narrowly scoped entries instead of replacing content; preserve user comments/order when feasible.
 5. If `.gitignore` is missing and the selected task generates artifacts, create a minimal `.gitignore` that excludes only generated/local files required by the task.
 6. Never add patterns that ignore lockfiles or source code by default.
-7. Ensure run outputs are ignored when applicable (including `.codex/pr/` artifacts and tool-generated temp/build/test outputs).
+7. Ensure run outputs are ignored when applicable (including `.codex/pr/`, `.codex/claims-local/`, and tool-generated temp/build/test outputs).
 8. Do not commit secrets or local credentials (`.env`, private keys, tokens, machine-specific config).
 
 ## Implementation rules
@@ -117,12 +133,15 @@ Do exactly one PR bundle per run.
 1. Create `.codex/pr` if missing.
 2. Write PR body markdown to `.codex/pr/PR_BODY.md`.
 3. Write machine-readable run summary to `.codex/pr/RUN_SUMMARY.json` with:
-   - selected bundle task IDs
-   - branch name
-   - commit list (hash + message)
-   - files changed
-   - validation/test results
-   - next boundary task ID
+   - `selectedBundleTaskIds`
+   - `branchName`
+   - `commits` (hash + message)
+   - `filesChanged`
+   - `validationResults`
+   - `preflightChecks`
+   - `taskClaim`
+   - `memoryUpdate`
+   - `nextBoundaryTaskId`
 4. Overwrite `.codex/pr/PR_BODY.md` and `.codex/pr/RUN_SUMMARY.json` on each run.
 5. Also print the PR body in terminal output.
 
@@ -145,10 +164,11 @@ Return:
 3. Commit list (hash + message)
 4. Files changed
 5. Validation/test results
-6. Task claim summary (claim ref used, and whether claim succeeded or fallback was used)
-7. Memory update summary (`appended` or `no_change`, plus short note)
-8. Next boundary task ID (next `prLevel: true` not implemented)
-9. A PR body in Markdown using this template:
+6. Preflight checks summary
+7. Task claim summary (claim ref used, and whether claim succeeded or fallback was used)
+8. Memory update summary (`appended` or `no_change`, plus short note)
+9. Next boundary task ID (next `prLevel: true` not implemented)
+10. A PR body in Markdown using this template:
 
 ### PR Title
 `<conventional-commit-style summary for bundle>`
