@@ -3,9 +3,11 @@ import type {
   RenderedSection,
 } from "../../types/reviewContracts";
 import type { RenderedScalarValue } from "../../types/reviewContracts";
+import { assertSemanticPreservation } from "./assertSemanticPreservation";
 import { isRenderedScalarValue } from "./guards";
+import { orderFields } from "./orderFields";
 
-type ObjectFieldSchema = {
+export type ObjectFieldSchema = {
   description?: string;
   title?: string;
 };
@@ -20,11 +22,22 @@ type MapObjectSectionInput = {
 
 const mapFieldValue = (value: unknown): RenderedScalarValue | RenderedScalarValue[] => {
   if (isRenderedScalarValue(value)) {
+    assertSemanticPreservation({
+      source: value,
+      rendered: value,
+      context: "object field scalar",
+    });
     return value;
   }
 
   if (Array.isArray(value) && value.every((item) => isRenderedScalarValue(item))) {
-    return value;
+    const rendered = [...value];
+    assertSemanticPreservation({
+      source: value,
+      rendered,
+      context: "object field scalar array",
+    });
+    return rendered;
   }
 
   throw new Error("Object mapper only supports scalar values or arrays of scalars for fields.");
@@ -50,7 +63,9 @@ export const mapObjectSection = ({
   value,
   fieldSchemas = {},
 }: MapObjectSectionInput): Extract<RenderedSection, { kind: "object" }> => {
-  const fields: RenderedObjectField[] = Object.entries(value).map(([key, rawValue]) => {
+  const orderedKeys = orderFields({ value, fieldSchemas });
+  const fields: RenderedObjectField[] = orderedKeys.map((key) => {
+    const rawValue = value[key];
     const schema = fieldSchemas[key];
     return {
       key,

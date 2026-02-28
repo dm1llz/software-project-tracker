@@ -5,3 +5,6 @@ export const isRenderedScalarValue = (value: unknown): value is RenderedScalarVa
   typeof value === "string" ||
   typeof value === "number" ||
   typeof value === "boolean";
+
+export const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
