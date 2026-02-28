@@ -3,7 +3,7 @@
     "frdId": "FRD-005",
     "title": "UI Review Flow",
     "description": "Implement full review-run UI state flow, results overview, per-file detail views, and schema-reset interactions.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 5,
     "estimatedEffort": "large",
     "dependencies": [
@@ -89,7 +89,7 @@
       "taskId": "FRD-005-T2",
       "title": "Implement results overview and per-file detail panes",
       "description": "Display batch summary, sorted file rows, issue list fields, and readable FRD tab for valid files.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-005-T1",
@@ -100,7 +100,7 @@
           "subtaskId": "FRD-005-T2-S1",
           "title": "Create summary and file result list components",
           "description": "Render total/passed/failed/parseFailed metrics and file status badges in deterministic order.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/components/ReviewSummary.tsx",
             "src/ui/components/FileResultList.tsx"
@@ -110,7 +110,7 @@
           "subtaskId": "FRD-005-T2-S2",
           "title": "Create issues panel and readable view tabs",
           "description": "Render issue table fields and conditionally show Readable FRD tab only for passed files.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/components/FileIssueTable.tsx",
             "src/ui/components/ReadableFrdView.tsx",
@@ -164,7 +164,7 @@
       "taskId": "FRD-005-T3",
       "title": "Implement run-issue panel and immutable run reset behavior",
       "description": "Render run-blocking schema issues and enforce reset semantics when schema is replaced.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-005-T1",
@@ -175,7 +175,7 @@
           "subtaskId": "FRD-005-T3-S1",
           "title": "Create run-issue panel UI",
           "description": "Display schema-level errors above file results with code/message/path/line/column fields.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/components/RunIssuePanel.tsx"
           ]
@@ -184,7 +184,7 @@
           "subtaskId": "FRD-005-T3-S2",
           "title": "Implement schema-replace reset action",
           "description": "Replace-schema interaction clears prior run state and returns to ready empty-results baseline.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/state/reviewRunStore.ts",
             "src/ui/components/SchemaControlPanel.tsx"

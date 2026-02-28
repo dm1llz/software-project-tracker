@@ -87,3 +87,9 @@ Template:
 - Action/Decision: Added `deriveScreenState`, `ReviewRunPage` state-shell model, and `SchemaControlPanel` gating model with integration tests covering Empty/Ready/Running/Complete/Error transitions and running-time interaction locks.
 - Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse when adding future UI modules before full React/Vite runtime wiring is introduced.
+### 2026-02-28 FRD-005-T2-T3
+- Situation: UI result/detail flow needed deterministic tab visibility and blocked-run behavior while preserving stable file-id selection and schema-replacement reset semantics.
+- Learning: Modeling UI components as pure view-model derivations (summary/list/detail/run-issues) keeps sort/tab/visibility contracts testable without full DOM wiring, and a central reset action prevents stale file selections after schema replacement.
+- Action/Decision: Added result/detail/run-issue component models plus `reviewRunStore` transitions (`completeReviewRun`, `selectReviewFile`, `replaceSchemaAndResetRunState`) and integrated helpers through `ReviewRunPage`/`SchemaControlPanel`.
+- Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse for subsequent UI tasks where interaction rules are strict but rendering framework wiring is introduced incrementally.
