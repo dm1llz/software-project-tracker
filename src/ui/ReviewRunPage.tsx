@@ -1,9 +1,15 @@
 import type { RunIssue } from "../types/reviewContracts";
 import {
+  applyReplaceSchemaAction,
   deriveSchemaControlPanelModel,
   type SchemaControlPanelModel,
 } from "./components/SchemaControlPanel";
+import { deriveFileDetailPanelModel } from "./components/FileDetailPanel";
+import { deriveFileResultListModel } from "./components/FileResultList";
+import { deriveReviewSummaryModel } from "./components/ReviewSummary";
+import { deriveRunIssuePanelModel } from "./components/RunIssuePanel";
 import { deriveScreenState, type ReviewScreenState } from "./state/deriveScreenState";
+import { type ReviewRunStoreState, selectReviewFile } from "./state/reviewRunStore";
 
 export type ReviewRunPageInput = {
   schemaName: string | null;
@@ -12,6 +18,14 @@ export type ReviewRunPageInput = {
   runIssues: RunIssue[];
   processedFiles: number;
   totalFiles: number;
+};
+
+export type ReviewRunContentModel = {
+  summary: ReturnType<typeof deriveReviewSummaryModel>;
+  fileList: ReturnType<typeof deriveFileResultListModel>;
+  detailPanel: ReturnType<typeof deriveFileDetailPanelModel>;
+  runIssuePanel: ReturnType<typeof deriveRunIssuePanelModel>;
+  showFileRows: boolean;
 };
 
 export type ReviewRunPageModel = {
@@ -67,3 +81,38 @@ export const deriveReviewRunPageModel = ({
     },
   };
 };
+
+export const deriveReviewRunContentModel = (state: ReviewRunStoreState): ReviewRunContentModel => {
+  const selectedFile = state.files.find((file) => file.id === state.selectedFileId) ?? null;
+  const runIssuePanel = deriveRunIssuePanelModel(state.runIssues);
+  const showFileRows = !(runIssuePanel.visible && state.files.length === 0);
+
+  return {
+    summary: deriveReviewSummaryModel(state.summary),
+    fileList: deriveFileResultListModel({
+      files: state.files,
+      selectedFileId: state.selectedFileId,
+    }),
+    detailPanel: deriveFileDetailPanelModel({
+      file: selectedFile,
+    }),
+    runIssuePanel,
+    showFileRows,
+  };
+};
+
+export const selectFileFromReviewRunPage = (
+  state: ReviewRunStoreState,
+  fileId: string | null,
+): ReviewRunStoreState => selectReviewFile(state, fileId);
+
+export const replaceSchemaFromReviewRunPage = (
+  state: ReviewRunStoreState,
+  screenState: ReviewScreenState,
+  nextSchemaName: string,
+): ReviewRunStoreState =>
+  applyReplaceSchemaAction({
+    state,
+    screenState,
+    nextSchemaName,
+  });

@@ -1,4 +1,8 @@
 import type { ReviewScreenState } from "../state/deriveScreenState";
+import {
+  replaceSchemaAndResetRunState,
+  type ReviewRunStoreState,
+} from "../state/reviewRunStore";
 
 export type SchemaControlPanelInput = {
   schemaName: string | null;
@@ -42,4 +46,27 @@ export const deriveSchemaControlPanelModel = ({
       canReplaceSchema,
     },
   };
+};
+
+export type ReplaceSchemaActionInput = {
+  state: ReviewRunStoreState;
+  screenState: ReviewScreenState;
+  nextSchemaName: string;
+};
+
+export const applyReplaceSchemaAction = ({
+  state,
+  screenState,
+  nextSchemaName,
+}: ReplaceSchemaActionInput): ReviewRunStoreState => {
+  const model = deriveSchemaControlPanelModel({
+    schemaName: state.schemaName,
+    screenState,
+  });
+
+  if (!model.controls.canReplaceSchema) {
+    return state;
+  }
+
+  return replaceSchemaAndResetRunState(nextSchemaName);
 };
