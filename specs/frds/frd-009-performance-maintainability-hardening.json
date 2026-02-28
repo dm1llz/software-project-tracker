@@ -1,0 +1,272 @@
+{
+  "metadata": {
+    "frdId": "FRD-009",
+    "title": "Performance and Maintainability Hardening",
+    "description": "Improve runtime responsiveness and long-term maintainability by extracting orchestration logic, reducing render churn, and adding measurable performance gates.",
+    "status": "not_started",
+    "priority": 9,
+    "estimatedEffort": "large",
+    "dependencies": [
+      "FRD-007",
+      "FRD-008",
+      "FRD-003",
+      "FRD-005",
+      "FRD-001"
+    ],
+    "specReferences": [
+      "specs/architecture-overview.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/roadmap.md"
+    ],
+    "createdAt": "2026-02-28",
+    "updatedAt": "2026-02-28"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-009-T1",
+      "title": "Establish performance and maintainability baseline",
+      "description": "Capture current hotspots, complexity seams, and baseline processing metrics before refactors.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-007"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-009-T1-S1",
+          "title": "Document current hotspots and complexity risks",
+          "description": "Create an engineering note summarizing current bottlenecks and maintainability pain points in UI orchestration and processing flow.",
+          "status": "not_started",
+          "filesToCreate": [
+            "docs/performance-maintainability-baseline.md"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T1-S2",
+          "title": "Add repeatable local profiling command",
+          "description": "Provide a deterministic command/script for collecting baseline run timing on representative FRD batches.",
+          "status": "not_started",
+          "filesToCreate": [
+            "scripts/profile-review-run.mjs"
+          ],
+          "filesToModify": [
+            "package.json"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-009-T1-V1",
+          "type": "manual",
+          "description": "Baseline metrics and hotspot notes are captured and reproducible from a single documented command."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-009-T1-TR1",
+          "type": "benchmark",
+          "description": "Measure and record baseline throughput/latency for review processing flows.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-009-T1-TR1-S1",
+              "type": "success",
+              "description": "Profile a valid mixed-size batch with current pipeline.",
+              "expectedOutcome": "Baseline total-processing and per-file timings are recorded in the baseline document."
+            },
+            {
+              "scenarioId": "FRD-009-T1-TR1-S2",
+              "type": "error",
+              "description": "Profile a batch containing parse and validation failures.",
+              "expectedOutcome": "Error-path processing costs are captured and compared against success-path baseline."
+            },
+            {
+              "scenarioId": "FRD-009-T1-TR1-S3",
+              "type": "edge",
+              "description": "Profile a larger batch (for example 50+ files) in one run.",
+              "expectedOutcome": "Metric output highlights render/update bottlenecks under higher cardinality input."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-009-T2",
+      "title": "Extract ReviewRunPage orchestration into maintainable modules",
+      "description": "Refactor the monolithic page controller into focused hooks/helpers while preserving current behavior and contract semantics.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-009-T1",
+        "FRD-008"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-009-T2-S1",
+          "title": "Create review-run controller hook",
+          "description": "Move upload orchestration, request-version guards, and runtime state transitions into a dedicated hook module.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/hooks/useReviewRunController.ts"
+          ],
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T2-S2",
+          "title": "Centralize error mapping and request-guard utilities",
+          "description": "Extract reusable helpers for unexpected-run issue mapping and request staleness checks.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/state/reviewRunRequestGuards.ts",
+            "src/ui/state/reviewRunErrorMapping.ts"
+          ],
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T2-S3",
+          "title": "Consolidate screen-state derivation helpers",
+          "description": "Extract a single helper for deriving review screen-state inputs from store snapshots and replace repeated inline mappings.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/state/reviewRunScreenStateHelpers.ts"
+          ],
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/state/deriveScreenState.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T2-S4",
+          "title": "Introduce distinct runtime/orchestration run-issue code",
+          "description": "Differentiate unexpected runtime/orchestration failures from schema failures in run-issue contracts and mapping logic.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/types/reviewContracts.ts",
+            "src/ui/state/reviewRunErrorMapping.ts",
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/components/RunIssuePanel.tsx"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-009-T2-G1",
+          "severity": "critical",
+          "text": "Refactor must preserve current stale-request protection and schema replacement semantics under concurrent uploads."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-009-T2-V1",
+          "type": "integration",
+          "description": "UI orchestration behaves identically after controller extraction across schema upload, FRD run, and schema replacement flows."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-009-T2-TR1",
+          "type": "integration",
+          "description": "Protect existing behavior while reducing component complexity.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-009-T2-TR1-S1",
+              "type": "success",
+              "description": "Valid schema and FRD uploads complete with expected summary/detail behavior.",
+              "expectedOutcome": "Controller hook and page composition produce equivalent run results and tab behavior."
+            },
+            {
+              "scenarioId": "FRD-009-T2-TR1-S2",
+              "type": "error",
+              "description": "Schema parse/compile failures and unexpected runtime errors are triggered.",
+              "expectedOutcome": "Error state and run-issue panel behavior remain deterministic and recoverable."
+            },
+            {
+              "scenarioId": "FRD-009-T2-TR1-S3",
+              "type": "edge",
+              "description": "Consecutive uploads race (stale and current requests overlap).",
+              "expectedOutcome": "Only latest request mutates visible state and stale completions are ignored."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-009-T3",
+      "title": "Reduce render churn and processing bottlenecks",
+      "description": "Optimize high-frequency updates and expensive loops in batch processing while keeping deterministic ordering and contract outputs.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": [
+        "FRD-009-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-009-T3-S1",
+          "title": "Batch progress updates to reduce React re-renders",
+          "description": "Throttle or batch progress state updates so large runs do not trigger one re-render per file.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T3-S2",
+          "title": "Parallelize FRD source reads while preserving deterministic output order",
+          "description": "Replace sequential file-read loop with ordered concurrent reads and deterministic mapping semantics.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/domain/review-run/mapReviewInputFiles.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-009-T3-S3",
+          "title": "Stabilize render boundaries for large result lists",
+          "description": "Introduce memoized row/render boundaries where profiling identifies avoidable recomputation.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/FileResultListView.tsx",
+            "src/ui/components/ReadableFrdSectionView.tsx",
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-009-T3-V1",
+          "type": "test",
+          "description": "Benchmark metrics show reduced render/update overhead versus baseline for larger batches."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-009-T3-TR1",
+          "type": "benchmark",
+          "description": "Validate measurable performance improvement without behavior regressions.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-009-T3-TR1-S1",
+              "type": "success",
+              "description": "Run a representative valid batch against baseline and optimized code paths.",
+              "expectedOutcome": "Optimized path reduces total runtime and/or UI update count while preserving results."
+            },
+            {
+              "scenarioId": "FRD-009-T3-TR1-S2",
+              "type": "error",
+              "description": "Run a mixed-error batch through optimized processing.",
+              "expectedOutcome": "Error handling remains correct and performance does not regress versus baseline."
+            },
+            {
+              "scenarioId": "FRD-009-T3-TR1-S3",
+              "type": "edge",
+              "description": "Process a large batch with duplicate filenames and parse failures.",
+              "expectedOutcome": "Deterministic ordering and display-name disambiguation remain intact under optimization changes."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
