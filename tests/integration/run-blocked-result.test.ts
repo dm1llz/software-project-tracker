@@ -3,16 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createRunBlockedResult } from "../../src/domain/review-run/createRunBlockedResult";
 import { compileSchema } from "../../src/domain/validation/compileSchema";
 import { mapRunIssue } from "../../src/domain/validation/mapRunIssue";
-import { DEFAULT_SCHEMA_DRAFT } from "../../src/domain/validation/schemaDraftSupport";
-import type { SchemaBundle } from "../../src/types/reviewContracts";
-
-const makeSchemaBundle = (raw: Record<string, unknown>, declaredDraft: string | null): SchemaBundle => ({
-  id: "schema-2",
-  name: "schema.json",
-  raw,
-  declaredDraft,
-  effectiveDraft: DEFAULT_SCHEMA_DRAFT,
-});
+import { makeSchemaBundle } from "../helpers/schemaBundleHelper";
 
 describe("run-level blocked result behavior", () => {
   it("does not generate blocked result when schema compiles successfully", () => {
@@ -56,7 +47,7 @@ describe("run-level blocked result behavior", () => {
         failed: 0,
         parseFailed: 0,
       });
-      expect(blocked.runIssues.length).toBeGreaterThan(0);
+      expect(blocked.runIssues).toEqual(compileResult.runIssues);
     }
   });
 
