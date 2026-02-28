@@ -9,10 +9,11 @@ export const makeSchemaBundle = (
   declaredDraft: string | null,
   id = "schema-test",
   name = "schema.json",
+  effectiveDraft: SchemaBundle["effectiveDraft"] = DEFAULT_SCHEMA_DRAFT,
 ): SchemaBundle => ({
   id,
   name,
   raw,
   declaredDraft,
-  effectiveDraft: DEFAULT_SCHEMA_DRAFT,
+  effectiveDraft,
 });
