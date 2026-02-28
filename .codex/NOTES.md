@@ -80,3 +80,10 @@ Template:
 - Action/Decision: Added `buildRenderedSections` recursion with dedicated array mappers, plus `orderFields` and `assertSemanticPreservation` to enforce deterministic ordering and no coercive transforms.
 - Reusable check/command: `npm run build && npm run test:unit && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for future renderer extensions that traverse mixed nested data while preserving contract-level semantics.
+
+### 2026-02-28 FRD-005-T1
+- Situation: UI state-shell task introduced first `.tsx` files while the existing TypeScript build only included `src/**/*.ts` and had no JSX compiler setting.
+- Learning: To keep strict CI meaningful for UI tasks without adding new runtime deps, include `src/**/*.tsx` in `tsconfig` and set `jsx: "preserve"` so `.tsx` modules are type-checked under current toolchain.
+- Action/Decision: Added `deriveScreenState`, `ReviewRunPage` state-shell model, and `SchemaControlPanel` gating model with integration tests covering Empty/Ready/Running/Complete/Error transitions and running-time interaction locks.
+- Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse when adding future UI modules before full React/Vite runtime wiring is introduced.
