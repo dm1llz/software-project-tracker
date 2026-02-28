@@ -24,3 +24,17 @@ Template:
 - Action/Decision: Added `src/types/moduleBoundaryPolicy.ts`, integration tests under `tests/integration/`, and documented allowed module imports in `docs/module-boundaries.md`.
 - Reusable check/command: `npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for future FRDs that introduce new module imports or ownership boundaries.
+
+### 2026-02-27 FRD-001-T2-T3
+- Situation: The selected bundle started at a `prLevel: true` task (`T2`) and correctly expanded to include subsequent eligible `prLevel: false` task `T3`.
+- Learning: Enforcing canonical contracts with `tsc --noEmit` strict build plus unit invariants catches status/summary drift before pipeline code exists.
+- Action/Decision: Added strict TypeScript build gate, canonical `reviewContracts`, guard helpers, deterministic sort/disambiguation helpers, and unit coverage for both success/error scenarios.
+- Reusable check/command: `npm run build && npm run test:unit && npm run validate:schema`
+- Applicability: Use for all future FRD bundles that define contracts first and derive pipeline helpers from contract invariants.
+
+### 2026-02-27 TS return-type style
+- Situation: Team preference clarified around using TypeScript inference vs explicit function return annotations.
+- Learning: Prefer inference for local/private helpers and test fixtures; keep explicit return types on exported/shared APIs and critical policy/security logic.
+- Action/Decision: Updated local helpers to rely on inference while preserving explicit signatures for boundary functions.
+- Reusable check/command: `rg -n "\\):\\s*.*=>" src tests`
+- Applicability: Apply during refactors and new module additions to keep APIs explicit and internals concise.
