@@ -46,12 +46,22 @@
         },
         {
           "subtaskId": "FRD-007-T1-S2",
-          "title": "Align scripts and TS settings for runtime",
-          "description": "Add dev/build/preview scripts and TS config needed for Vite runtime without breaking existing quality gates.",
+          "title": "Align scripts and TS settings for runtime and dev flow",
+          "description": "Add npm scripts including `dev` (`vite`), plus TypeScript settings needed for Vite runtime without breaking existing quality gates.",
           "status": "not_started",
           "filesToModify": [
             "package.json",
             "tsconfig.json"
+          ]
+        },
+        {
+          "subtaskId": "FRD-007-T1-S3",
+          "title": "Install React and Vite runtime dependencies",
+          "description": "Install and lock runtime/tooling deps needed for browser rendering and local dev server execution.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json",
+            "package-lock.json"
           ]
         }
       ],
@@ -71,8 +81,8 @@
             {
               "scenarioId": "FRD-007-T1-TR1-S1",
               "type": "success",
-              "description": "App starts with valid runtime config and renders root container.",
-              "expectedOutcome": "Runtime initializes with no bootstrap exceptions and initial UI appears."
+              "description": "Developer runs `npm run dev` after dependency install.",
+              "expectedOutcome": "Vite dev server starts successfully and initial UI appears without requiring a production build."
             },
             {
               "scenarioId": "FRD-007-T1-TR1-S2",
@@ -88,6 +98,9 @@
             }
           ]
         }
+      ],
+      "notes": [
+        "Dependency installation for runtime bootstrap must be explicit in this task: include React/ReactDOM and Vite-related packages in package manifests."
       ]
     },
     {
