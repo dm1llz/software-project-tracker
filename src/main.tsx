@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 import App from "./App";
+import "./styles/tailwind.css";
 
 export const resolveMountElement = (
   rootId = "app",
