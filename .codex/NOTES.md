@@ -135,3 +135,10 @@ Template:
 - Action/Decision: Added explicit `aria-label` values for schema/FRD/replace file inputs and retained existing control names while applying Tailwind styling/layout.
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx`
 - Applicability: Reuse whenever UI styling refactors touch labeled form controls used by accessibility-driven tests.
+
+### 2026-02-28 FRD-009-T1
+- Situation: Baseline profiling needed a single reproducible command without introducing TypeScript runtime tooling for script execution.
+- Learning: A plain Node `.mjs` profiler that uses Ajv directly and fixture-backed scenarios (success/error/large-batch) is enough to capture repeatable benchmark baselines while staying toolchain-neutral.
+- Action/Decision: Added `scripts/profile-review-run.mjs`, npm script `profile:review-run`, and baseline documentation with measured scenario metrics.
+- Reusable check/command: `npm run profile:review-run && cat .codex/pr/profile-review-run.json`
+- Applicability: Reuse for future benchmark gates where we need deterministic local profiling with minimal dependencies.
