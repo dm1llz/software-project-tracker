@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { buildRenderedSections } from "../domain/rendering/buildRenderedSections";
 import { buildReviewResult } from "../domain/review-run/buildReviewResult";
@@ -197,6 +197,7 @@ export const ReviewRunPage = () => {
   const [preferredTab, setPreferredTab] = useState<FileDetailTab>("issues");
   const [processedFiles, setProcessedFiles] = useState(0);
   const [totalFiles, setTotalFiles] = useState(0);
+  const requestVersionRef = useRef(0);
 
   const pageModel = useMemo(
     () =>
@@ -216,57 +217,129 @@ export const ReviewRunPage = () => {
     [preferredTab, store],
   );
 
-  const resetRuntimeState = () => {
+  const isCurrentRequest = (requestVersion: number): boolean =>
+    requestVersionRef.current === requestVersion;
+
+  const beginRequest = (): number => {
+    requestVersionRef.current += 1;
+    return requestVersionRef.current;
+  };
+
+  const resetRuntimeState = (requestVersion: number) => {
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setPreferredTab("issues");
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setProcessedFiles(0);
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setTotalFiles(0);
   };
 
   const handleSchemaUpload = async (file: File, replaceMode = false): Promise<void> => {
+    const requestVersion = beginRequest();
+
     if (replaceMode) {
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setStore((previous) =>
         replaceSchemaFromReviewRunPage(previous, pageModel.screenState, file.name),
       );
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setSchemaBundle(null);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setValidator(null);
-      resetRuntimeState();
+      resetRuntimeState(requestVersion);
     }
 
     const loaded = await loadSchemaFile({
       name: file.name,
       text: () => readFileText(file),
     });
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
 
     if (!loaded.ok) {
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setSchemaBundle(null);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setValidator(null);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setStore(toErrorStoreState(loaded.runIssues));
-      resetRuntimeState();
+      resetRuntimeState(requestVersion);
       return;
     }
 
     const compiled = compileSchema(loaded.schema);
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     if (!compiled.ok) {
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setSchemaBundle(null);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setValidator(null);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setStore(toErrorStoreState(compiled.runIssues));
-      resetRuntimeState();
+      resetRuntimeState(requestVersion);
       return;
     }
 
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setSchemaBundle(loaded.schema);
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setValidator(() => compiled.validator);
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setStore(createReviewRunStoreState(loaded.schema.name));
-    resetRuntimeState();
+    resetRuntimeState(requestVersion);
   };
 
   const handleFrdUpload = async (files: File[]): Promise<void> => {
+    const requestVersion = beginRequest();
+
     if (!schemaBundle || !validator || files.length === 0) {
       return;
     }
 
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setStore((previous) => startReviewRun(previous));
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setTotalFiles(files.length);
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setProcessedFiles(0);
 
     const mapped = await mapReviewInputFiles(
@@ -275,9 +348,15 @@ export const ReviewRunPage = () => {
         text: () => readFileText(file),
       })),
     );
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
 
     const results: ReviewResult[] = [];
     for (const [index, file] of mapped.files.entries()) {
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       const displayName = mapped.displayNameById[file.id] ?? file.fileName;
       const parseResult = parseFrdFile(file);
       const validationIssues = parseResult.ok
@@ -310,14 +389,26 @@ export const ReviewRunPage = () => {
       });
 
       results.push(nextResult);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       setProcessedFiles(index + 1);
     }
 
     for (const issue of mapped.fileIssues) {
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
       results.push(mapReadFailureToReviewResult(issue, mapped.displayNameById));
     }
 
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     const summary = summarizeBatchReview(results);
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setStore((previous) =>
       completeReviewRun(previous, {
         runIssues: [],
@@ -325,7 +416,13 @@ export const ReviewRunPage = () => {
         files: results,
       }),
     );
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setPreferredTab("issues");
+    if (!isCurrentRequest(requestVersion)) {
+      return;
+    }
     setProcessedFiles(files.length);
   };
 

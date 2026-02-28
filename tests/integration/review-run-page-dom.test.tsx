@@ -18,23 +18,32 @@ type RenderedPage = {
   container: HTMLElement;
 };
 
+const mountedRoots: Root[] = [];
+
 const renderPage = async (): Promise<RenderedPage> => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
+  mountedRoots.push(root);
   await act(async () => {
     root.render(<ReviewRunPage />);
   });
   return { root, container };
 };
 
-afterEach(() => {
+afterEach(async () => {
+  const roots = mountedRoots.splice(0, mountedRoots.length);
+  for (const root of roots) {
+    await act(async () => {
+      root.unmount();
+    });
+  }
   document.body.innerHTML = "";
 });
 
 describe("review run page DOM behavior", () => {
   it("renders issues/readable tabs conditionally and preserves distinct duplicate display names", async () => {
-    const { root, container } = await renderPage();
+    const { container } = await renderPage();
     const user = userEvent.setup();
 
     const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
@@ -73,13 +82,10 @@ describe("review run page DOM behavior", () => {
     await user.click(getByRole(container, "button", { name: "broken.json" }));
     expect(queryByRole(container, "button", { name: "Readable FRD" })).toBeNull();
 
-    await act(async () => {
-      root.unmount();
-    });
   });
 
   it("keeps FRD upload disabled after invalid schema upload", async () => {
-    const { root, container } = await renderPage();
+    const { container } = await renderPage();
     const user = userEvent.setup();
 
     const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
@@ -92,13 +98,10 @@ describe("review run page DOM behavior", () => {
     const frdInput = getByLabelText(container, "FRD files") as HTMLInputElement;
     expect(frdInput.disabled).toBe(true);
 
-    await act(async () => {
-      root.unmount();
-    });
   });
 
   it("replacing schema clears prior summary, file rows, and file-detail selection", async () => {
-    const { root, container } = await renderPage();
+    const { container } = await renderPage();
     const user = userEvent.setup();
 
     const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
@@ -137,8 +140,5 @@ describe("review run page DOM behavior", () => {
       expect(container.textContent).toContain("schema-v2.json");
     });
 
-    await act(async () => {
-      root.unmount();
-    });
   });
 });
