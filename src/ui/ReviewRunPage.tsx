@@ -311,8 +311,6 @@ export const ReviewRunPage = () => {
       if (!isCurrentRequest(requestVersion)) {
         return;
       }
-      setSchemaBundle(null);
-      setValidator(null);
       setStore(toErrorStoreState([toUnexpectedRunIssue(error)]));
       resetRuntimeState(requestVersion);
     }
