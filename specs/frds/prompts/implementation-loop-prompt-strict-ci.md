@@ -55,14 +55,15 @@ Do exactly one PR bundle per run.
 1. Use remote branch claims instead of editing one shared file.
 2. Claim namespace: `refs/heads/codex/claim/<taskId>`.
 3. Remote claim metadata schema (required for `refs/heads/codex/claim/<taskId>`):
+   - claim JSON must be stored as `.codex-claim.json` at the tip commit of the claim branch.
    - JSON payload with required fields: `createdAt` (ISO-8601), `expiresAt` (ISO-8601), `ownerId` (agent unique id).
    - optional fields: `ownerInfo` (for example hostname/pid) and `version`.
 4. Before selecting a task, refresh and read active claims:
    - `git fetch origin --prune`
    - `git ls-remote --heads origin \"refs/heads/codex/claim/*\"`
-   - read claim metadata payload and use `expiresAt`/`ownerId` for availability checks and stale detection.
+   - read `.codex-claim.json` from branch tip (for example `git show origin/codex/claim/<taskId>:.codex-claim.json`) and use `expiresAt`/`ownerId` for availability checks and stale detection.
 5. When first candidate task `T` is found, try to claim it atomically:
-   - write/update claim metadata (`createdAt`, `expiresAt`, `ownerId`, optional `ownerInfo`/`version`) and push to `refs/heads/codex/claim/<taskId>`.
+   - create/update `.codex-claim.json` in the claim-branch commit with `createdAt`, `expiresAt`, `ownerId` (optional `ownerInfo`/`version`), then push `refs/heads/codex/claim/<taskId>`.
 6. If claim push fails because the claim branch already exists (or another agent wins race), treat that task as unavailable, continue scanning for the next eligible unclaimed task, and retry claim.
 7. Keep the claim branch active for that task until the implementation branch is merged; this prevents duplicate work while PR is pending review.
 8. Claim cleanup happens after merge (or explicit cancellation):
