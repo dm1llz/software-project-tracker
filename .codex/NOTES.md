@@ -100,3 +100,10 @@ Template:
 - Action/Decision: Added `index.html`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, React/Vite deps, and npm scripts (`dev`, `build:app`, `preview`) with integration coverage for bootstrap success/error.
 - Reusable check/command: `npm run build && npm run build:app && npm run test:integration && npm run dev -- --help && npm run validate:schema`
 - Applicability: Reuse for future browser-runtime bootstraps that need deterministic startup errors and CI-safe validation of both TS and bundler builds.
+
+### 2026-02-28 FRD-007-T2-T3
+- Situation: FRD uploads were ignored in React UI wiring even though input `onChange` fired with files present.
+- Learning: When storing function-valued state (for example Ajv validator), `setState(fn)` is interpreted as an updater; use `setState(() => fn)` to persist the function value.
+- Action/Decision: Updated `setValidator(compiled.validator)` to `setValidator(() => compiled.validator)` in `ReviewRunPage`, restoring FRD processing and DOM lifecycle flows.
+- Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx`
+- Applicability: Reuse anywhere hooks persist callbacks/validators/strategies as state values.
