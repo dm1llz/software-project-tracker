@@ -1,7 +1,8 @@
-import type { RunIssue, SchemaBundle, SupportedSchemaDraft } from "../../types/reviewContracts";
+import type { RunIssue, SchemaBundle } from "../../types/reviewContracts";
 import { mapSchemaParseIssue } from "./mapSchemaParseIssue";
+import { DEFAULT_SCHEMA_DRAFT, normalizeDeclaredDraft } from "./schemaDraftSupport";
 
-export const DEFAULT_SCHEMA_DRAFT: SupportedSchemaDraft = "2020-12";
+export { DEFAULT_SCHEMA_DRAFT } from "./schemaDraftSupport";
 
 type SchemaFileSource = {
   name: string;
@@ -34,8 +35,27 @@ const mapInvalidRootIssue = (fileName: string): RunIssue => ({
   path: "/",
 });
 
+const mapSchemaReadIssue = (fileName: string, error: unknown): RunIssue => ({
+  level: "error",
+  code: "SCHEMA_ERROR",
+  message: `Failed to read schema file \"${fileName}\": ${
+    error instanceof Error ? error.message : String(error)
+  }`,
+  path: "/",
+});
+
 export const loadSchemaFile = async (source: SchemaFileSource): Promise<SchemaLoadResult> => {
-  const rawText = await readSourceText(source);
+  let rawText: string;
+  try {
+    rawText = await readSourceText(source);
+  } catch (error) {
+    return {
+      ok: false,
+      blocked: true,
+      schema: null,
+      runIssues: [mapSchemaReadIssue(source.name, error)],
+    };
+  }
 
   let parsed: unknown;
   try {
@@ -59,7 +79,7 @@ export const loadSchemaFile = async (source: SchemaFileSource): Promise<SchemaLo
   }
 
   const raw = parsed as Record<string, unknown>;
-  const declaredDraft = typeof raw.$schema === "string" ? raw.$schema : null;
+  const declaredDraft = normalizeDeclaredDraft(raw.$schema);
 
   return {
     ok: true,
