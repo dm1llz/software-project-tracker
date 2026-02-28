@@ -52,3 +52,10 @@ Template:
 - Action/Decision: Added `compileSchema`, `detectUnsupportedDraft`, `mapRunIssue`, and `createRunBlockedResult` with tests covering draft gating, format-plugin enforcement, and blocked-run summary contracts.
 - Reusable check/command: `npm run build && npm run test:unit && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for future schema-compile paths and any typed issue mappers with `exactOptionalPropertyTypes` enabled.
+
+### 2026-02-27 FRD-003-T1
+- Situation: FRD ingestion needed stable IDs, preserved upload order, duplicate-name labeling, and continue-on-read-failure behavior.
+- Learning: Generating IDs from `(uploadIndex + normalized fileName)` keeps IDs deterministic while still unique across duplicate names.
+- Action/Decision: Added `mapReviewInputFiles` to continue processing after per-file read failures, emit `PARSE_ERROR` file issues, and return `displayNameById` built from all attempted uploads.
+- Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse for browser file-ingestion stages that must preserve order and tolerate partial read failures.

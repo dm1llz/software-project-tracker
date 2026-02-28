@@ -3,7 +3,7 @@
     "frdId": "FRD-003",
     "title": "Batch Review Pipeline",
     "description": "Implement FRD multi-file ingestion, per-file parse and validation, duplicate name handling, and summary/status invariants.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 3,
     "estimatedEffort": "large",
     "dependencies": ["FRD-001", "FRD-002"],
@@ -14,14 +14,14 @@
       "specs/ux-review-flow.md"
     ],
     "createdAt": "2026-02-25",
-    "updatedAt": "2026-02-25"
+    "updatedAt": "2026-02-28"
   },
   "majorTasks": [
     {
       "taskId": "FRD-003-T1",
       "title": "Ingest FRD files with stable IDs and upload ordering",
       "description": "Convert uploaded files into ReviewInputFile entries with unique IDs and stable uploadIndex values.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": ["FRD-001", "FRD-002"],
       "subtasks": [
@@ -29,7 +29,7 @@
           "subtaskId": "FRD-003-T1-S1",
           "title": "Implement file ingestion mapper",
           "description": "Read selected FRD files as text and assign deterministic id + uploadIndex.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/mapReviewInputFiles.ts"
           ]
@@ -38,7 +38,7 @@
           "subtaskId": "FRD-003-T1-S2",
           "title": "Apply duplicate filename disambiguation",
           "description": "Generate display names that preserve source filename while avoiding collisions.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/domain/review-run/disambiguateDisplayName.ts"
           ]
