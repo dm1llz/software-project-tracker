@@ -3,15 +3,7 @@ import { describe, expect, it } from "vitest";
 import { compileSchema } from "../compileSchema";
 import { detectUnsupportedDraft } from "../detectUnsupportedDraft";
 import { mapRunIssue } from "../mapRunIssue";
-import type { SchemaBundle } from "../../../types/reviewContracts";
-
-const makeSchemaBundle = (raw: Record<string, unknown>, declaredDraft: string | null): SchemaBundle => ({
-  id: "schema-1",
-  name: "schema.json",
-  raw,
-  declaredDraft,
-  effectiveDraft: "2020-12",
-});
+import { makeSchemaBundle } from "../../../../tests/helpers/schemaBundleHelper";
 
 describe("schema validation helpers", () => {
   it("compiles valid 2020-12 schemas", () => {
@@ -25,6 +17,7 @@ describe("schema validation helpers", () => {
           },
         },
         "2020-12",
+        "schema-1",
       ),
     );
 
@@ -78,6 +71,7 @@ describe("schema validation helpers", () => {
           },
         },
         "2020-12",
+        "schema-1",
       ),
       { registerFormats: false },
     );

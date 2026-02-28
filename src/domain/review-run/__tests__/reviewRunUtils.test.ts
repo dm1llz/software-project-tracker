@@ -6,7 +6,8 @@ import { sortReviewResults } from "../sortReviewResults";
 import { summarizeBatchReview } from "../summarizeBatchReview";
 import { validateFrdFile } from "../validateFrdFile";
 import { compileSchema } from "../../validation/compileSchema";
-import type { ReviewInputFile, SchemaBundle } from "../../../types/reviewContracts";
+import type { ReviewInputFile } from "../../../types/reviewContracts";
+import { makeSchemaBundle } from "../../../../tests/helpers/schemaBundleHelper";
 
 const makeFile = (overrides: Partial<ReviewInputFile> = {}): ReviewInputFile => ({
   id: "frd-0-file",
@@ -16,29 +17,25 @@ const makeFile = (overrides: Partial<ReviewInputFile> = {}): ReviewInputFile => 
   ...overrides,
 });
 
-const makeSchemaBundle = (raw: Record<string, unknown>): SchemaBundle => ({
-  id: "schema-0",
-  name: "schema.json",
-  raw,
-  declaredDraft: "2020-12",
-  effectiveDraft: "2020-12",
-});
-
 describe("review-run utils", () => {
   it("builds passed results for parse+validation success", () => {
     const file = makeFile({ text: JSON.stringify({ title: "ok" }) });
     const parseResult = parseFrdFile(file);
 
     const compiled = compileSchema(
-      makeSchemaBundle({
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        required: ["title"],
-        properties: {
-          title: { type: "string" },
+      makeSchemaBundle(
+        {
+          $schema: "https://json-schema.org/draft/2020-12/schema",
+          type: "object",
+          required: ["title"],
+          properties: {
+            title: { type: "string" },
+          },
+          additionalProperties: false,
         },
-        additionalProperties: false,
-      }),
+        "2020-12",
+        "schema-0",
+      ),
     );
 
     expect(parseResult.ok).toBe(true);
@@ -97,15 +94,19 @@ describe("review-run utils", () => {
 
   it("keeps warning-only diagnostics non-blocking and deterministic in summary ordering", () => {
     const schema = compileSchema(
-      makeSchemaBundle({
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        required: ["title"],
-        properties: {
-          title: { type: "string" },
+      makeSchemaBundle(
+        {
+          $schema: "https://json-schema.org/draft/2020-12/schema",
+          type: "object",
+          required: ["title"],
+          properties: {
+            title: { type: "string" },
+          },
+          additionalProperties: false,
         },
-        additionalProperties: false,
-      }),
+        "2020-12",
+        "schema-0",
+      ),
     );
 
     expect(schema.ok).toBe(true);
@@ -146,40 +147,28 @@ describe("review-run utils", () => {
     expect(warningResult.issues).toHaveLength(1);
     expect(warningResult.issues[0]?.level).toBe("warning");
 
+    const parseFile = makeFile({
+      id: "frd-0-parse",
+      fileName: "parse.json",
+      uploadIndex: 0,
+      text: "{",
+    });
     const parseFailed = buildReviewResult({
-      file: makeFile({
-        id: "frd-0-parse",
-        fileName: "parse.json",
-        uploadIndex: 0,
-        text: "{",
-      }),
+      file: parseFile,
       displayName: "parse.json",
-      parseResult: parseFrdFile(
-        makeFile({
-          id: "frd-0-parse",
-          fileName: "parse.json",
-          uploadIndex: 0,
-          text: "{",
-        }),
-      ),
+      parseResult: parseFrdFile(parseFile),
     });
 
+    const invalidFile = makeFile({
+      id: "frd-2-invalid",
+      fileName: "invalid.json",
+      uploadIndex: 2,
+      text: JSON.stringify({}),
+    });
     const validationFailed = buildReviewResult({
-      file: makeFile({
-        id: "frd-2-invalid",
-        fileName: "invalid.json",
-        uploadIndex: 2,
-        text: JSON.stringify({}),
-      }),
+      file: invalidFile,
       displayName: "invalid.json",
-      parseResult: parseFrdFile(
-        makeFile({
-          id: "frd-2-invalid",
-          fileName: "invalid.json",
-          uploadIndex: 2,
-          text: JSON.stringify({}),
-        }),
-      ),
+      parseResult: parseFrdFile(invalidFile),
       validationIssues: [
         {
           fileId: "frd-2-invalid",

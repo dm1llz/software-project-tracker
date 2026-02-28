@@ -25,8 +25,9 @@ describe("rendering utils", () => {
 
   it("preserves scalar-array semantics and returns copied arrays", () => {
     const source = ["a", "b", null] as const;
+    const input = [...source];
     const mapped = mapScalarFieldValue(
-      [...source],
+      input,
       "object field (/items)",
       "unsupported",
     );
@@ -34,7 +35,7 @@ describe("rendering utils", () => {
     expect(mapped).toEqual(source);
     expect(Array.isArray(mapped)).toBe(true);
     if (Array.isArray(mapped)) {
-      expect(mapped).not.toBe(source);
+      expect(mapped).not.toBe(input);
     }
   });
 
