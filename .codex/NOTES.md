@@ -59,3 +59,10 @@ Template:
 - Action/Decision: Added `mapReviewInputFiles` to continue processing after per-file read failures, emit `PARSE_ERROR` file issues, and return `displayNameById` built from all attempted uploads.
 - Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for browser file-ingestion stages that must preserve order and tolerate partial read failures.
+
+### 2026-02-27 FRD-003-T2-T3
+- Situation: Per-file parse/validate pipeline needed continue-on-error behavior while preserving contract invariants and deterministic ordering/summary outputs.
+- Learning: Keeping parse, validate, and result-reducer stages explicit makes status mapping (`parse_failed` / `validation_failed` / `passed`) testable and keeps warning-only diagnostics non-blocking.
+- Action/Decision: Added `parseFrdFile`, `validateFrdFile`, `buildReviewResult`, and `summarizeBatchReview`, plus integration/unit coverage for mixed-quality batches, warning-only diagnostics, and summary invariant enforcement.
+- Reusable check/command: `npm run build && npm run test:unit && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse for future file-processing pipelines that require deterministic partial-failure handling and strict contract checks.
