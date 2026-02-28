@@ -56,7 +56,7 @@
     {
       "frdId": "FRD-007",
       "title": "React/Vite Runtime and UI Wiring",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 6,
       "path": "./frd-007-react-vite-runtime-ui-wiring.json",
       "dependencies": [

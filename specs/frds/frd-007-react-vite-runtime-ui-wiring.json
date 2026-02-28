@@ -3,7 +3,7 @@
     "frdId": "FRD-007",
     "title": "React/Vite Runtime and UI Wiring",
     "description": "Implement concrete React + Vite runtime bootstrap and wire UI view-model components to rendered DOM interactions.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 6,
     "estimatedEffort": "large",
     "dependencies": [
@@ -26,7 +26,7 @@
       "taskId": "FRD-007-T1",
       "title": "Bootstrap Vite/React runtime entrypoints",
       "description": "Create concrete Vite and React app entrypoints so UI modules can render in browser and test environments.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-001"
@@ -36,7 +36,7 @@
           "subtaskId": "FRD-007-T1-S1",
           "title": "Create runtime entry files",
           "description": "Add Vite app shell and React mount entry with strict TypeScript compatibility.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "index.html",
             "vite.config.ts",
@@ -48,7 +48,7 @@
           "subtaskId": "FRD-007-T1-S2",
           "title": "Align scripts and TS settings for runtime and dev flow",
           "description": "Add npm scripts including `dev` (`vite`), plus TypeScript settings needed for Vite runtime without breaking existing quality gates.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json",
             "tsconfig.json"
@@ -58,7 +58,7 @@
           "subtaskId": "FRD-007-T1-S3",
           "title": "Install React and Vite runtime dependencies",
           "description": "Install and lock runtime/tooling deps needed for browser rendering and local dev server execution.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json",
             "package-lock.json"

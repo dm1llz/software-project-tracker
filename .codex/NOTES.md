@@ -93,3 +93,10 @@ Template:
 - Action/Decision: Added result/detail/run-issue component models plus `reviewRunStore` transitions (`completeReviewRun`, `selectReviewFile`, `replaceSchemaAndResetRunState`) and integrated helpers through `ReviewRunPage`/`SchemaControlPanel`.
 - Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for subsequent UI tasks where interaction rules are strict but rendering framework wiring is introduced incrementally.
+
+### 2026-02-28 FRD-007-T1
+- Situation: First concrete React/Vite runtime bootstrap required both browser entry wiring and explicit dev-server script support while preserving existing TypeScript contract checks.
+- Learning: Keeping mount behavior behind `resolveMountElement` + `mountApp` allows controlled missing-root failures for tests while still auto-mounting only when `#app` exists in runtime entry.
+- Action/Decision: Added `index.html`, `vite.config.ts`, `src/main.tsx`, `src/App.tsx`, React/Vite deps, and npm scripts (`dev`, `build:app`, `preview`) with integration coverage for bootstrap success/error.
+- Reusable check/command: `npm run build && npm run build:app && npm run test:integration && npm run dev -- --help && npm run validate:schema`
+- Applicability: Reuse for future browser-runtime bootstraps that need deterministic startup errors and CI-safe validation of both TS and bundler builds.
