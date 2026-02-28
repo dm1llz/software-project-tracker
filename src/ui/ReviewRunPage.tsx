@@ -143,14 +143,14 @@ export const replaceSchemaFromReviewRunPage = (
     nextSchemaName,
   });
 
-const toUploadIndexFromFileId = (fileId: string): number => {
+const toUploadIndexFromFileId = (fileId: string, fallbackIndex: number): number => {
   const match = fileId.match(/^frd-(\d+)-/);
   if (!match || !match[1]) {
-    return 0;
+    return fallbackIndex;
   }
 
   const parsed = Number.parseInt(match[1], 10);
-  return Number.isNaN(parsed) ? 0 : parsed;
+  return Number.isNaN(parsed) ? fallbackIndex : parsed;
 };
 
 const toSchemaNode = (rawSchema: Record<string, unknown>): Record<string, unknown> => rawSchema;
@@ -172,9 +172,10 @@ const readFileText = async (file: File): Promise<string> => {
 const mapReadFailureToReviewResult = (
   issue: FileIssue,
   displayNameById: Record<string, string>,
+  fallbackIndex: number,
 ) => ({
   id: issue.fileId,
-  uploadIndex: toUploadIndexFromFileId(issue.fileId),
+  uploadIndex: toUploadIndexFromFileId(issue.fileId, fallbackIndex),
   fileName: issue.fileName,
   displayName: displayNameById[issue.fileId] ?? issue.fileName,
   // Read failures map to parse_failed to keep existing ReviewResult status contracts.
@@ -182,6 +183,14 @@ const mapReadFailureToReviewResult = (
   parseOk: false,
   valid: false,
   issues: [issue],
+});
+
+const toUnexpectedRunIssue = (error: unknown): RunIssue => ({
+  level: "error",
+  code: "SCHEMA_ERROR",
+  message: `Unexpected runtime failure: ${
+    error instanceof Error ? error.message : String(error)
+  }`,
 });
 
 const toErrorStoreState = (runIssues: RunIssue[]): ReviewRunStoreState => ({
@@ -238,65 +247,75 @@ export const ReviewRunPage = () => {
   const handleSchemaUpload = async (file: File, replaceMode = false): Promise<void> => {
     const requestVersion = beginRequest();
 
-    if (replaceMode) {
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      setStore((previous) => {
-        const currentScreenState = deriveScreenState({
-          schemaLoaded: previous.schemaName !== null,
-          isRunning: previous.isRunning,
-          hasCompletedRun: previous.hasCompletedRun,
-          runIssues: previous.runIssues,
+    try {
+      if (replaceMode) {
+        if (!isCurrentRequest(requestVersion)) {
+          return;
+        }
+        setStore((previous) => {
+          const currentScreenState = deriveScreenState({
+            schemaLoaded: previous.schemaName !== null,
+            isRunning: previous.isRunning,
+            hasCompletedRun: previous.hasCompletedRun,
+            runIssues: previous.runIssues,
+          });
+          return replaceSchemaFromReviewRunPage(previous, currentScreenState, file.name);
         });
-        return replaceSchemaFromReviewRunPage(previous, currentScreenState, file.name);
+        setSchemaBundle(null);
+        setValidator(null);
+        resetRuntimeState(requestVersion);
+      }
+
+      const loaded = await loadSchemaFile({
+        name: file.name,
+        text: () => readFileText(file),
       });
-      setSchemaBundle(null);
-      setValidator(null);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
+
+      if (!loaded.ok) {
+        if (!isCurrentRequest(requestVersion)) {
+          return;
+        }
+        setSchemaBundle(null);
+        setValidator(null);
+        setStore(toErrorStoreState(loaded.runIssues));
+        resetRuntimeState(requestVersion);
+        return;
+      }
+
+      const compiled = compileSchema(loaded.schema);
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
+      if (!compiled.ok) {
+        if (!isCurrentRequest(requestVersion)) {
+          return;
+        }
+        setSchemaBundle(null);
+        setValidator(null);
+        setStore(toErrorStoreState(compiled.runIssues));
+        resetRuntimeState(requestVersion);
+        return;
+      }
+
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
+      setSchemaBundle(loaded.schema);
+      setValidator(() => compiled.validator);
+      setStore(createReviewRunStoreState(loaded.schema.name));
       resetRuntimeState(requestVersion);
-    }
-
-    const loaded = await loadSchemaFile({
-      name: file.name,
-      text: () => readFileText(file),
-    });
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-
-    if (!loaded.ok) {
+    } catch (error) {
       if (!isCurrentRequest(requestVersion)) {
         return;
       }
       setSchemaBundle(null);
       setValidator(null);
-      setStore(toErrorStoreState(loaded.runIssues));
+      setStore(toErrorStoreState([toUnexpectedRunIssue(error)]));
       resetRuntimeState(requestVersion);
-      return;
     }
-
-    const compiled = compileSchema(loaded.schema);
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-    if (!compiled.ok) {
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      setSchemaBundle(null);
-      setValidator(null);
-      setStore(toErrorStoreState(compiled.runIssues));
-      resetRuntimeState(requestVersion);
-      return;
-    }
-
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-    setSchemaBundle(loaded.schema);
-    setValidator(() => compiled.validator);
-    setStore(createReviewRunStoreState(loaded.schema.name));
-    resetRuntimeState(requestVersion);
   };
 
   const handleFrdUpload = async (files: File[]): Promise<void> => {
@@ -305,83 +324,99 @@ export const ReviewRunPage = () => {
     }
     const requestVersion = beginRequest();
 
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-    setStore((previous) => startReviewRun(previous));
-    setTotalFiles(files.length);
-    setProcessedFiles(0);
-
-    const mapped = await mapReviewInputFiles(
-      files.map((file) => ({
-        name: file.name,
-        text: () => readFileText(file),
-      })),
-    );
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-
-    const results: ReviewResult[] = [];
-    for (const [index, file] of mapped.files.entries()) {
+    try {
       if (!isCurrentRequest(requestVersion)) {
         return;
       }
-      const displayName = mapped.displayNameById[file.id] ?? file.fileName;
-      const parseResult = parseFrdFile(file);
-      const validationIssues = parseResult.ok
-        ? validateFrdFile({
-            fileId: file.id,
-            fileName: file.fileName,
-            parsed: parseResult.parsed,
-            validator,
-          })
-        : [];
+      setStore((previous) => startReviewRun(previous));
+      setTotalFiles(files.length);
+      setProcessedFiles(0);
 
-      const hasErrorIssues = validationIssues.some((issue) => issue.level === "error");
-      let sections: ReviewResult["sections"];
-      if (parseResult.ok && !hasErrorIssues) {
-        sections = buildRenderedSections({
-          id: `${file.id}-root`,
-          title: displayName,
-          path: "/",
-          value: parseResult.parsed,
-          schema: toSchemaNode(schemaBundle.raw),
+      const mapped = await mapReviewInputFiles(
+        files.map((file) => ({
+          name: file.name,
+          text: () => readFileText(file),
+        })),
+      );
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
+
+      const results: ReviewResult[] = [];
+      for (const [index, file] of mapped.files.entries()) {
+        if (!isCurrentRequest(requestVersion)) {
+          return;
+        }
+        const displayName = mapped.displayNameById[file.id] ?? file.fileName;
+        const parseResult = parseFrdFile(file);
+        const validationIssues = parseResult.ok
+          ? validateFrdFile({
+              fileId: file.id,
+              fileName: file.fileName,
+              parsed: parseResult.parsed,
+              validator,
+            })
+          : [];
+
+        const hasErrorIssues = validationIssues.some((issue) => issue.level === "error");
+        let sections: ReviewResult["sections"];
+        if (parseResult.ok && !hasErrorIssues) {
+          sections = buildRenderedSections({
+            id: `${file.id}-root`,
+            title: displayName,
+            path: "/",
+            value: parseResult.parsed,
+            schema: toSchemaNode(schemaBundle.raw),
+          });
+        }
+
+        const nextResult = buildReviewResult({
+          file,
+          displayName,
+          parseResult,
+          validationIssues,
+          ...(sections ? { sections } : {}),
         });
+
+        results.push(nextResult);
+        setProcessedFiles(index + 1);
       }
 
-      const nextResult = buildReviewResult({
-        file,
-        displayName,
-        parseResult,
-        validationIssues,
-        ...(sections ? { sections } : {}),
-      });
+      for (const [index, issue] of mapped.fileIssues.entries()) {
+        if (!isCurrentRequest(requestVersion)) {
+          return;
+        }
+        results.push(
+          mapReadFailureToReviewResult(
+            issue,
+            mapped.displayNameById,
+            mapped.files.length + index,
+          ),
+        );
+      }
 
-      results.push(nextResult);
-      setProcessedFiles(index + 1);
-    }
-
-    for (const issue of mapped.fileIssues) {
       if (!isCurrentRequest(requestVersion)) {
         return;
       }
-      results.push(mapReadFailureToReviewResult(issue, mapped.displayNameById));
+      const summary = summarizeBatchReview(results);
+      setStore((previous) =>
+        completeReviewRun(previous, {
+          runIssues: [],
+          summary,
+          files: results,
+        }),
+      );
+      setPreferredTab("issues");
+      setProcessedFiles(files.length);
+    } catch (error) {
+      if (!isCurrentRequest(requestVersion)) {
+        return;
+      }
+      setSchemaBundle(null);
+      setValidator(null);
+      setStore(toErrorStoreState([toUnexpectedRunIssue(error)]));
+      resetRuntimeState(requestVersion);
     }
-
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-    const summary = summarizeBatchReview(results);
-    setStore((previous) =>
-      completeReviewRun(previous, {
-        runIssues: [],
-        summary,
-        files: results,
-      }),
-    );
-    setPreferredTab("issues");
-    setProcessedFiles(files.length);
   };
 
   return (
