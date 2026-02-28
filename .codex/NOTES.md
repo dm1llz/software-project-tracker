@@ -45,3 +45,10 @@ Template:
 - Action/Decision: Added `loadSchemaFile` and `mapSchemaParseIssue` to produce blocked results with `SCHEMA_ERROR` issues, including draft defaults (`declaredDraft=null`, `effectiveDraft=2020-12`).
 - Reusable check/command: `npm run build && npm run test:integration && npm run validate:schema`
 - Applicability: Reuse for file-ingestion paths that must convert parse exceptions into contract-level issues.
+
+### 2026-02-27 FRD-002-T2-T3
+- Situation: Strict schema compilation for draft-2020-12 failed when using generic Ajv constructor and optional RunIssue fields violated exact-optional typing.
+- Learning: Use `ajv/dist/2020` for 2020-12 meta-schema compatibility and construct RunIssue objects by omitting undefined optional fields.
+- Action/Decision: Added `compileSchema`, `detectUnsupportedDraft`, `mapRunIssue`, and `createRunBlockedResult` with tests covering draft gating, format-plugin enforcement, and blocked-run summary contracts.
+- Reusable check/command: `npm run build && npm run test:unit && npm run test:integration && npm run validate:schema`
+- Applicability: Reuse for future schema-compile paths and any typed issue mappers with `exactOptionalPropertyTypes` enabled.

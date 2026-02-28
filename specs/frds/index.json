@@ -14,7 +14,7 @@
     {
       "frdId": "FRD-002",
       "title": "Schema Intake and Validation Core",
-      "status": "in_progress",
+      "status": "completed",
       "priority": 2,
       "path": "./frd-002-schema-intake-validation.json",
       "dependencies": [

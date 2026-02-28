@@ -3,7 +3,7 @@
     "frdId": "FRD-002",
     "title": "Schema Intake and Validation Core",
     "description": "Implement schema upload parsing, strict Ajv compilation, draft enforcement, and run-level schema issue handling.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 2,
     "estimatedEffort": "large",
     "dependencies": [
@@ -87,7 +87,7 @@
       "taskId": "FRD-002-T2",
       "title": "Compile schema with strict Ajv and draft policy",
       "description": "Compile schema in strict mode and reject unsupported drafts before FRD processing starts.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-002-T1",
@@ -98,7 +98,7 @@
           "subtaskId": "FRD-002-T2-S1",
           "title": "Create Ajv compiler wrapper",
           "description": "Instantiate Ajv with strict behavior and schema draft compatibility checks for 2020-12 only.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/validation/compileSchema.ts"
           ]
@@ -107,7 +107,7 @@
           "subtaskId": "FRD-002-T2-S2",
           "title": "Create unsupported draft detector",
           "description": "Evaluate declared draft and produce deterministic run issue for non-2020-12 values.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/validation/detectUnsupportedDraft.ts"
           ]
@@ -116,7 +116,7 @@
           "subtaskId": "FRD-002-T2-S3",
           "title": "Wire Ajv format support in validator setup",
           "description": "Ensure Ajv compiler setup loads ajv-formats so schema format keywords like date are validated in strict mode.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/domain/validation/compileSchema.ts",
             "package.json"
@@ -169,7 +169,7 @@
       "taskId": "FRD-002-T3",
       "title": "Produce run-level issue model and blocking behavior",
       "description": "Map schema failures to RunIssue contracts and enforce zero-file summary when run cannot start.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-002-T2"
@@ -179,7 +179,7 @@
           "subtaskId": "FRD-002-T3-S1",
           "title": "Implement run-blocked result factory",
           "description": "Generate ReviewRunResult for schema-level failures with empty files and zero counts.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/createRunBlockedResult.ts"
           ]
@@ -188,7 +188,7 @@
           "subtaskId": "FRD-002-T3-S2",
           "title": "Map schema errors to RunIssue fields",
           "description": "Normalize parse, compile, and unsupported draft failures into RunIssue with SCHEMA_ERROR code.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/validation/mapRunIssue.ts"
           ]
