@@ -18,7 +18,7 @@ const ALLOWED_IMPORTS: Record<ModuleSegment, ReadonlySet<ModuleSegment>> = {
   types: new Set(["types"]),
 };
 
-const normalizePath = (filePath: string): string => filePath.replace(/\\/g, "/");
+const normalizePath = (filePath: string) => filePath.replace(/\\/g, "/");
 
 export const classifyModulePath = (filePath: string): ModuleSegment | null => {
   const normalized = normalizePath(filePath);

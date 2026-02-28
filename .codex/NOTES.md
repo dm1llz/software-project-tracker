@@ -31,3 +31,10 @@ Template:
 - Action/Decision: Added strict TypeScript build gate, canonical `reviewContracts`, guard helpers, deterministic sort/disambiguation helpers, and unit coverage for both success/error scenarios.
 - Reusable check/command: `npm run build && npm run test:unit && npm run validate:schema`
 - Applicability: Use for all future FRD bundles that define contracts first and derive pipeline helpers from contract invariants.
+
+### 2026-02-27 TS return-type style
+- Situation: Team preference clarified around using TypeScript inference vs explicit function return annotations.
+- Learning: Prefer inference for local/private helpers and test fixtures; keep explicit return types on exported/shared APIs and critical policy/security logic.
+- Action/Decision: Updated local helpers to rely on inference while preserving explicit signatures for boundary functions.
+- Reusable check/command: `rg -n "\):\s*.*=>" src tests`
+- Applicability: Apply during refactors and new module additions to keep APIs explicit and internals concise.

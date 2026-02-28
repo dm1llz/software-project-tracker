@@ -12,7 +12,7 @@ const makeResult = (
   fileName: string,
   uploadIndex: number,
   status: ReviewResult["status"],
-): ReviewResult => ({
+) => ({
   id,
   fileName,
   displayName: fileName,
