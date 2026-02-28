@@ -1,0 +1,238 @@
+{
+  "metadata": {
+    "frdId": "FRD-008",
+    "title": "Tailwind Styling and Layout Foundation",
+    "description": "Introduce Tailwind CSS in the Vite runtime, apply baseline styling to existing UI elements, and establish a responsive page layout shell for the review workflow.",
+    "status": "not_started",
+    "priority": 8,
+    "estimatedEffort": "medium",
+    "dependencies": [
+      "FRD-007",
+      "FRD-005",
+      "FRD-001"
+    ],
+    "specReferences": [
+      "specs/architecture-overview.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/ux-review-flow.md"
+    ],
+    "createdAt": "2026-02-28",
+    "updatedAt": "2026-02-28"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-008-T1",
+      "title": "Install and configure Tailwind in the runtime pipeline",
+      "description": "Add Tailwind/PostCSS dependencies and runtime configuration so utility classes compile in both dev and production builds.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-007"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-008-T1-S1",
+          "title": "Add Tailwind and PostCSS dependencies",
+          "description": "Install Tailwind CSS, PostCSS, and Autoprefixer in the existing npm toolchain.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json",
+            "package-lock.json"
+          ]
+        },
+        {
+          "subtaskId": "FRD-008-T1-S2",
+          "title": "Create Tailwind configuration and stylesheet entry",
+          "description": "Create Tailwind/PostCSS config and wire a base stylesheet into the runtime entrypoint.",
+          "status": "not_started",
+          "filesToCreate": [
+            "tailwind.config.ts",
+            "postcss.config.cjs",
+            "src/styles/tailwind.css"
+          ],
+          "filesToModify": [
+            "src/main.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-008-T1-V1",
+          "type": "build",
+          "description": "Vite dev/build pipelines compile Tailwind utilities without CSS configuration errors."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-008-T1-TR1",
+          "type": "integration",
+          "description": "Validate Tailwind runtime wiring across local and CI workflows.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-008-T1-TR1-S1",
+              "type": "success",
+              "description": "Developer runs the Vite dev server after dependency installation.",
+              "expectedOutcome": "App boots with Tailwind base styles loaded and no runtime CSS import errors."
+            },
+            {
+              "scenarioId": "FRD-008-T1-TR1-S2",
+              "type": "error",
+              "description": "Tailwind directives are missing or misconfigured.",
+              "expectedOutcome": "Build output fails with clear CSS pipeline diagnostics instead of silent style loss."
+            },
+            {
+              "scenarioId": "FRD-008-T1-TR1-S3",
+              "type": "edge",
+              "description": "TypeScript build and Vite build run back-to-back after Tailwind setup.",
+              "expectedOutcome": "Both commands pass with no config conflicts or module-resolution regressions."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-008-T2",
+      "title": "Apply baseline utility styling to review UI components",
+      "description": "Style the existing review page controls, summary, lists, and detail panels with a consistent Tailwind utility baseline.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-008-T1",
+        "FRD-005"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-008-T2-S1",
+          "title": "Style top-level shell and control panel",
+          "description": "Add baseline spacing, typography, and control styles to App/ReviewRunPage and schema upload controls.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/App.tsx",
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/components/SchemaControlPanel.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-008-T2-S2",
+          "title": "Style result, issue, and readable detail views",
+          "description": "Apply consistent table/list/card treatments across summary, file results, issue tables, and readable sections.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/ReviewSummaryView.tsx",
+            "src/ui/components/FileResultListView.tsx",
+            "src/ui/components/FileIssueTableView.tsx",
+            "src/ui/components/ReadableFrdSectionView.tsx",
+            "src/ui/components/RunIssuePanelView.tsx"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-008-T2-G1",
+          "severity": "critical",
+          "text": "Visual changes must not remove existing labels/roles used by integration tests and accessibility queries."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-008-T2-V1",
+          "type": "manual",
+          "description": "Baseline UI styling is visible across empty/ready/running/complete/error states with readable contrast."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-008-T2-TR1",
+          "type": "integration",
+          "description": "Ensure styling updates preserve interaction behavior and semantic structure.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-008-T2-TR1-S1",
+              "type": "success",
+              "description": "User uploads valid schema and FRD files through styled controls.",
+              "expectedOutcome": "All prior interaction flows succeed and styled elements remain keyboard-accessible."
+            },
+            {
+              "scenarioId": "FRD-008-T2-TR1-S2",
+              "type": "error",
+              "description": "Schema upload fails and error view is shown.",
+              "expectedOutcome": "Error panel styling appears without hiding or breaking actionable controls."
+            },
+            {
+              "scenarioId": "FRD-008-T2-TR1-S3",
+              "type": "edge",
+              "description": "Duplicate filename rows render in styled result lists.",
+              "expectedOutcome": "Rows remain distinct and selectable with stable semantics."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-008-T3",
+      "title": "Create a responsive page layout shell",
+      "description": "Introduce a basic responsive layout that organizes controls, run summary, file list, and detail panel for desktop and mobile.",
+      "status": "not_started",
+      "prLevel": false,
+      "dependencies": [
+        "FRD-008-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-008-T3-S1",
+          "title": "Define layout structure and breakpoints",
+          "description": "Add grid/flex layout utilities and section wrappers so content adapts cleanly between narrow and wide screens.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-008-T3-S2",
+          "title": "Align detail panel placement with file-list navigation",
+          "description": "Ensure detail panel placement remains predictable and readable when switching between files or tabs.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/FileResultListView.tsx",
+            "src/ui/components/ReadableFrdSectionView.tsx",
+            "src/ui/components/FileIssueTableView.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-008-T3-V1",
+          "type": "manual",
+          "description": "Layout remains usable on mobile and desktop widths without overlap or clipped controls."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-008-T3-TR1",
+          "type": "integration",
+          "description": "Validate responsive-layout structural behavior does not regress UI flow.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-008-T3-TR1-S1",
+              "type": "success",
+              "description": "Run completes with mixed results and detail panel is opened.",
+              "expectedOutcome": "Summary/list/detail regions all remain visible and navigable in layout shell."
+            },
+            {
+              "scenarioId": "FRD-008-T3-TR1-S2",
+              "type": "error",
+              "description": "Run issues are shown with no file rows.",
+              "expectedOutcome": "Run-issue panel placement remains stable and does not collapse surrounding layout."
+            },
+            {
+              "scenarioId": "FRD-008-T3-TR1-S3",
+              "type": "edge",
+              "description": "Schema replacement occurs after file selection.",
+              "expectedOutcome": "Layout resets to baseline state without orphaned spacing or stale sections."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
