@@ -295,8 +295,7 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         return;
       }
       setStore(toErrorStoreState([mapUnexpectedRunIssue(error)]));
-      // Keep preferred tab unchanged on error; success/schema-reset paths are responsible
-      // for explicitly resetting tab state to "issues" through resetRuntimeState.
+      // Reset transient runtime UI state for the active request after an upload error.
       resetRuntimeState(requestVersion);
     }
   }, [resetRuntimeState, schemaBundle, validator]);
