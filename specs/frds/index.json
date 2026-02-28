@@ -69,7 +69,7 @@
     {
       "frdId": "FRD-006",
       "title": "Quality and Performance",
-      "status": "in_progress",
+      "status": "completed",
       "priority": 7,
       "path": "./frd-006-quality-performance.json",
       "dependencies": [

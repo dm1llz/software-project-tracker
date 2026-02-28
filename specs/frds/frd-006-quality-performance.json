@@ -3,7 +3,7 @@
     "frdId": "FRD-006",
     "title": "Quality and Performance",
     "description": "Define and implement quality gates across unit, integration, and e2e smoke tests, including worker fallback and responsiveness expectations.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 7,
     "estimatedEffort": "medium",
     "dependencies": [
@@ -101,7 +101,7 @@
       "taskId": "FRD-006-T2",
       "title": "Establish integration tests for end-to-end review pipeline",
       "description": "Exercise schema load, file processing, failure continuation, and summary invariants through integration harnesses.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-006-T1",
@@ -112,7 +112,7 @@
           "subtaskId": "FRD-006-T2-S1",
           "title": "Create integration harness with fixture batches",
           "description": "Model valid, invalid, and mixed batches to assert run outcomes and per-file details.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/__tests__/reviewRun.integration.test.ts",
             "src/test-fixtures/schema/valid-2020-12.json",
@@ -126,7 +126,7 @@
           "subtaskId": "FRD-006-T2-S2",
           "title": "Add worker fallback integration coverage",
           "description": "Verify pipeline produces equivalent results with worker-enabled and fallback-to-main-thread execution.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/infra/workers/__tests__/workerFallback.integration.test.ts"
           ]
@@ -171,7 +171,7 @@
       "taskId": "FRD-006-T3",
       "title": "Add e2e smoke checks for UX responsiveness and network isolation",
       "description": "Implement lightweight e2e tests to prove first-run usability, responsiveness, and no-network assumptions.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-006-T2"
@@ -181,7 +181,7 @@
           "subtaskId": "FRD-006-T3-S1",
           "title": "Create Playwright smoke flow",
           "description": "Automate user path from schema upload to mixed-result file detail inspection.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "tests/e2e/review-run-smoke.spec.ts"
           ]
@@ -190,7 +190,7 @@
           "subtaskId": "FRD-006-T3-S2",
           "title": "Add no-network and responsiveness assertions",
           "description": "Assert no outbound network calls during core flows and UI remains interactive while processing.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "tests/e2e/network-and-responsiveness.spec.ts"
           ]
@@ -199,7 +199,7 @@
           "subtaskId": "FRD-006-T3-S3",
           "title": "Document Playwright browser install and CI bootstrap",
           "description": "Add explicit command requirements for Playwright browser installation so e2e runs are reproducible in clean environments.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "package.json",
             "docs/development-setup.md"

@@ -114,3 +114,10 @@ Template:
 - Action/Decision: Added `vitest.config.ts` + setup file and updated npm scripts so unit runs `src/domain` then `tests/unit`, while integration runs only `tests/integration`.
 - Reusable check/command: `npm run test:unit && npm run test:integration`
 - Applicability: Reuse whenever mixed test layouts need strict CI partitioning without introducing a Vitest workspace.
+
+### 2026-02-28 FRD-006-T2-T3
+- Situation: New integration tests were created under `src/**` (included in `tsc --noEmit`) and initially used Node `fs/path` imports that failed without Node ambient types.
+- Learning: For fixture-backed tests inside `src/**`, using Vite `?raw` fixture imports plus a local `declare module "*?raw"` keeps strict TypeScript builds green without introducing `@types/node`.
+- Action/Decision: Switched integration fixture loading to raw-module imports, added `src/types/vite-raw-modules.d.ts`, and updated `tsconfig` include to cover `.d.ts` declarations.
+- Reusable check/command: `npm run build && npx vitest run --config vitest.config.ts src/domain/review-run/__tests__/reviewRun.integration.test.ts src/infra/workers/__tests__/workerFallback.integration.test.ts`
+- Applicability: Reuse whenever browser-oriented repos keep `src/**` tests type-checked but avoid Node type dependencies.
