@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { executeReviewRun } from "../executeReviewRun";
+import { mapReviewInputFiles } from "../mapReviewInputFiles";
+import { processReviewRunBatch } from "../processReviewRunBatch";
+import { compileSchema } from "../../validation/compileSchema";
+import { loadSchemaFile } from "../../validation/loadSchemaFile";
 import invalidJsonFrd from "../../../test-fixtures/frd/invalid-json.frd?raw";
 import invalidSchemaFrd from "../../../test-fixtures/frd/invalid-schema.frd?raw";
 import validFrd from "../../../test-fixtures/frd/valid-frd.json?raw";
@@ -84,5 +88,64 @@ describe("executeReviewRun integration", () => {
       parseFailed: 0,
     });
     expect(execution.result.files.every((file) => file.status === "passed")).toBe(true);
+  });
+
+  it("matches shared processor output for all-valid and mixed batches", async () => {
+    const schemaSource = {
+      name: "valid-2020-12.json",
+      text: validSchema202012,
+    };
+
+    const loadedSchema = await loadSchemaFile(schemaSource);
+    expect(loadedSchema.ok).toBe(true);
+    if (!loadedSchema.ok) {
+      return;
+    }
+
+    const compileResult = compileSchema(loadedSchema.schema);
+    expect(compileResult.ok).toBe(true);
+    if (!compileResult.ok) {
+      return;
+    }
+
+    const scenarios = [
+      {
+        name: "all-valid",
+        frdSources: [
+          { name: "valid-frd.json", text: validFrd },
+          { name: "valid-frd-copy.json", text: validFrd },
+        ],
+      },
+      {
+        name: "mixed-with-read-failure",
+        frdSources: [
+          { name: "valid-frd.json", text: validFrd },
+          { name: "invalid-json.frd", text: invalidJsonFrd },
+          { name: "invalid-schema.frd", text: invalidSchemaFrd },
+          { name: "valid-frd.json", text: async () => Promise.reject(new Error("reader failed")) },
+        ],
+      },
+    ];
+
+    for (const scenario of scenarios) {
+      const execution = await executeReviewRun({
+        schemaSource,
+        frdSources: scenario.frdSources,
+      });
+
+      const mapped = await mapReviewInputFiles(scenario.frdSources);
+      const processed = await processReviewRunBatch({
+        mappedFiles: mapped,
+        validator: compileResult.validator,
+        schemaRaw: loadedSchema.schema.raw,
+      });
+      expect(processed.cancelled).toBe(false);
+      if (processed.cancelled) {
+        return;
+      }
+
+      expect(execution.result.summary).toEqual(processed.summary);
+      expect(execution.result.files).toEqual(processed.files);
+    }
   });
 });

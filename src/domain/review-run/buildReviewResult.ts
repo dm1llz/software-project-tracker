@@ -9,7 +9,7 @@ type BuildReviewResultInput = {
   sections?: RenderedSection[];
 };
 
-const hasErrorIssues = (issues: readonly FileIssue[]): boolean =>
+export const hasErrorLevelIssues = (issues: readonly FileIssue[]): boolean =>
   issues.some((issue) => issue.level === "error");
 
 export const buildReviewResult = ({
@@ -33,7 +33,7 @@ export const buildReviewResult = ({
   }
 
   const issues = [...validationIssues];
-  const hasErrors = hasErrorIssues(issues);
+  const hasErrors = hasErrorLevelIssues(issues);
   const passed = !hasErrors;
 
   return {

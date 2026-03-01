@@ -24,6 +24,16 @@ const createFileId = (fileName: string, uploadIndex: number): string => {
   return `frd-${uploadIndex}-${normalizedName || "file"}`;
 };
 
+export const uploadIndexFromFileId = (fileId: string, fallbackIndex: number): number => {
+  const match = fileId.match(/^frd-(\d+)-/);
+  if (!match || !match[1]) {
+    return fallbackIndex;
+  }
+
+  const parsed = Number.parseInt(match[1], 10);
+  return Number.isNaN(parsed) ? fallbackIndex : parsed;
+};
+
 const readSourceText = async (source: ReviewFileSource): Promise<string> =>
   typeof source.text === "string" ? source.text : source.text();
 

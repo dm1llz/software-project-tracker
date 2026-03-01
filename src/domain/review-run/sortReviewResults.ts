@@ -6,8 +6,13 @@ const STATUS_PRIORITY: Record<ReviewStatus, number> = {
   passed: 2,
 };
 
+export const compareReviewStatusPriority = (
+  left: ReviewStatus,
+  right: ReviewStatus,
+): number => STATUS_PRIORITY[left] - STATUS_PRIORITY[right];
+
 export const compareReviewResults = (left: ReviewResult, right: ReviewResult): number => {
-  const statusPriorityDelta = STATUS_PRIORITY[left.status] - STATUS_PRIORITY[right.status];
+  const statusPriorityDelta = compareReviewStatusPriority(left.status, right.status);
   if (statusPriorityDelta !== 0) {
     return statusPriorityDelta;
   }
