@@ -228,7 +228,7 @@ export const ReviewRunPage = () => {
           {contentModel.detailPanel.fileId !== null ? (
             <section
               aria-label="File detail"
-              className="flex min-h-screen min-h-[100dvh] flex-col rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
+              className="flex max-h-screen max-h-[100dvh] flex-col overflow-hidden rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
             >
               <h2 className="text-base font-semibold text-slate-100">File detail</h2>
               <div className="mt-3 flex flex-wrap gap-2">
