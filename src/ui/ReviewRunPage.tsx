@@ -174,9 +174,9 @@ export const ReviewRunPage = () => {
 
       <section
         aria-label="Review workspace top row"
-        className="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+        className="mt-5 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
       >
-        <div className="min-w-0 space-y-4">
+        <div className="min-w-0 h-full">
           <SchemaControlPanel
             model={pageModel.schemaPanel}
             onSchemaUpload={(file, replaceMode) => {
@@ -195,28 +195,28 @@ export const ReviewRunPage = () => {
               ) : null
             }
           />
-
-          {pageModel.visibleSections.emptyHint ? (
-            <p className="rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
-              Upload schema first.
-            </p>
-          ) : null}
-          {pageModel.visibleSections.readyHint ? (
-            <p className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-              Schema ready for FRD upload.
-            </p>
-          ) : null}
-          {pageModel.visibleSections.runningProgress ? (
-            <p className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
-              Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
-            </p>
-          ) : null}
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 h-full">
           <ReviewSummaryView model={contentModel.summary} />
         </div>
       </section>
+
+      {pageModel.visibleSections.emptyHint ? (
+        <p className="mt-4 rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
+          Upload schema first.
+        </p>
+      ) : null}
+      {pageModel.visibleSections.readyHint ? (
+        <p className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          Schema ready for FRD upload.
+        </p>
+      ) : null}
+      {pageModel.visibleSections.runningProgress ? (
+        <p className="mt-4 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
+          Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
+        </p>
+      ) : null}
 
       {contentModel.runIssuePanel.visible || contentModel.detailPanel.fileId !== null ? (
         <section
