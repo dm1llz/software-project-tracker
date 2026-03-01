@@ -31,15 +31,22 @@ test("completes a mixed-result review flow and inspects file detail tabs", async
 
   await page.getByLabel("FRD files").setInputFiles([
     jsonUpload("valid-frd.json", { title: "Good" }),
+    jsonUpload("valid-frd.json", { description: "Missing title", extra: true }),
     textUpload("invalid-json.frd", "{\n  \"title\": \n"),
-    jsonUpload("invalid-schema.frd", { description: "Missing title", extra: true }),
   ]);
 
   await expect(page.getByText("total: 3")).toBeVisible();
-  await expect(page.getByRole("button", { name: "valid-frd.json" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "valid-frd.json (1)" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "valid-frd.json (2)" })).toBeVisible();
   await expect(page.getByRole("button", { name: "invalid-json.frd" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "File results" })).toHaveCount(1);
+  await expect(
+    page
+      .getByRole("region", { name: "Schema controls" })
+      .getByRole("region", { name: "File results" }),
+  ).toBeVisible();
 
-  await page.getByRole("button", { name: "valid-frd.json" }).click();
+  await page.getByRole("button", { name: "valid-frd.json (1)" }).click();
   await expect(page.getByRole("heading", { name: "File detail" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Readable FRD" })).toBeVisible();
 

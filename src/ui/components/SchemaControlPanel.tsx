@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 
 import { ConfirmDialog } from "./ConfirmDialog";
 import type { ReviewScreenState } from "../state/deriveScreenState";
@@ -79,6 +79,7 @@ type SchemaControlPanelProps = {
   model: SchemaControlPanelModel;
   onSchemaUpload: (file: File, replaceMode?: boolean) => void;
   onFrdUpload: (files: File[]) => void;
+  fileListContent?: ReactNode;
 };
 
 const firstFile = (event: ChangeEvent<HTMLInputElement>): File | null =>
@@ -91,6 +92,7 @@ export const SchemaControlPanel = ({
   model,
   onSchemaUpload,
   onFrdUpload,
+  fileListContent,
 }: SchemaControlPanelProps) => {
   const schemaInputRef = useRef<HTMLInputElement | null>(null);
   const [showReplacementModal, setShowReplacementModal] = useState(false);
@@ -164,26 +166,29 @@ export const SchemaControlPanel = ({
           />
         </div>
 
-        <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-teal-300/80 focus-within:ring-2 focus-within:ring-teal-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
-          FRD files
-          <span className="inline-flex w-fit items-center rounded-md border border-teal-500/60 bg-teal-500/15 px-3 py-1.5 text-xs font-semibold text-teal-200">
-            Choose one or more FRDs
-          </span>
-          <input
-            type="file"
-            multiple
-            accept="application/json,.json"
-            aria-label="FRD files"
-            className="sr-only"
-            onChange={(event) => {
-              const files = fileList(event);
-              if (files.length > 0) {
-                onFrdUpload(files);
-              }
-            }}
-            disabled={!model.controls.canUploadFrdFiles}
-          />
-        </label>
+        <div className="space-y-3">
+          <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-teal-300/80 focus-within:ring-2 focus-within:ring-teal-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
+            FRD files
+            <span className="inline-flex w-fit items-center rounded-md border border-teal-500/60 bg-teal-500/15 px-3 py-1.5 text-xs font-semibold text-teal-200">
+              Choose one or more FRDs
+            </span>
+            <input
+              type="file"
+              multiple
+              accept="application/json,.json"
+              aria-label="FRD files"
+              className="sr-only"
+              onChange={(event) => {
+                const files = fileList(event);
+                if (files.length > 0) {
+                  onFrdUpload(files);
+                }
+              }}
+              disabled={!model.controls.canUploadFrdFiles}
+            />
+          </label>
+          {fileListContent}
+        </div>
       </div>
 
       <ConfirmDialog

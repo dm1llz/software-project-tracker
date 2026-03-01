@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { getByLabelText, getByRole, queryByRole, waitFor, within } from "@testing-library/dom";
+import { getAllByRole, getByLabelText, getByRole, queryByRole, waitFor, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -81,9 +81,11 @@ describe("review run page DOM behavior", () => {
     const topRow = getByRole(container, "region", { name: "Review workspace top row" });
     expect(topRow.className).toContain("grid-cols-1");
     expect(topRow.className).toContain("lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]");
-    expect(within(topRow).getByRole("region", { name: "Schema controls" })).toBeDefined();
+    const schemaControls = within(topRow).getByRole("region", { name: "Schema controls" });
+    expect(schemaControls).toBeDefined();
     expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
-    expect(within(topRow).getByRole("region", { name: "File results" })).toBeDefined();
+    expect(within(schemaControls).getByRole("region", { name: "File results" })).toBeDefined();
+    expect(getAllByRole(container, "region", { name: "File results" })).toHaveLength(1);
 
     await user.click(getByRole(container, "button", { name: "feature.json (1)" }));
     expect(getByRole(container, "button", { name: "Readable FRD" })).toBeDefined();
@@ -124,9 +126,11 @@ describe("review run page DOM behavior", () => {
     });
 
     const topRow = getByRole(container, "region", { name: "Review workspace top row" });
-    expect(within(topRow).getByRole("region", { name: "Schema controls" })).toBeDefined();
+    const schemaControls = within(topRow).getByRole("region", { name: "Schema controls" });
+    expect(schemaControls).toBeDefined();
     expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
     expect(queryByRole(topRow, "region", { name: "File results" })).toBeNull();
+    expect(within(schemaControls).queryByRole("region", { name: "File results" })).toBeNull();
 
     const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
     expect(within(detailRow).getByRole("region", { name: "Run issues" })).toBeDefined();

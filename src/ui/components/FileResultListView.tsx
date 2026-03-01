@@ -5,6 +5,7 @@ import type { FileResultListModel, FileResultRow as FileResultRowType } from "./
 type FileResultListViewProps = {
   model: FileResultListModel;
   onSelectFile: (fileId: string) => void;
+  variant?: "panel" | "inline";
 };
 
 type FileResultRowProps = {
@@ -51,13 +52,29 @@ const FileResultRowView = memo(({
 
 FileResultRowView.displayName = "FileResultRowView";
 
-export const FileResultListView = memo(({ model, onSelectFile }: FileResultListViewProps) => (
+export const FileResultListView = memo(({
+  model,
+  onSelectFile,
+  variant = "panel",
+}: FileResultListViewProps) => (
   <section
     aria-label="File results"
-    className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+    className={
+      variant === "inline"
+        ? "rounded-xl border border-slate-700/80 bg-slate-950/55 p-3"
+        : "rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+    }
   >
-    <h2 className="text-base font-semibold text-slate-100">Files</h2>
-    <ul className="mt-3 space-y-2">
+    <h2
+      className={
+        variant === "inline"
+          ? "text-sm font-semibold uppercase tracking-wide text-slate-300"
+          : "text-base font-semibold text-slate-100"
+      }
+    >
+      Files
+    </h2>
+    <ul className={variant === "inline" ? "mt-2 space-y-1.5" : "mt-3 space-y-2"}>
       {model.rows.map((row) => (
         <FileResultRowView
           key={row.id}

@@ -185,6 +185,15 @@ export const ReviewRunPage = () => {
             onFrdUpload={(files) => {
               void handleFrdUpload(files);
             }}
+            fileListContent={
+              contentModel.showFileRows ? (
+                <FileResultListView
+                  model={contentModel.fileList}
+                  onSelectFile={selectFile}
+                  variant="inline"
+                />
+              ) : null
+            }
           />
 
           {pageModel.visibleSections.emptyHint ? (
@@ -201,13 +210,6 @@ export const ReviewRunPage = () => {
             <p className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
               Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
             </p>
-          ) : null}
-
-          {contentModel.showFileRows ? (
-            <FileResultListView
-              model={contentModel.fileList}
-              onSelectFile={selectFile}
-            />
           ) : null}
         </div>
 
