@@ -191,3 +191,10 @@ Template:
 - Action/Decision: Added `fileListContent` slot support in `SchemaControlPanel`, introduced `FileResultListView` inline variant styling, and moved file-list rendering from `ReviewRunPage` into the intake control column with updated integration/e2e coverage.
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx && npm run test:e2e -- tests/e2e/review-run-smoke.spec.ts`
 - Applicability: Reuse when relocating existing interactive regions without breaking selection semantics or accessibility-driven test locators.
+
+### 2026-02-28 FRD-011-T3 viewport-height-and-scroll
+- Situation: Intake-adjacent file navigation can consume excessive vertical space on dense batches, and plain `vh` layouts can be clipped by mobile browser chrome.
+- Learning: Combining `min-h-screen` fallback with `min-h-[100dvh]` improves full-height behavior across desktop/mobile, while capping inline file-list height with `overflow-y-auto` preserves context without losing file access.
+- Action/Decision: Applied dynamic viewport min-height on `ReviewRunPage` and added max-height scroll behavior to inline `FileResultListView`.
+- Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx && npm run build`
+- Applicability: Reuse for responsive dashboards where persistent controls and long selectable lists share the same viewport.
