@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export type ConfirmDialogProps = {
   open: boolean;
@@ -27,6 +27,86 @@ export const ConfirmDialog = ({
   onCancel,
   onClose,
 }: ConfirmDialogProps) => {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    previousActiveElementRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+
+    const getFocusableElements = (): HTMLElement[] =>
+      Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          [
+            "a[href]",
+            "button:not([disabled])",
+            "input:not([disabled])",
+            "select:not([disabled])",
+            "textarea:not([disabled])",
+            "[tabindex]:not([tabindex='-1'])",
+          ].join(","),
+        ),
+      ).filter((element) => !element.hasAttribute("hidden"));
+
+    const focusableElements = getFocusableElements();
+    const initialFocusTarget = focusableElements[0] ?? dialog;
+    initialFocusTarget.focus();
+
+    const handleKeydown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const availableElements = getFocusableElements();
+      if (availableElements.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const firstElement = availableElements[0]!;
+      const lastElement = availableElements[availableElements.length - 1]!;
+      const activeElement = document.activeElement;
+      const activeInDialog = activeElement instanceof HTMLElement && dialog.contains(activeElement);
+
+      if (event.shiftKey) {
+        if (!activeInDialog || activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+        return;
+      }
+
+      if (!activeInDialog || activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeydown);
+    return () => {
+      document.removeEventListener("keydown", handleKeydown);
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+      }
+    };
+  }, [onClose, open]);
+
   if (!open) {
     return null;
   }
@@ -36,6 +116,8 @@ export const ConfirmDialog = ({
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
+      ref={dialogRef}
+      tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4"
     >
       <div className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 p-5 shadow-2xl shadow-slate-950/60">
