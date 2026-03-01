@@ -5,6 +5,7 @@ import { processReviewRunBatch } from "../../domain/review-run/processReviewRunB
 import { compileSchema } from "../../domain/validation/compileSchema";
 import { loadSchemaFile } from "../../domain/validation/loadSchemaFile";
 import type { SchemaBundle } from "../../types/reviewContracts";
+import { yieldToMacrotask } from "../../utils/async";
 import { applyReplaceSchemaAction } from "../components/SchemaControlPanel";
 import type { FileDetailTab } from "../components/FileDetailPanel";
 import { deriveScreenStateFromStore } from "../state/reviewRunScreenStateHelpers";
@@ -27,9 +28,6 @@ import {
 
 const PROGRESS_BATCH_SIZE = 5;
 const FILE_PROCESS_CONCURRENCY = 4;
-const yieldToMacrotask = (): Promise<void> => new Promise((resolve) => {
-  setTimeout(resolve, 0);
-});
 
 const readFileText = async (file: File): Promise<string> => {
   const withText = file as File & { text?: () => Promise<string> };

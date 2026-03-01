@@ -13,13 +13,13 @@ import { parseFrdFile } from "./parseFrdFile";
 import { summarizeBatchReview } from "./summarizeBatchReview";
 import { validateFrdFile } from "./validateFrdFile";
 
-type ProcessReviewRunMappedFiles = {
+export type ProcessReviewRunMappedFiles = {
   files: readonly ReviewInputFile[];
   fileIssues: readonly FileIssue[];
   displayNameById: Record<string, string>;
 };
 
-type ProcessReviewRunBatchInput = {
+export type ProcessReviewRunBatchInput = {
   mappedFiles: ProcessReviewRunMappedFiles;
   validator: ValidateFunction;
   schemaRaw: Record<string, unknown>;

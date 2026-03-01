@@ -12,17 +12,19 @@ import { makeSchemaBundle } from "../helpers/schemaBundleHelper";
 
 describe("review-run parse and validation pipeline", () => {
   it("produces deterministic mixed-batch results through the shared processor", async () => {
+    const schemaRaw = {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      required: ["title"],
+      properties: {
+        title: { type: "string" },
+      },
+      additionalProperties: false,
+    } as const;
+
     const compileResult = compileSchema(
       makeSchemaBundle(
-        {
-          $schema: "https://json-schema.org/draft/2020-12/schema",
-          type: "object",
-          required: ["title"],
-          properties: {
-            title: { type: "string" },
-          },
-          additionalProperties: false,
-        },
+        schemaRaw,
         "2020-12",
       ),
     );
@@ -40,9 +42,7 @@ describe("review-run parse and validation pipeline", () => {
     const processed = await processReviewRunBatch({
       mappedFiles: ingestResult,
       validator: compileResult.validator,
-      schemaRaw: {
-        type: "object",
-      },
+      schemaRaw,
       concurrency: 2,
     });
     expect(processed.cancelled).toBe(false);
@@ -148,16 +148,18 @@ describe("review-run parse and validation pipeline", () => {
   });
 
   it("keeps duplicate display names and read-failure upload indices stable", async () => {
+    const schemaRaw = {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      properties: {
+        title: { type: "string" },
+      },
+      additionalProperties: true,
+    } as const;
+
     const compileResult = compileSchema(
       makeSchemaBundle(
-        {
-          $schema: "https://json-schema.org/draft/2020-12/schema",
-          type: "object",
-          properties: {
-            title: { type: "string" },
-          },
-          additionalProperties: true,
-        },
+        schemaRaw,
         "2020-12",
       ),
     );
@@ -176,9 +178,7 @@ describe("review-run parse and validation pipeline", () => {
     const processed = await processReviewRunBatch({
       mappedFiles: ingestResult,
       validator: compileResult.validator,
-      schemaRaw: {
-        type: "object",
-      },
+      schemaRaw,
     });
     expect(processed.cancelled).toBe(false);
     if (processed.cancelled) {
