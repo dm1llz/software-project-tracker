@@ -63,7 +63,7 @@ const RenderSectionContent = memo(({ section }: { section: RenderedSection }) =>
 RenderSectionContent.displayName = "RenderSectionContent";
 
 const ReadableSectionArticle = memo(({ section }: { section: RenderedSection }) => (
-  <article className="mt-3 rounded-xl border border-slate-700/70 bg-slate-900/50 p-4">
+  <article className="rounded-lg border border-slate-700/70 bg-slate-900/40 p-3">
     <h4 className="text-sm font-semibold text-slate-100">{section.title}</h4>
     <p className="mt-1 text-xs text-slate-400">{section.path}</p>
     <RenderSectionContent section={section} />
@@ -75,7 +75,7 @@ ReadableSectionArticle.displayName = "ReadableSectionArticle";
 export const ReadableFrdSectionView = memo(({ sections }: ReadableFrdSectionViewProps) => (
   <section
     aria-label="Readable FRD"
-    className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+    className="min-w-0 space-y-3"
   >
     <h3 className="text-base font-semibold text-slate-100">Readable FRD</h3>
     {sections.map((section) => (

@@ -120,7 +120,7 @@
     {
       "frdId": "FRD-011",
       "title": "UI Intake and Layout Refresh",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 11,
       "path": "./frd-011-ui-intake-layout-refresh.json",
       "dependencies": [
