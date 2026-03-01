@@ -29,7 +29,8 @@ import {
 } from "../state/reviewRunStore";
 import {
   mapUnexpectedRunIssue,
-  toErrorStoreState,
+  toRecoverableRunErrorStoreState,
+  toSchemaUploadErrorStoreState,
 } from "../state/reviewRunErrorMapping";
 
 const PROGRESS_BATCH_SIZE = 5;
@@ -142,7 +143,7 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
       if (!loaded.ok) {
         setSchemaBundle(null);
         setValidator(null);
-        setStore(toErrorStoreState(loaded.runIssues));
+        setStore(toSchemaUploadErrorStoreState(loaded.runIssues));
         resetRuntimeState(requestVersion);
         return;
       }
@@ -154,7 +155,7 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
       if (!compiled.ok) {
         setSchemaBundle(null);
         setValidator(null);
-        setStore(toErrorStoreState(compiled.runIssues));
+        setStore(toSchemaUploadErrorStoreState(compiled.runIssues));
         resetRuntimeState(requestVersion);
         return;
       }
@@ -170,7 +171,10 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
       if (!isCurrentRequest(requestVersionRef, requestVersion)) {
         return;
       }
-      setStore(toErrorStoreState([mapUnexpectedRunIssue(error)]));
+      const runIssues = [mapUnexpectedRunIssue(error)];
+      setSchemaBundle(null);
+      setValidator(null);
+      setStore(toSchemaUploadErrorStoreState(runIssues));
       resetRuntimeState(requestVersion);
     }
   }, [resetRuntimeState]);
@@ -297,10 +301,9 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
       if (!isCurrentRequest(requestVersionRef, requestVersion)) {
         return;
       }
-      setStore(toErrorStoreState([mapUnexpectedRunIssue(error)]));
-      setSchemaBundle(null);
-      setValidator(null);
-      // Reset transient runtime UI state for the active request after an upload error.
+      const runIssues = [mapUnexpectedRunIssue(error)];
+      setStore((previous) => toRecoverableRunErrorStoreState(previous.schemaName, runIssues));
+      // Reset transient runtime UI state for the active request after an FRD-processing error.
       resetRuntimeState(requestVersion);
     }
   }, [resetRuntimeState, schemaBundle, validator]);

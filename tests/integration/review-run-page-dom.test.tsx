@@ -100,6 +100,49 @@ describe("review run page DOM behavior", () => {
 
   });
 
+  it("keeps schema loaded after runtime run failure and allows FRD retry without re-uploading schema", async () => {
+    const { container } = await renderPage();
+    const user = userEvent.setup();
+
+    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+    await user.upload(
+      schemaInput,
+      makeJsonFile("runtime-schema.json", {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        required: ["items"],
+        properties: {
+          items: {},
+        },
+        additionalProperties: false,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("Schema ready for FRD upload.");
+    });
+
+    const frdInput = getByLabelText(container, "FRD files") as HTMLInputElement;
+    expect(frdInput.disabled).toBe(false);
+
+    await user.upload(frdInput, [makeJsonFile("runtime-error.json", { items: [1, { nested: true }] })]);
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("Run issues");
+      expect(container.textContent).toContain("Unexpected runtime failure");
+    });
+
+    expect(container.textContent).toContain("runtime-schema.json");
+    expect(frdInput.disabled).toBe(false);
+
+    await user.upload(frdInput, [makeJsonFile("retry-success.json", { items: [1, 2, 3] })]);
+
+    await waitFor(() => {
+      expect(getByRole(container, "button", { name: "retry-success.json" })).toBeDefined();
+      expect(container.textContent).not.toContain("Unexpected runtime failure");
+    });
+  });
+
   it("replacing schema clears prior summary, file rows, and file-detail selection", async () => {
     const { container } = await renderPage();
     const user = userEvent.setup();

@@ -110,7 +110,7 @@
     {
       "frdId": "FRD-010",
       "title": "Review-Run Refactor and Resilience",
-      "status": "not_started",
+      "status": "in_progress",
       "priority": 10,
       "path": "./frd-010-review-run-refactor-resilience.json",
       "dependencies": [
