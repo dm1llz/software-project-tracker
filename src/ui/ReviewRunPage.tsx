@@ -162,7 +162,7 @@ export const ReviewRunPage = () => {
   );
 
   return (
-    <main className="mx-auto min-h-screen min-h-[100dvh] max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl shadow-slate-950/40">
         <h1 className="text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
           Software Project Tracker
@@ -228,7 +228,7 @@ export const ReviewRunPage = () => {
           {contentModel.detailPanel.fileId !== null ? (
             <section
               aria-label="File detail"
-              className="rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
+              className="flex min-h-screen min-h-[100dvh] flex-col rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
             >
               <h2 className="text-base font-semibold text-slate-100">File detail</h2>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -249,7 +249,7 @@ export const ReviewRunPage = () => {
                 ))}
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
                 {contentModel.detailPanel.activeTab === "issues" ? (
                   <FileIssueTableView model={contentModel.detailPanel.issueTable} />
                 ) : (
