@@ -28,6 +28,41 @@ const ControllerHarness = ({ onUpdate }: ControllerHarnessProps) => {
 
 const mountedRoots: Root[] = [];
 
+type MountedControllerHarness = {
+  getLatestController: () => UseReviewRunControllerResult;
+};
+
+const mountControllerHarness = async (): Promise<MountedControllerHarness> => {
+  let latestController: UseReviewRunControllerResult | null = null;
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  mountedRoots.push(root);
+
+  await act(async () => {
+    root.render(
+      <ControllerHarness
+        onUpdate={(controller) => {
+          latestController = controller;
+        }}
+      />,
+    );
+  });
+
+  await waitFor(() => {
+    expect(latestController).not.toBeNull();
+  });
+
+  return {
+    getLatestController: () => {
+      if (!latestController) {
+        throw new Error("Controller harness has not initialized.");
+      }
+      return latestController;
+    },
+  };
+};
+
 afterEach(async () => {
   const roots = mountedRoots.splice(0, mountedRoots.length);
   for (const root of roots) {
@@ -40,32 +75,14 @@ afterEach(async () => {
 
 describe("review run controller request race behavior", () => {
   it("keeps the latest schema upload state when an earlier slower upload resolves later", async () => {
-    let latestController: UseReviewRunControllerResult | null = null;
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const root = createRoot(container);
-    mountedRoots.push(root);
-
-    await act(async () => {
-      root.render(
-        <ControllerHarness
-          onUpdate={(controller) => {
-            latestController = controller;
-          }}
-        />,
-      );
-    });
-
-    await waitFor(() => {
-      expect(latestController).not.toBeNull();
-    });
+    const harness = await mountControllerHarness();
 
     const slowSchema = createDeferred<string>();
     const fastSchema = createDeferred<string>();
-    const slowSchemaUpload = latestController?.handleSchemaUpload(
+    const slowSchemaUpload = harness.getLatestController().handleSchemaUpload(
       makeDeferredTextFile("schema-slow.json", slowSchema),
     );
-    const fastSchemaUpload = latestController?.handleSchemaUpload(
+    const fastSchemaUpload = harness.getLatestController().handleSchemaUpload(
       makeDeferredTextFile("schema-fast.json", fastSchema),
     );
 
@@ -86,7 +103,7 @@ describe("review run controller request race behavior", () => {
     });
 
     await waitFor(() => {
-      expect(latestController?.store.schemaName).toBe("schema-fast.json");
+      expect(harness.getLatestController().store.schemaName).toBe("schema-fast.json");
     });
 
     slowSchema.resolve(
@@ -105,52 +122,34 @@ describe("review run controller request race behavior", () => {
       await slowSchemaUpload;
     });
 
-    expect(latestController?.store.schemaName).toBe("schema-fast.json");
-    expect(latestController?.store.runIssues).toEqual([]);
+    expect(harness.getLatestController().store.schemaName).toBe("schema-fast.json");
+    expect(harness.getLatestController().store.runIssues).toEqual([]);
 
     await act(async () => {
-      await latestController?.handleFrdUpload([makeJsonFile("latest-schema-frd.json", { id: 42 })]);
+      await harness.getLatestController().handleFrdUpload([makeJsonFile("latest-schema-frd.json", { id: 42 })]);
     });
 
     await waitFor(() => {
-      expect(latestController?.store.summary).toEqual({
+      expect(harness.getLatestController().store.summary).toEqual({
         total: 1,
         passed: 1,
         failed: 0,
         parseFailed: 0,
       });
-      expect(latestController?.store.files[0]?.status).toBe("passed");
+      expect(harness.getLatestController().store.files[0]?.status).toBe("passed");
     });
   });
 
   it("ignores a late failure from an earlier schema upload after a newer upload succeeded", async () => {
-    let latestController: UseReviewRunControllerResult | null = null;
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const root = createRoot(container);
-    mountedRoots.push(root);
-
-    await act(async () => {
-      root.render(
-        <ControllerHarness
-          onUpdate={(controller) => {
-            latestController = controller;
-          }}
-        />,
-      );
-    });
-
-    await waitFor(() => {
-      expect(latestController).not.toBeNull();
-    });
+    const harness = await mountControllerHarness();
 
     const slowSchema = createDeferred<string>();
     const fastSchema = createDeferred<string>();
 
-    const slowUpload = latestController?.handleSchemaUpload(
+    const slowUpload = harness.getLatestController().handleSchemaUpload(
       makeDeferredTextFile("schema-slow-failure.json", slowSchema),
     );
-    const fastUpload = latestController?.handleSchemaUpload(
+    const fastUpload = harness.getLatestController().handleSchemaUpload(
       makeDeferredTextFile("schema-latest-success.json", fastSchema),
     );
 
@@ -170,7 +169,7 @@ describe("review run controller request race behavior", () => {
     });
 
     await waitFor(() => {
-      expect(latestController?.store.schemaName).toBe("schema-latest-success.json");
+      expect(harness.getLatestController().store.schemaName).toBe("schema-latest-success.json");
     });
 
     slowSchema.reject(new Error("slow-schema-read-failure"));
@@ -182,42 +181,24 @@ describe("review run controller request race behavior", () => {
       }
     });
 
-    expect(latestController?.store.schemaName).toBe("schema-latest-success.json");
-    expect(latestController?.store.runIssues).toEqual([]);
+    expect(harness.getLatestController().store.schemaName).toBe("schema-latest-success.json");
+    expect(harness.getLatestController().store.runIssues).toEqual([]);
 
     await act(async () => {
-      await latestController?.handleFrdUpload([makeJsonFile("still-works.json", { id: 9 })]);
+      await harness.getLatestController().handleFrdUpload([makeJsonFile("still-works.json", { id: 9 })]);
     });
 
     await waitFor(() => {
-      expect(latestController?.store.summary.passed).toBe(1);
-      expect(latestController?.store.files[0]?.fileName).toBe("still-works.json");
+      expect(harness.getLatestController().store.summary.passed).toBe(1);
+      expect(harness.getLatestController().store.files[0]?.fileName).toBe("still-works.json");
     });
   });
 
   it("keeps progress counters and final files aligned to the latest overlapping FRD upload", async () => {
-    let latestController: UseReviewRunControllerResult | null = null;
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const root = createRoot(container);
-    mountedRoots.push(root);
+    const harness = await mountControllerHarness();
 
     await act(async () => {
-      root.render(
-        <ControllerHarness
-          onUpdate={(controller) => {
-            latestController = controller;
-          }}
-        />,
-      );
-    });
-
-    await waitFor(() => {
-      expect(latestController).not.toBeNull();
-    });
-
-    await act(async () => {
-      await latestController?.handleSchemaUpload(
+      await harness.getLatestController().handleSchemaUpload(
         makeJsonFile("schema.json", {
           $schema: "https://json-schema.org/draft/2020-12/schema",
           type: "object",
@@ -231,18 +212,18 @@ describe("review run controller request race behavior", () => {
     });
 
     await waitFor(() => {
-      expect(latestController?.store.schemaName).toBe("schema.json");
+      expect(harness.getLatestController().store.schemaName).toBe("schema.json");
     });
 
     const firstBatchSlowA = createDeferred<string>();
     const firstBatchSlowB = createDeferred<string>();
-    const firstUpload = latestController?.handleFrdUpload([
+    const firstUpload = harness.getLatestController().handleFrdUpload([
       makeDeferredTextFile("stale-a.json", firstBatchSlowA),
       makeDeferredTextFile("stale-b.json", firstBatchSlowB),
     ]);
 
     const secondBatchFast = createDeferred<string>();
-    const secondUpload = latestController?.handleFrdUpload([
+    const secondUpload = harness.getLatestController().handleFrdUpload([
       makeDeferredTextFile("latest.json", secondBatchFast),
     ]);
 
@@ -252,15 +233,15 @@ describe("review run controller request race behavior", () => {
     });
 
     await waitFor(() => {
-      expect(latestController?.store.summary).toEqual({
+      expect(harness.getLatestController().store.summary).toEqual({
         total: 1,
         passed: 1,
         failed: 0,
         parseFailed: 0,
       });
-      expect(latestController?.store.files.map((file) => file.fileName)).toEqual(["latest.json"]);
-      expect(latestController?.processedFiles).toBe(1);
-      expect(latestController?.totalFiles).toBe(1);
+      expect(harness.getLatestController().store.files.map((file) => file.fileName)).toEqual(["latest.json"]);
+      expect(harness.getLatestController().processedFiles).toBe(1);
+      expect(harness.getLatestController().totalFiles).toBe(1);
     });
 
     firstBatchSlowA.resolve(JSON.stringify({ title: "stale-a" }));
@@ -269,8 +250,8 @@ describe("review run controller request race behavior", () => {
       await firstUpload;
     });
 
-    expect(latestController?.store.files.map((file) => file.fileName)).toEqual(["latest.json"]);
-    expect(latestController?.processedFiles).toBe(1);
-    expect(latestController?.totalFiles).toBe(1);
+    expect(harness.getLatestController().store.files.map((file) => file.fileName)).toEqual(["latest.json"]);
+    expect(harness.getLatestController().processedFiles).toBe(1);
+    expect(harness.getLatestController().totalFiles).toBe(1);
   });
 });
