@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import type { RunIssue } from "../types/reviewContracts";
 import {
@@ -160,6 +160,32 @@ export const ReviewRunPage = () => {
     () => deriveReviewRunContentModel(store, preferredTab),
     [preferredTab, store],
   );
+  const detailRowRef = useRef<HTMLElement | null>(null);
+
+  const scrollDetailRowIntoView = useCallback(() => {
+    const detailRowElement = detailRowRef.current;
+    if (!detailRowElement || typeof detailRowElement.scrollIntoView !== "function") {
+      return;
+    }
+
+    detailRowElement.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
+  const handleSelectFile = useCallback((fileId: string) => {
+    selectFile(fileId);
+
+    requestAnimationFrame(() => {
+      if (detailRowRef.current) {
+        scrollDetailRowIntoView();
+        return;
+      }
+
+      requestAnimationFrame(scrollDetailRowIntoView);
+    });
+  }, [scrollDetailRowIntoView, selectFile]);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -189,7 +215,7 @@ export const ReviewRunPage = () => {
               contentModel.showFileRows ? (
                 <FileResultListView
                   model={contentModel.fileList}
-                  onSelectFile={selectFile}
+                  onSelectFile={handleSelectFile}
                   variant="inline"
                 />
               ) : null
@@ -221,6 +247,7 @@ export const ReviewRunPage = () => {
       {contentModel.runIssuePanel.visible || contentModel.detailPanel.fileId !== null ? (
         <section
           aria-label="Review workspace detail row"
+          ref={detailRowRef}
           className="mt-5 w-full min-w-0 space-y-5"
         >
           <RunIssuePanelView model={contentModel.runIssuePanel} />
