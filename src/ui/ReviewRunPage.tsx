@@ -162,7 +162,7 @@ export const ReviewRunPage = () => {
   );
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto min-h-screen min-h-[100dvh] max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl shadow-slate-950/40">
         <h1 className="text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
           Software Project Tracker

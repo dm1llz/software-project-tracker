@@ -61,7 +61,7 @@ export const FileResultListView = memo(({
     aria-label="File results"
     className={
       variant === "inline"
-        ? "rounded-xl border border-slate-700/80 bg-slate-950/55 p-3"
+        ? "overflow-hidden rounded-xl border border-slate-700/80 bg-slate-950/55 p-3"
         : "rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
     }
   >
@@ -74,7 +74,13 @@ export const FileResultListView = memo(({
     >
       Files
     </h2>
-    <ul className={variant === "inline" ? "mt-2 space-y-1.5" : "mt-3 space-y-2"}>
+    <ul
+      className={
+        variant === "inline"
+          ? "mt-2 max-h-64 space-y-1.5 overflow-y-auto pr-1"
+          : "mt-3 space-y-2"
+      }
+    >
       {model.rows.map((row) => (
         <FileResultRowView
           key={row.id}
