@@ -9,6 +9,11 @@ export type DeriveScreenStateInput = {
   runIssues: RunIssue[];
 };
 
+export const hasBlockingRunIssues = (
+  runIssues: readonly RunIssue[],
+  hasCompletedRun: boolean,
+): boolean => runIssues.length > 0 && !hasCompletedRun;
+
 export const deriveScreenState = ({
   schemaLoaded,
   isRunning,
@@ -19,7 +24,7 @@ export const deriveScreenState = ({
     return "running";
   }
 
-  if (runIssues.length > 0 && !hasCompletedRun) {
+  if (hasBlockingRunIssues(runIssues, hasCompletedRun)) {
     return "error";
   }
 

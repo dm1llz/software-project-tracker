@@ -24,7 +24,7 @@ export type IssueLevel = "error" | "warning";
 
 export type FileIssueCode = "PARSE_ERROR" | "VALIDATION_ERROR";
 
-export type RunIssueCode = "SCHEMA_ERROR";
+export type RunIssueCode = "SCHEMA_ERROR" | "RUNTIME_ERROR";
 
 export type RunIssue = {
   level: "error";

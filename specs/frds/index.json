@@ -96,7 +96,7 @@
     {
       "frdId": "FRD-009",
       "title": "Performance and Maintainability Hardening",
-      "status": "in_progress",
+      "status": "completed",
       "priority": 9,
       "path": "./frd-009-performance-maintainability-hardening.json",
       "dependencies": [

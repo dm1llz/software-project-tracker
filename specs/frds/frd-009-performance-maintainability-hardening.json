@@ -3,7 +3,7 @@
     "frdId": "FRD-009",
     "title": "Performance and Maintainability Hardening",
     "description": "Improve runtime responsiveness and long-term maintainability by extracting orchestration logic, reducing render churn, and adding measurable performance gates.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 9,
     "estimatedEffort": "large",
     "dependencies": [
@@ -93,7 +93,7 @@
       "taskId": "FRD-009-T2",
       "title": "Extract ReviewRunPage orchestration into maintainable modules",
       "description": "Refactor the monolithic page controller into focused hooks/helpers while preserving current behavior and contract semantics.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-009-T1",
@@ -104,7 +104,7 @@
           "subtaskId": "FRD-009-T2-S1",
           "title": "Create review-run controller hook",
           "description": "Move upload orchestration, request-version guards, and runtime state transitions into a dedicated hook module.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/hooks/useReviewRunController.ts"
           ],
@@ -116,7 +116,7 @@
           "subtaskId": "FRD-009-T2-S2",
           "title": "Centralize error mapping and request-guard utilities",
           "description": "Extract reusable helpers for unexpected-run issue mapping and request staleness checks.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/state/reviewRunRequestGuards.ts",
             "src/ui/state/reviewRunErrorMapping.ts"
@@ -129,7 +129,7 @@
           "subtaskId": "FRD-009-T2-S3",
           "title": "Consolidate screen-state derivation helpers",
           "description": "Extract a single helper for deriving review screen-state inputs from store snapshots and replace repeated inline mappings.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/ui/state/reviewRunScreenStateHelpers.ts"
           ],
@@ -142,7 +142,7 @@
           "subtaskId": "FRD-009-T2-S4",
           "title": "Introduce distinct runtime/orchestration run-issue code",
           "description": "Differentiate unexpected runtime/orchestration failures from schema failures in run-issue contracts and mapping logic.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/types/reviewContracts.ts",
             "src/ui/state/reviewRunErrorMapping.ts",
@@ -197,7 +197,7 @@
       "taskId": "FRD-009-T3",
       "title": "Reduce render churn and processing bottlenecks",
       "description": "Optimize high-frequency updates and expensive loops in batch processing while keeping deterministic ordering and contract outputs.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": false,
       "dependencies": [
         "FRD-009-T2"
@@ -207,7 +207,7 @@
           "subtaskId": "FRD-009-T3-S1",
           "title": "Batch progress updates to reduce React re-renders",
           "description": "Throttle or batch progress state updates so large runs do not trigger one re-render per file.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx"
           ]
@@ -216,7 +216,7 @@
           "subtaskId": "FRD-009-T3-S2",
           "title": "Parallelize FRD source reads while preserving deterministic output order",
           "description": "Replace sequential file-read loop with ordered concurrent reads and deterministic mapping semantics.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/domain/review-run/mapReviewInputFiles.ts"
           ]
@@ -225,7 +225,7 @@
           "subtaskId": "FRD-009-T3-S3",
           "title": "Stabilize render boundaries for large result lists",
           "description": "Introduce memoized row/render boundaries where profiling identifies avoidable recomputation.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/FileResultListView.tsx",
             "src/ui/components/ReadableFrdSectionView.tsx",

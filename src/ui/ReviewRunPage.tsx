@@ -1,14 +1,6 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 
-import { buildRenderedSections } from "../domain/rendering/buildRenderedSections";
-import { buildReviewResult } from "../domain/review-run/buildReviewResult";
-import { mapReviewInputFiles } from "../domain/review-run/mapReviewInputFiles";
-import { parseFrdFile } from "../domain/review-run/parseFrdFile";
-import { summarizeBatchReview } from "../domain/review-run/summarizeBatchReview";
-import { validateFrdFile } from "../domain/review-run/validateFrdFile";
-import { compileSchema } from "../domain/validation/compileSchema";
-import { loadSchemaFile } from "../domain/validation/loadSchemaFile";
-import type { FileIssue, ReviewResult, RunIssue, SchemaBundle } from "../types/reviewContracts";
+import type { RunIssue } from "../types/reviewContracts";
 import {
   applyReplaceSchemaAction,
   deriveSchemaControlPanelModel,
@@ -24,14 +16,10 @@ import { deriveReviewSummaryModel } from "./components/ReviewSummary";
 import { ReviewSummaryView } from "./components/ReviewSummaryView";
 import { deriveRunIssuePanelModel } from "./components/RunIssuePanel";
 import { RunIssuePanelView } from "./components/RunIssuePanelView";
+import { useReviewRunController } from "./hooks/useReviewRunController";
 import { deriveScreenState, type ReviewScreenState } from "./state/deriveScreenState";
-import {
-  completeReviewRun,
-  createReviewRunStoreState,
-  selectReviewFile,
-  startReviewRun,
-  type ReviewRunStoreState,
-} from "./state/reviewRunStore";
+import type { ReviewRunStoreState } from "./state/reviewRunStore";
+import { selectReviewFile } from "./state/reviewRunStore";
 
 export type ReviewRunPageInput = {
   schemaName: string | null;
@@ -143,69 +131,17 @@ export const replaceSchemaFromReviewRunPage = (
     nextSchemaName,
   });
 
-const toUploadIndexFromFileId = (fileId: string, fallbackIndex: number): number => {
-  const match = fileId.match(/^frd-(\d+)-/);
-  if (!match || !match[1]) {
-    return fallbackIndex;
-  }
-
-  const parsed = Number.parseInt(match[1], 10);
-  return Number.isNaN(parsed) ? fallbackIndex : parsed;
-};
-
-const readFileText = async (file: File): Promise<string> => {
-  const withText = file as File & { text?: () => Promise<string> };
-  if (typeof withText.text === "function") {
-    return withText.text();
-  }
-
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
-    reader.onerror = () => reject(reader.error ?? new Error("Failed to read file text."));
-    reader.readAsText(file);
-  });
-};
-
-const mapReadFailureToReviewResult = (
-  issue: FileIssue,
-  displayNameById: Record<string, string>,
-  fallbackIndex: number,
-) => ({
-  id: issue.fileId,
-  uploadIndex: toUploadIndexFromFileId(issue.fileId, fallbackIndex),
-  fileName: issue.fileName,
-  displayName: displayNameById[issue.fileId] ?? issue.fileName,
-  // Read failures map to parse_failed to keep existing ReviewResult status contracts.
-  status: "parse_failed" as const,
-  parseOk: false,
-  valid: false,
-  issues: [issue],
-});
-
-const toUnexpectedRunIssue = (error: unknown): RunIssue => ({
-  level: "error",
-  code: "SCHEMA_ERROR",
-  message: `Unexpected runtime failure: ${
-    error instanceof Error ? error.message : String(error)
-  }`,
-});
-
-const toErrorStoreState = (runIssues: RunIssue[]): ReviewRunStoreState => ({
-  ...createReviewRunStoreState(null),
-  runIssues,
-  hasCompletedRun: false,
-  isRunning: false,
-});
-
 export const ReviewRunPage = () => {
-  const [store, setStore] = useState<ReviewRunStoreState>(() => createReviewRunStoreState(null));
-  const [schemaBundle, setSchemaBundle] = useState<SchemaBundle | null>(null);
-  const [validator, setValidator] = useState<ReturnType<typeof compileSchema>["validator"]>(null);
-  const [preferredTab, setPreferredTab] = useState<FileDetailTab>("issues");
-  const [processedFiles, setProcessedFiles] = useState(0);
-  const [totalFiles, setTotalFiles] = useState(0);
-  const requestVersionRef = useRef(0);
+  const {
+    store,
+    processedFiles,
+    totalFiles,
+    preferredTab,
+    handleSchemaUpload,
+    handleFrdUpload,
+    selectFile,
+    setPreferredTab,
+  } = useReviewRunController();
 
   const pageModel = useMemo(
     () =>
@@ -224,188 +160,6 @@ export const ReviewRunPage = () => {
     () => deriveReviewRunContentModel(store, preferredTab),
     [preferredTab, store],
   );
-
-  const isCurrentRequest = (requestVersion: number): boolean =>
-    requestVersionRef.current === requestVersion;
-
-  const beginRequest = (): number => {
-    requestVersionRef.current += 1;
-    return requestVersionRef.current;
-  };
-
-  const resetRuntimeState = (requestVersion: number) => {
-    if (!isCurrentRequest(requestVersion)) {
-      return;
-    }
-    setPreferredTab("issues");
-    setProcessedFiles(0);
-    setTotalFiles(0);
-  };
-
-  const handleSchemaUpload = async (file: File, replaceMode = false): Promise<void> => {
-    const requestVersion = beginRequest();
-
-    try {
-      if (replaceMode) {
-        if (!isCurrentRequest(requestVersion)) {
-          return;
-        }
-        setStore((previous) => {
-          const currentScreenState = deriveScreenState({
-            schemaLoaded: previous.schemaName !== null,
-            isRunning: previous.isRunning,
-            hasCompletedRun: previous.hasCompletedRun,
-            runIssues: previous.runIssues,
-          });
-          return replaceSchemaFromReviewRunPage(previous, currentScreenState, file.name);
-        });
-        setSchemaBundle(null);
-        setValidator(null);
-        resetRuntimeState(requestVersion);
-      }
-
-      const loaded = await loadSchemaFile({
-        name: file.name,
-        text: () => readFileText(file),
-      });
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-
-      if (!loaded.ok) {
-        setSchemaBundle(null);
-        setValidator(null);
-        setStore(toErrorStoreState(loaded.runIssues));
-        resetRuntimeState(requestVersion);
-        return;
-      }
-
-      const compiled = compileSchema(loaded.schema);
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      if (!compiled.ok) {
-        setSchemaBundle(null);
-        setValidator(null);
-        setStore(toErrorStoreState(compiled.runIssues));
-        resetRuntimeState(requestVersion);
-        return;
-      }
-
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      setSchemaBundle(loaded.schema);
-      setValidator(() => compiled.validator);
-      setStore(createReviewRunStoreState(loaded.schema.name));
-      resetRuntimeState(requestVersion);
-    } catch (error) {
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      setStore(toErrorStoreState([toUnexpectedRunIssue(error)]));
-      resetRuntimeState(requestVersion);
-    }
-  };
-
-  const handleFrdUpload = async (files: File[]): Promise<void> => {
-    if (!schemaBundle || !validator || files.length === 0) {
-      return;
-    }
-    const requestVersion = beginRequest();
-
-    try {
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      setStore((previous) => startReviewRun(previous));
-      setTotalFiles(files.length);
-      setProcessedFiles(0);
-
-      const mapped = await mapReviewInputFiles(
-        files.map((file) => ({
-          name: file.name,
-          text: () => readFileText(file),
-        })),
-      );
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-
-      const results: ReviewResult[] = [];
-      for (const [index, file] of mapped.files.entries()) {
-        if (!isCurrentRequest(requestVersion)) {
-          return;
-        }
-        const displayName = mapped.displayNameById[file.id] ?? file.fileName;
-        const parseResult = parseFrdFile(file);
-        const validationIssues = parseResult.ok
-          ? validateFrdFile({
-              fileId: file.id,
-              fileName: file.fileName,
-              parsed: parseResult.parsed,
-              validator,
-            })
-          : [];
-
-        const hasErrorIssues = validationIssues.some((issue) => issue.level === "error");
-        let sections: ReviewResult["sections"];
-        if (parseResult.ok && !hasErrorIssues) {
-          sections = buildRenderedSections({
-            id: `${file.id}-root`,
-            title: displayName,
-            path: "/",
-            value: parseResult.parsed,
-            schema: schemaBundle.raw,
-          });
-        }
-
-        const nextResult = buildReviewResult({
-          file,
-          displayName,
-          parseResult,
-          validationIssues,
-          ...(sections ? { sections } : {}),
-        });
-
-        results.push(nextResult);
-        setProcessedFiles(index + 1);
-      }
-
-      for (const [index, issue] of mapped.fileIssues.entries()) {
-        if (!isCurrentRequest(requestVersion)) {
-          return;
-        }
-        results.push(
-          mapReadFailureToReviewResult(
-            issue,
-            mapped.displayNameById,
-            mapped.files.length + index,
-          ),
-        );
-      }
-
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      const summary = summarizeBatchReview(results);
-      setStore((previous) =>
-        completeReviewRun(previous, {
-          runIssues: [],
-          summary,
-          files: results,
-        }),
-      );
-      setPreferredTab("issues");
-      setProcessedFiles(files.length);
-    } catch (error) {
-      if (!isCurrentRequest(requestVersion)) {
-        return;
-      }
-      setStore(toErrorStoreState([toUnexpectedRunIssue(error)]));
-      resetRuntimeState(requestVersion);
-    }
-  };
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -458,10 +212,7 @@ export const ReviewRunPage = () => {
                   <ReviewSummaryView model={contentModel.summary} />
                   <FileResultListView
                     model={contentModel.fileList}
-                    onSelectFile={(fileId) => {
-                      setStore((previous) => selectFileFromReviewRunPage(previous, fileId));
-                      setPreferredTab("issues");
-                    }}
+                    onSelectFile={selectFile}
                   />
                 </>
               ) : null}

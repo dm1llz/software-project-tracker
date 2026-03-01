@@ -41,28 +41,44 @@ const mapReadFailureIssue = (fileId: string, fileName: string, error: unknown): 
 export const mapReviewInputFiles = async (
   sources: readonly ReviewFileSource[],
 ): Promise<MapReviewInputFilesResult> => {
-  const files: ReviewInputFile[] = [];
-  const fileIssues: FileIssue[] = [];
-  const displayTargets: Array<Pick<ReviewInputFile, "id" | "fileName" | "uploadIndex">> = [];
-
-  for (const [uploadIndex, source] of sources.entries()) {
-    const fileId = createFileId(source.name, uploadIndex);
-    displayTargets.push({
-      id: fileId,
+  const displayTargets: Array<Pick<ReviewInputFile, "id" | "fileName" | "uploadIndex">> =
+    sources.map((source, uploadIndex) => ({
+      id: createFileId(source.name, uploadIndex),
       fileName: source.name,
       uploadIndex,
-    });
+    }));
 
-    try {
-      const text = await readSourceText(source);
-      files.push({
-        id: fileId,
-        fileName: source.name,
-        uploadIndex,
-        text,
-      });
-    } catch (error) {
-      fileIssues.push(mapReadFailureIssue(fileId, source.name, error));
+  const settled = await Promise.all(
+    sources.map(async (source, uploadIndex) => {
+      const target = displayTargets[uploadIndex];
+      if (!target) {
+        throw new Error(`Missing display target for upload index ${uploadIndex}.`);
+      }
+      try {
+        const text = await readSourceText(source);
+        const file: ReviewInputFile = {
+          id: target.id,
+          fileName: target.fileName,
+          uploadIndex: target.uploadIndex,
+          text,
+        };
+        return { ok: true as const, file };
+      } catch (error) {
+        return {
+          ok: false as const,
+          issue: mapReadFailureIssue(target.id, target.fileName, error),
+        };
+      }
+    }),
+  );
+
+  const files: ReviewInputFile[] = [];
+  const fileIssues: FileIssue[] = [];
+  for (const entry of settled) {
+    if (entry.ok) {
+      files.push(entry.file);
+    } else {
+      fileIssues.push(entry.issue);
     }
   }
 
