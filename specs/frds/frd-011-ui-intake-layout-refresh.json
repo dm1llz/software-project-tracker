@@ -3,7 +3,7 @@
     "frdId": "FRD-011",
     "title": "UI Intake and Layout Refresh",
     "description": "Refresh the review workspace to prioritize readability by consolidating schema/file intake controls, co-locating file navigation with upload actions, and simplifying panel nesting.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 11,
     "estimatedEffort": "large",
     "dependencies": [
@@ -164,7 +164,7 @@
       "taskId": "FRD-011-T3",
       "title": "Move file navigation next to upload controls and retire the separate files panel",
       "description": "Render loaded file entries adjacent to FRD upload controls so file management and file selection happen in one place, retire the separate files panel from the results column, and preserve status badges, stable-ID selection, and duplicate-name disambiguation.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-011-T1",
@@ -175,7 +175,7 @@
           "subtaskId": "FRD-011-T3-S1",
           "title": "Render inline file list beside FRD upload actions",
           "description": "Introduce an intake-adjacent file list with file status indicators and selection affordances, and remove duplicate list rendering from the previous results panel location.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/SchemaControlPanel.tsx",
             "src/ui/ReviewRunPage.tsx",
@@ -186,7 +186,7 @@
           "subtaskId": "FRD-011-T3-S2",
           "title": "Wire inline file selection into detail panel state",
           "description": "Keep file-selection behavior keyed by file ID and ensure detail panel updates correctly when files are chosen from the intake-adjacent list.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/FileResultList.ts",
             "src/ui/ReviewRunPage.tsx",

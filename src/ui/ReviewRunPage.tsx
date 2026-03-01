@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 import type { RunIssue } from "../types/reviewContracts";
 import {
@@ -160,6 +160,32 @@ export const ReviewRunPage = () => {
     () => deriveReviewRunContentModel(store, preferredTab),
     [preferredTab, store],
   );
+  const detailRowRef = useRef<HTMLElement | null>(null);
+
+  const scrollDetailRowIntoView = useCallback(() => {
+    const detailRowElement = detailRowRef.current;
+    if (!detailRowElement || typeof detailRowElement.scrollIntoView !== "function") {
+      return;
+    }
+
+    detailRowElement.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
+  const handleSelectFile = useCallback((fileId: string) => {
+    selectFile(fileId);
+
+    requestAnimationFrame(() => {
+      if (detailRowRef.current) {
+        scrollDetailRowIntoView();
+        return;
+      }
+
+      requestAnimationFrame(scrollDetailRowIntoView);
+    });
+  }, [scrollDetailRowIntoView, selectFile]);
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -174,9 +200,9 @@ export const ReviewRunPage = () => {
 
       <section
         aria-label="Review workspace top row"
-        className="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+        className="mt-5 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
       >
-        <div className="min-w-0 space-y-4">
+        <div className="min-w-0 h-full">
           <SchemaControlPanel
             model={pageModel.schemaPanel}
             onSchemaUpload={(file, replaceMode) => {
@@ -185,40 +211,43 @@ export const ReviewRunPage = () => {
             onFrdUpload={(files) => {
               void handleFrdUpload(files);
             }}
+            fileListContent={
+              contentModel.showFileRows ? (
+                <FileResultListView
+                  model={contentModel.fileList}
+                  onSelectFile={handleSelectFile}
+                  variant="inline"
+                />
+              ) : null
+            }
           />
-
-          {pageModel.visibleSections.emptyHint ? (
-            <p className="rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
-              Upload schema first.
-            </p>
-          ) : null}
-          {pageModel.visibleSections.readyHint ? (
-            <p className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-              Schema ready for FRD upload.
-            </p>
-          ) : null}
-          {pageModel.visibleSections.runningProgress ? (
-            <p className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
-              Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
-            </p>
-          ) : null}
-
-          {contentModel.showFileRows ? (
-            <FileResultListView
-              model={contentModel.fileList}
-              onSelectFile={selectFile}
-            />
-          ) : null}
         </div>
 
-        <div className="min-w-0">
+        <div className="min-w-0 h-full">
           <ReviewSummaryView model={contentModel.summary} />
         </div>
       </section>
 
+      {pageModel.visibleSections.emptyHint ? (
+        <p className="mt-4 rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
+          Upload schema first.
+        </p>
+      ) : null}
+      {pageModel.visibleSections.readyHint ? (
+        <p className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+          Schema ready for FRD upload.
+        </p>
+      ) : null}
+      {pageModel.visibleSections.runningProgress ? (
+        <p className="mt-4 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
+          Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
+        </p>
+      ) : null}
+
       {contentModel.runIssuePanel.visible || contentModel.detailPanel.fileId !== null ? (
         <section
           aria-label="Review workspace detail row"
+          ref={detailRowRef}
           className="mt-5 w-full min-w-0 space-y-5"
         >
           <RunIssuePanelView model={contentModel.runIssuePanel} />
@@ -226,7 +255,7 @@ export const ReviewRunPage = () => {
           {contentModel.detailPanel.fileId !== null ? (
             <section
               aria-label="File detail"
-              className="rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
+              className="flex min-h-screen min-h-[100dvh] max-h-screen max-h-[100dvh] flex-col overflow-hidden rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
             >
               <h2 className="text-base font-semibold text-slate-100">File detail</h2>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -247,7 +276,7 @@ export const ReviewRunPage = () => {
                 ))}
               </div>
 
-              <div className="mt-4">
+              <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
                 {contentModel.detailPanel.activeTab === "issues" ? (
                   <FileIssueTableView model={contentModel.detailPanel.issueTable} />
                 ) : (

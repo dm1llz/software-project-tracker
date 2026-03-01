@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { getByLabelText, getByRole, queryByRole, waitFor, within } from "@testing-library/dom";
+import { getAllByRole, getByLabelText, getByRole, queryByRole, waitFor, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -47,52 +47,70 @@ describe("review run page DOM behavior", () => {
   it("renders issues/readable tabs conditionally and preserves distinct duplicate display names", async () => {
     const { container } = await renderPage();
     const user = userEvent.setup();
-
-    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
-    await user.upload(
-      schemaInput,
-      makeJsonFile("schema.json", {
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-        required: ["title"],
-        properties: {
-          title: { type: "string" },
-        },
-        additionalProperties: false,
-      }),
-    );
-    await waitFor(() => {
-      expect(container.textContent).toContain("Schema ready for FRD upload.");
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    const scrollIntoViewMock = vi.fn();
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoViewMock,
     });
 
-    const frdInput = getByLabelText(container, "FRD files") as HTMLInputElement;
-    await user.upload(frdInput, [
-      makeJsonFile("feature.json", { title: "ok" }),
-      makeJsonFile("feature.json", { extra: true }),
-      makeTextFile("broken.json", "{\n  \"title\": \n"),
-    ]);
+    try {
+      const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+      await user.upload(
+        schemaInput,
+        makeJsonFile("schema.json", {
+          $schema: "https://json-schema.org/draft/2020-12/schema",
+          type: "object",
+          required: ["title"],
+          properties: {
+            title: { type: "string" },
+          },
+          additionalProperties: false,
+        }),
+      );
+      await waitFor(() => {
+        expect(container.textContent).toContain("Schema ready for FRD upload.");
+      });
 
-    await waitFor(() => {
-      expect(getByRole(container, "button", { name: "broken.json" })).toBeDefined();
-      expect(getByRole(container, "button", { name: "feature.json (2)" })).toBeDefined();
-      expect(getByRole(container, "button", { name: "feature.json (1)" })).toBeDefined();
-    });
+      const frdInput = getByLabelText(container, "FRD files") as HTMLInputElement;
+      await user.upload(frdInput, [
+        makeJsonFile("feature.json", { title: "ok" }),
+        makeJsonFile("feature.json", { extra: true }),
+        makeTextFile("broken.json", "{\n  \"title\": \n"),
+      ]);
 
-    const topRow = getByRole(container, "region", { name: "Review workspace top row" });
-    expect(topRow.className).toContain("grid-cols-1");
-    expect(topRow.className).toContain("lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]");
-    expect(within(topRow).getByRole("region", { name: "Schema controls" })).toBeDefined();
-    expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
-    expect(within(topRow).getByRole("region", { name: "File results" })).toBeDefined();
+      await waitFor(() => {
+        expect(getByRole(container, "button", { name: "broken.json" })).toBeDefined();
+        expect(getByRole(container, "button", { name: "feature.json (2)" })).toBeDefined();
+        expect(getByRole(container, "button", { name: "feature.json (1)" })).toBeDefined();
+      });
 
-    await user.click(getByRole(container, "button", { name: "feature.json (1)" }));
-    expect(getByRole(container, "button", { name: "Readable FRD" })).toBeDefined();
-    const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
-    expect(detailRow.className).toContain("w-full");
-    expect(within(detailRow).getByRole("region", { name: "File detail" })).toBeDefined();
+      const topRow = getByRole(container, "region", { name: "Review workspace top row" });
+      expect(topRow.className).toContain("grid-cols-1");
+      expect(topRow.className).toContain("lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]");
+      const schemaControls = within(topRow).getByRole("region", { name: "Schema controls" });
+      expect(schemaControls).toBeDefined();
+      expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
+      expect(within(schemaControls).getByRole("region", { name: "File results" })).toBeDefined();
+      expect(getAllByRole(container, "region", { name: "File results" })).toHaveLength(1);
 
-    await user.click(getByRole(container, "button", { name: "broken.json" }));
-    expect(queryByRole(container, "button", { name: "Readable FRD" })).toBeNull();
+      await user.click(getByRole(container, "button", { name: "feature.json (1)" }));
+      await waitFor(() => {
+        expect(scrollIntoViewMock).toHaveBeenCalled();
+      });
+      expect(getByRole(container, "button", { name: "Readable FRD" })).toBeDefined();
+      const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
+      expect(detailRow.className).toContain("w-full");
+      expect(within(detailRow).getByRole("region", { name: "File detail" })).toBeDefined();
+
+      await user.click(getByRole(container, "button", { name: "broken.json" }));
+      expect(queryByRole(container, "button", { name: "Readable FRD" })).toBeNull();
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+        configurable: true,
+        value: originalScrollIntoView,
+      });
+    }
 
   });
 
@@ -124,9 +142,11 @@ describe("review run page DOM behavior", () => {
     });
 
     const topRow = getByRole(container, "region", { name: "Review workspace top row" });
-    expect(within(topRow).getByRole("region", { name: "Schema controls" })).toBeDefined();
+    const schemaControls = within(topRow).getByRole("region", { name: "Schema controls" });
+    expect(schemaControls).toBeDefined();
     expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
     expect(queryByRole(topRow, "region", { name: "File results" })).toBeNull();
+    expect(within(schemaControls).queryByRole("region", { name: "File results" })).toBeNull();
 
     const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
     expect(within(detailRow).getByRole("region", { name: "Run issues" })).toBeDefined();
