@@ -172,90 +172,95 @@ export const ReviewRunPage = () => {
         </p>
       </header>
 
-      <SchemaControlPanel
-        model={pageModel.schemaPanel}
-        onSchemaUpload={(file) => {
-          void handleSchemaUpload(file);
-        }}
-        onFrdUpload={(files) => {
-          void handleFrdUpload(files);
-        }}
-        onReplaceSchemaUpload={(file) => {
-          void handleSchemaUpload(file, true);
-        }}
-      />
+      <section
+        aria-label="Review workspace top row"
+        className="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+      >
+        <div className="min-w-0 space-y-4">
+          <SchemaControlPanel
+            model={pageModel.schemaPanel}
+            onSchemaUpload={(file) => {
+              void handleSchemaUpload(file);
+            }}
+            onFrdUpload={(files) => {
+              void handleFrdUpload(files);
+            }}
+            onReplaceSchemaUpload={(file) => {
+              void handleSchemaUpload(file, true);
+            }}
+          />
 
-      {pageModel.visibleSections.emptyHint ? (
-        <p className="mt-4 rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
-          Upload schema first.
-        </p>
+          {pageModel.visibleSections.emptyHint ? (
+            <p className="rounded-xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-sm text-slate-300">
+              Upload schema first.
+            </p>
+          ) : null}
+          {pageModel.visibleSections.readyHint ? (
+            <p className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+              Schema ready for FRD upload.
+            </p>
+          ) : null}
+          {pageModel.visibleSections.runningProgress ? (
+            <p className="rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
+              Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
+            </p>
+          ) : null}
+
+          {contentModel.showFileRows ? (
+            <FileResultListView
+              model={contentModel.fileList}
+              onSelectFile={selectFile}
+            />
+          ) : null}
+        </div>
+
+        <div className="min-w-0">
+          <ReviewSummaryView model={contentModel.summary} />
+        </div>
+      </section>
+
+      {contentModel.runIssuePanel.visible || contentModel.detailPanel.fileId !== null ? (
+        <section
+          aria-label="Review workspace detail row"
+          className="mt-5 w-full min-w-0 space-y-5"
+        >
+          <RunIssuePanelView model={contentModel.runIssuePanel} />
+
+          {contentModel.detailPanel.fileId !== null ? (
+            <section
+              aria-label="File detail"
+              className="rounded-xl border border-slate-800/70 bg-slate-900/55 p-4"
+            >
+              <h2 className="text-base font-semibold text-slate-100">File detail</h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {contentModel.detailPanel.availableTabs.map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    aria-pressed={contentModel.detailPanel.activeTab === tab}
+                    className={
+                      contentModel.detailPanel.activeTab === tab
+                        ? "rounded-md border border-amber-400/70 bg-amber-500/20 px-3 py-1.5 text-sm font-semibold text-amber-100"
+                        : "rounded-md border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800/80"
+                    }
+                    onClick={() => setPreferredTab(tab)}
+                  >
+                    {tab === "issues" ? "Issues" : "Readable FRD"}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                {contentModel.detailPanel.activeTab === "issues" ? (
+                  <FileIssueTableView model={contentModel.detailPanel.issueTable} />
+                ) : (
+                  <ReadableFrdSectionView sections={contentModel.detailPanel.readableView.sections} />
+                )}
+              </div>
+            </section>
+          ) : null}
+        </section>
       ) : null}
-      {pageModel.visibleSections.readyHint ? (
-        <p className="mt-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-          Schema ready for FRD upload.
-        </p>
-      ) : null}
-      {pageModel.visibleSections.runningProgress ? (
-        <p className="mt-4 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-100">
-          Processing {pageModel.progress.processedFiles} / {pageModel.progress.totalFiles}
-        </p>
-      ) : null}
-
-      <div className="mt-5 space-y-5">
-        <RunIssuePanelView model={contentModel.runIssuePanel} />
-
-        {contentModel.showFileRows || contentModel.detailPanel.fileId !== null ? (
-          <section className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
-            <div className="space-y-5">
-              {contentModel.showFileRows ? (
-                <>
-                  <ReviewSummaryView model={contentModel.summary} />
-                  <FileResultListView
-                    model={contentModel.fileList}
-                    onSelectFile={selectFile}
-                  />
-                </>
-              ) : null}
-            </div>
-
-            <div className="space-y-5">
-              {contentModel.detailPanel.fileId !== null ? (
-                <section
-                  aria-label="File detail"
-                  className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
-                >
-                  <h2 className="text-base font-semibold text-slate-100">File detail</h2>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {contentModel.detailPanel.availableTabs.map((tab) => (
-                      <button
-                        key={tab}
-                        type="button"
-                        aria-pressed={contentModel.detailPanel.activeTab === tab}
-                        className={
-                          contentModel.detailPanel.activeTab === tab
-                            ? "rounded-md border border-amber-400/70 bg-amber-500/20 px-3 py-1.5 text-sm font-semibold text-amber-100"
-                            : "rounded-md border border-slate-700 bg-slate-950/60 px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-800/80"
-                        }
-                        onClick={() => setPreferredTab(tab)}
-                      >
-                        {tab === "issues" ? "Issues" : "Readable FRD"}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="mt-4">
-                    {contentModel.detailPanel.activeTab === "issues" ? (
-                      <FileIssueTableView model={contentModel.detailPanel.issueTable} />
-                    ) : (
-                      <ReadableFrdSectionView sections={contentModel.detailPanel.readableView.sections} />
-                    )}
-                  </div>
-                </section>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-      </div>
     </main>
   );
 };

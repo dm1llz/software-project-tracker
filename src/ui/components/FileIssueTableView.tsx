@@ -7,10 +7,10 @@ type FileIssueTableViewProps = {
 export const FileIssueTableView = ({ model }: FileIssueTableViewProps) => (
   <section
     aria-label="File issues"
-    className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30"
+    className="min-w-0"
   >
     <h3 className="text-base font-semibold text-slate-100">Issues</h3>
-    <div className="mt-3 overflow-x-auto">
+    <div className="mt-2 overflow-x-auto rounded-lg border border-slate-700/70 bg-slate-950/45">
       <table className="min-w-full border-collapse text-left text-sm text-slate-200">
         <thead>
           <tr className="border-b border-slate-700 text-xs uppercase tracking-wide text-slate-400">

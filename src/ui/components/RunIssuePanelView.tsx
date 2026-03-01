@@ -12,10 +12,10 @@ export const RunIssuePanelView = ({ model }: RunIssuePanelViewProps) => {
   return (
     <section
       aria-label="Run issues"
-      className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 shadow-lg shadow-slate-950/30"
+      className="min-w-0 rounded-xl border border-rose-500/40 bg-rose-500/10 p-4"
     >
       <h2 className="text-base font-semibold text-rose-200">Run issues</h2>
-      <div className="mt-3 overflow-x-auto">
+      <div className="mt-2 overflow-x-auto rounded-lg border border-rose-300/30 bg-rose-950/20">
         <table className="min-w-full border-collapse text-left text-sm text-slate-100">
           <thead>
             <tr className="border-b border-rose-300/30 text-xs uppercase tracking-wide text-rose-200/80">

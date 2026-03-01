@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { getByLabelText, getByRole, queryByRole, waitFor } from "@testing-library/dom";
+import { getByLabelText, getByRole, queryByRole, waitFor, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -77,8 +77,18 @@ describe("review run page DOM behavior", () => {
       expect(getByRole(container, "button", { name: "feature.json (1)" })).toBeDefined();
     });
 
+    const topRow = getByRole(container, "region", { name: "Review workspace top row" });
+    expect(topRow.className).toContain("grid-cols-1");
+    expect(topRow.className).toContain("lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]");
+    expect(within(topRow).getByRole("region", { name: "Schema controls" })).toBeDefined();
+    expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
+    expect(within(topRow).getByRole("region", { name: "File results" })).toBeDefined();
+
     await user.click(getByRole(container, "button", { name: "feature.json (1)" }));
     expect(getByRole(container, "button", { name: "Readable FRD" })).toBeDefined();
+    const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
+    expect(detailRow.className).toContain("w-full");
+    expect(within(detailRow).getByRole("region", { name: "File detail" })).toBeDefined();
 
     await user.click(getByRole(container, "button", { name: "broken.json" }));
     expect(queryByRole(container, "button", { name: "Readable FRD" })).toBeNull();
@@ -99,6 +109,72 @@ describe("review run page DOM behavior", () => {
     const frdInput = getByLabelText(container, "FRD files") as HTMLInputElement;
     expect(frdInput.disabled).toBe(true);
 
+  });
+
+  it("keeps top-row controls visible when schema-level run issues render in detail row", async () => {
+    const { container } = await renderPage();
+    const user = userEvent.setup();
+
+    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+    await user.upload(schemaInput, makeTextFile("broken-schema.json", "{\n  \"type\": \n"));
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("Schema error");
+    });
+
+    const topRow = getByRole(container, "region", { name: "Review workspace top row" });
+    expect(within(topRow).getByRole("region", { name: "Schema controls" })).toBeDefined();
+    expect(within(topRow).getByRole("region", { name: "Review summary" })).toBeDefined();
+    expect(queryByRole(topRow, "region", { name: "File results" })).toBeNull();
+
+    const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
+    expect(within(detailRow).getByRole("region", { name: "Run issues" })).toBeDefined();
+  });
+
+  it("keeps mobile breakpoint layout stacked and navigable for completed runs", async () => {
+    const { container } = await renderPage();
+    const user = userEvent.setup();
+    const originalInnerWidth = window.innerWidth;
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 375 });
+    window.dispatchEvent(new Event("resize"));
+
+    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+    await user.upload(
+      schemaInput,
+      makeJsonFile("mobile-schema.json", {
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        required: ["title"],
+        properties: {
+          title: { type: "string" },
+        },
+        additionalProperties: false,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("Schema ready for FRD upload.");
+    });
+
+    const frdInput = getByLabelText(container, "FRD files") as HTMLInputElement;
+    await user.upload(frdInput, [makeJsonFile("mobile.json", { title: "ok" })]);
+
+    await waitFor(() => {
+      expect(getByRole(container, "button", { name: "mobile.json" })).toBeDefined();
+    });
+
+    await user.click(getByRole(container, "button", { name: "mobile.json" }));
+    expect(getByRole(container, "button", { name: "Readable FRD" })).toBeDefined();
+
+    const topRow = getByRole(container, "region", { name: "Review workspace top row" });
+    const detailRow = getByRole(container, "region", { name: "Review workspace detail row" });
+    expect(topRow.className).toContain("grid-cols-1");
+    expect((topRow.firstElementChild as HTMLElement).className).toContain("min-w-0");
+    expect(detailRow.className).toContain("min-w-0");
+
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: originalInnerWidth });
+    window.dispatchEvent(new Event("resize"));
   });
 
   it("surfaces mixed-array runtime failure details and allows retry with schema retained", async () => {
