@@ -96,6 +96,21 @@ describe("buildRenderedSections integration", () => {
     ).toThrow(/unsupported mixed array item types at path \/badArray/i);
   });
 
+  it("reports nested mixed-array failure with precise json-pointer path", () => {
+    expect(() =>
+      buildRenderedSections({
+        id: "nested-mixed",
+        title: "Nested Mixed",
+        path: "/",
+        value: {
+          metadata: {
+            checkpoints: [1, { deep: true }],
+          },
+        },
+      }),
+    ).toThrow(/unsupported mixed array item types at path \/metadata\/checkpoints/i);
+  });
+
   it("renders deeply nested empty arrays as empty list sections", () => {
     const sections = buildRenderedSections({
       id: "deep",
