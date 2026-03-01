@@ -194,4 +194,48 @@ describe("review-run parse and validation pipeline", () => {
     expect(byId.get("frd-2-feature.json")?.status).toBe("parse_failed");
     expect(processed.summary.total).toBe(4);
   });
+
+  it("supports cancellation via shouldContinue to keep stale overlapping runs from publishing results", async () => {
+    const schemaRaw = {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      required: ["title"],
+      properties: {
+        title: { type: "string" },
+      },
+      additionalProperties: false,
+    } as const;
+
+    const compileResult = compileSchema(makeSchemaBundle(schemaRaw, "2020-12"));
+    expect(compileResult.ok).toBe(true);
+    if (!compileResult.ok) {
+      return;
+    }
+
+    const ingestResult = await mapReviewInputFiles([
+      { name: "first.json", text: "{\"title\":\"first\"}" },
+      { name: "second.json", text: "{\"title\":\"second\"}" },
+      { name: "third.json", text: "{\"title\":\"third\"}" },
+    ]);
+
+    let keepProcessing = true;
+    const processed = await processReviewRunBatch({
+      mappedFiles: ingestResult,
+      validator: compileResult.validator,
+      schemaRaw,
+      concurrency: 1,
+      shouldContinue: () => keepProcessing,
+      onFileProcessed: ({ completedCount }) => {
+        if (completedCount === 1) {
+          keepProcessing = false;
+        }
+      },
+    });
+
+    expect(processed.cancelled).toBe(true);
+    if (!processed.cancelled) {
+      return;
+    }
+    expect(processed.processedCount).toBe(1);
+  });
 });

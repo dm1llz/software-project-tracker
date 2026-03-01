@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type MutableRefObject } from "react";
 
 import { mapReviewInputFiles } from "../../domain/review-run/mapReviewInputFiles";
 import { processReviewRunBatch } from "../../domain/review-run/processReviewRunBatch";
@@ -28,6 +28,15 @@ import {
 
 const PROGRESS_BATCH_SIZE = 5;
 const FILE_PROCESS_CONCURRENCY = 4;
+
+const shouldReportProgressUpdate = (
+  requestVersionRef: MutableRefObject<number>,
+  requestVersion: number,
+  completedCount: number,
+  totalFiles: number,
+): boolean =>
+  isCurrentRequest(requestVersionRef, requestVersion)
+  && (completedCount === totalFiles || completedCount % PROGRESS_BATCH_SIZE === 0);
 
 const readFileText = async (file: File): Promise<string> => {
   const withText = file as File & { text?: () => Promise<string> };
@@ -177,10 +186,12 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         shouldContinue: () => isCurrentRequest(requestVersionRef, requestVersion),
         yieldToMacrotask,
         onFileProcessed: ({ completedCount, totalFiles: mappedTotalFiles }) => {
-          if (
-            !isCurrentRequest(requestVersionRef, requestVersion)
-            || (completedCount !== mappedTotalFiles && completedCount % PROGRESS_BATCH_SIZE !== 0)
-          ) {
+          if (!shouldReportProgressUpdate(
+            requestVersionRef,
+            requestVersion,
+            completedCount,
+            mappedTotalFiles,
+          )) {
             return;
           }
           setProcessedFiles(completedCount);

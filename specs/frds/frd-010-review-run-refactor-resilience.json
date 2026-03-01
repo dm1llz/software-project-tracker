@@ -169,7 +169,7 @@
       "taskId": "FRD-010-T3",
       "title": "Add race/cancellation guard tests for controller request-version logic",
       "description": "Add focused tests to prove stale asynchronous requests cannot mutate state after newer schema/FRD upload actions begin.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-010-T2"
@@ -179,7 +179,7 @@
           "subtaskId": "FRD-010-T3-S1",
           "title": "Cover overlapping schema upload requests",
           "description": "Add tests where two schema uploads race and ensure only the latest request updates store/schema runtime state.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "tests/integration/review-run-request-race.test.tsx"
           ],
@@ -192,7 +192,7 @@
           "subtaskId": "FRD-010-T3-S2",
           "title": "Cover overlapping FRD upload requests",
           "description": "Add tests for concurrent FRD upload submissions ensuring stale completions are ignored and progress counters stay coherent.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "tests/integration/review-run-request-race.test.tsx",
             "tests/integration/review-run-processing.test.ts"

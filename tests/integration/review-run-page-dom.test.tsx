@@ -13,6 +13,31 @@ const makeJsonFile = (name: string, data: unknown): File =>
 const makeTextFile = (name: string, text: string): File =>
   new File([text], name, { type: "application/json" });
 
+type Deferred<T> = {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+};
+
+const createDeferred = <T,>(): Deferred<T> => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((innerResolve, innerReject) => {
+    resolve = innerResolve;
+    reject = innerReject;
+  });
+  return { promise, resolve, reject };
+};
+
+const makeDeferredTextFile = (name: string, deferred: Deferred<string>): File => {
+  const file = new File(["{}"], name, { type: "application/json" });
+  Object.defineProperty(file, "text", {
+    configurable: true,
+    value: () => deferred.promise,
+  });
+  return file;
+};
+
 type RenderedPage = {
   root: Root;
   container: HTMLElement;
@@ -140,6 +165,55 @@ describe("review run page DOM behavior", () => {
     await waitFor(() => {
       expect(getByRole(container, "button", { name: "retry-success.json" })).toBeDefined();
       expect(container.textContent).not.toContain("Unexpected runtime failure");
+    });
+  });
+
+  it("keeps the latest schema visible when overlapping schema uploads complete out of order", async () => {
+    const { container } = await renderPage();
+    const user = userEvent.setup();
+    const slowSchema = createDeferred<string>();
+    const fastSchema = createDeferred<string>();
+
+    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+
+    const slowUpload = user.upload(
+      schemaInput,
+      makeDeferredTextFile("schema-slow.json", slowSchema),
+    );
+
+    const fastUpload = user.upload(
+      schemaInput,
+      makeDeferredTextFile("schema-fast.json", fastSchema),
+    );
+
+    fastSchema.resolve(
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+      }),
+    );
+    await fastUpload;
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("schema-fast.json");
+      expect(container.textContent).toContain("Schema ready for FRD upload.");
+    });
+
+    slowSchema.resolve(
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        required: ["title"],
+        properties: {
+          title: { type: "string" },
+        },
+      }),
+    );
+    await slowUpload;
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("schema-fast.json");
+      expect(container.textContent).not.toContain("Schema error");
     });
   });
 

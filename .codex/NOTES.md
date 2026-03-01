@@ -163,3 +163,10 @@ Template:
 - Action/Decision: Added `processReviewRunBatch` and routed both `executeReviewRun` and `useReviewRunController` through it; kept controller request-version safety by passing `shouldContinue` and guarded progress callbacks.
 - Reusable check/command: `npm run test:unit && npm run test:integration && npm run build`
 - Applicability: Reuse when domain and UI entrypoints need identical review-run semantics without duplicated orchestration logic.
+
+### 2026-02-28 FRD-010-T3
+- Situation: Request-version race behavior needed deterministic integration coverage for overlapping schema and FRD uploads without introducing new controller dependencies.
+- Learning: Overriding `File.text()` with deferred Promises in jsdom tests provides deterministic control over upload completion order and reliably reproduces stale-request completion paths.
+- Action/Decision: Added `review-run-request-race` integration cases for latest-schema-wins, stale-failure ignored, and overlapping FRD uploads with latest-only progress/results assertions.
+- Reusable check/command: `npm run test:integration -- tests/integration/review-run-request-race.test.tsx tests/integration/review-run-page-dom.test.tsx tests/integration/review-run-processing.test.ts`
+- Applicability: Reuse for future async race/cancellation tests where request ordering and stale completion guards must be proven.
