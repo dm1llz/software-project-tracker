@@ -185,7 +185,7 @@ Template:
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx`
 - Applicability: Reuse when consolidating multi-step file workflows where replacement must be explicit and non-destructive on cancel.
 
-### 2026-03-01 FRD-011-T3
+### 2026-02-28 FRD-011-T3
 - Situation: File navigation initially rendered as a separate panel below intake controls, which split upload and file-selection workflows across different regions.
 - Learning: Passing the file-list view as an inline slot into the schema/intake panel preserves one canonical selector while keeping accessibility role queries stable (`region` + `aria-label="File results"`).
 - Action/Decision: Added `fileListContent` slot support in `SchemaControlPanel`, introduced `FileResultListView` inline variant styling, and moved file-list rendering from `ReviewRunPage` into the intake control column with updated integration/e2e coverage.
