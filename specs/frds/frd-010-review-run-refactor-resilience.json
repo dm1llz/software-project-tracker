@@ -3,7 +3,7 @@
     "frdId": "FRD-010",
     "title": "Review-Run Refactor and Resilience",
     "description": "Refactor duplicated review-run orchestration, clarify runtime-error recovery semantics, and close high-value test gaps for request races and UI runtime-failure handling.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 10,
     "estimatedEffort": "large",
     "dependencies": [
@@ -23,7 +23,7 @@
       "taskId": "FRD-010-T1",
       "title": "Align schema/runtime recovery semantics for upload and run failures",
       "description": "Ensure schema runtime state is cleared on schema upload failures, but preserved on FRD processing runtime failures so users can retry FRD uploads without re-uploading schema.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-009"
@@ -33,7 +33,7 @@
           "subtaskId": "FRD-010-T1-S1",
           "title": "Preserve loaded schema after FRD-processing runtime errors",
           "description": "Update FRD upload error handling so schemaName/schemaBundle/validator remain available when run-level runtime failures occur.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/hooks/useReviewRunController.ts",
             "src/ui/state/reviewRunErrorMapping.ts",
@@ -44,7 +44,7 @@
           "subtaskId": "FRD-010-T1-S2",
           "title": "Clear schema runtime state on unexpected schema-upload exceptions",
           "description": "Ensure unexpected schema upload failures keep runtime internals and store state aligned by clearing schema runtime references before resetting UI state.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/hooks/useReviewRunController.ts"
           ]

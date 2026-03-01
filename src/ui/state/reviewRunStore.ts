@@ -85,3 +85,20 @@ export const selectReviewFile = (
 export const replaceSchemaAndResetRunState = (nextSchemaName: string): ReviewRunStoreState => ({
   ...createReviewRunStoreState(nextSchemaName),
 });
+
+type CreateErrorReviewRunStoreStateInput = {
+  schemaName: string | null;
+  runIssues: RunIssue[];
+  hasCompletedRun: boolean;
+};
+
+export const createErrorReviewRunStoreState = ({
+  schemaName,
+  runIssues,
+  hasCompletedRun,
+}: CreateErrorReviewRunStoreStateInput): ReviewRunStoreState => ({
+  ...createReviewRunStoreState(schemaName),
+  runIssues: [...runIssues],
+  hasCompletedRun,
+  isRunning: false,
+});

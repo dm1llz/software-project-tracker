@@ -149,3 +149,10 @@ Template:
 - Action/Decision: Added `useReviewRunController` with extracted request/screen/error helpers, introduced `RUNTIME_ERROR` run-issue code for unexpected orchestration failures, parallelized FRD source reads with deterministic output order, and memoized file/result rendering boundaries.
 - Reusable check/command: `npm run build && npm run test:integration && npm run profile:review-run`
 - Applicability: Reuse for future UI-controller refactors where behavior parity and performance improvements must be demonstrated together.
+
+### 2026-02-28 FRD-010-T1
+- Situation: Runtime FRD-processing exceptions and schema-upload exceptions were both funneled through one blocking error-state path, which incorrectly forced schema re-upload after run-level failures.
+- Learning: Treat run-level runtime errors as recoverable when a schema is loaded (preserve schema runtime refs + mark run non-blocking), while schema-upload exceptions must clear schema refs and reset to blocked-until-valid-schema behavior.
+- Action/Decision: Added explicit schema-upload vs recoverable-run error store mapping, preserved `schemaBundle`/`validator` on FRD runtime failures, and cleared them in schema-upload catch handling.
+- Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx tests/integration/review-run-controller-recovery.test.tsx`
+- Applicability: Reuse when separating blocking schema intake failures from retryable run-processing failures in UI controllers.

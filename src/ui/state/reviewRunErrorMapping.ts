@@ -1,6 +1,6 @@
 import type { RunIssue } from "../../types/reviewContracts";
 import {
-  createReviewRunStoreState,
+  createErrorReviewRunStoreState,
   type ReviewRunStoreState,
 } from "./reviewRunStore";
 
@@ -12,9 +12,21 @@ export const mapUnexpectedRunIssue = (error: unknown): RunIssue => ({
   }`,
 });
 
-export const toErrorStoreState = (runIssues: RunIssue[]): ReviewRunStoreState => ({
-  ...createReviewRunStoreState(null),
-  runIssues,
-  hasCompletedRun: false,
-  isRunning: false,
-});
+export const toSchemaUploadErrorStoreState = (
+  runIssues: RunIssue[],
+): ReviewRunStoreState =>
+  createErrorReviewRunStoreState({
+    schemaName: null,
+    runIssues,
+    hasCompletedRun: false,
+  });
+
+export const toRecoverableRunErrorStoreState = (
+  schemaName: string | null,
+  runIssues: RunIssue[],
+): ReviewRunStoreState =>
+  createErrorReviewRunStoreState({
+    schemaName,
+    runIssues,
+    hasCompletedRun: schemaName !== null,
+  });
