@@ -87,9 +87,10 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
 
   const handleSchemaUpload = useCallback(async (file: File, replaceMode = false): Promise<void> => {
     const requestVersion = beginRequest(requestVersionRef);
+    const shouldReplaceActiveSchema = replaceMode && store.schemaName !== null;
 
     try {
-      if (replaceMode) {
+      if (shouldReplaceActiveSchema) {
         if (!isCurrentRequest(requestVersionRef, requestVersion)) {
           return;
         }
@@ -151,7 +152,7 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
       setStore(toSchemaUploadErrorStoreState(runIssues));
       resetRuntimeState(requestVersion);
     }
-  }, [resetRuntimeState]);
+  }, [resetRuntimeState, store.schemaName]);
 
   const handleFrdUpload = useCallback(async (files: File[]): Promise<void> => {
     if (!schemaBundle || !validator || files.length === 0) {

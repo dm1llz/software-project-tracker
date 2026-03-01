@@ -179,14 +179,11 @@ export const ReviewRunPage = () => {
         <div className="min-w-0 space-y-4">
           <SchemaControlPanel
             model={pageModel.schemaPanel}
-            onSchemaUpload={(file) => {
-              void handleSchemaUpload(file);
+            onSchemaUpload={(file, replaceMode) => {
+              void handleSchemaUpload(file, replaceMode);
             }}
             onFrdUpload={(files) => {
               void handleFrdUpload(files);
-            }}
-            onReplaceSchemaUpload={(file) => {
-              void handleSchemaUpload(file, true);
             }}
           />
 

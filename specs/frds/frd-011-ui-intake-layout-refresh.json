@@ -15,7 +15,7 @@
       "specs/mvp-frd-review-spec.md",
       "specs/architecture-overview.md"
     ],
-    "createdAt": "2026-03-01",
+    "createdAt": "2026-02-28",
     "updatedAt": "2026-02-28"
   },
   "majorTasks": [
@@ -97,7 +97,7 @@
       "taskId": "FRD-011-T2",
       "title": "Unify schema selection and replacement in a single control surface",
       "description": "Replace the dedicated third 'replace schema' box with a single schema control that always shows the active schema filename, switches CTA text from choose to replace when active, and requires explicit confirmation before replacement.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-005-T3"
@@ -107,7 +107,7 @@
           "subtaskId": "FRD-011-T2-S1",
           "title": "Update schema control copy and state model",
           "description": "Show the active schema name inline and derive dynamic button text so users can see when selecting a new file will replace the current schema.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/SchemaControlPanel.tsx",
             "src/ui/ReviewRunPage.tsx"
@@ -117,7 +117,7 @@
           "subtaskId": "FRD-011-T2-S2",
           "title": "Add replacement confirmation and preserve reset semantics",
           "description": "Introduce an explicit confirmation dialog before replacing an active schema and keep existing behavior that clears prior run/file state only after replacement is confirmed.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/SchemaControlPanel.tsx",
             "src/ui/hooks/useReviewRunController.ts",

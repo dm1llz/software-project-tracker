@@ -84,7 +84,8 @@ describe("ui review run screen states", () => {
     });
 
     expect(schemaPanel.controls.canUploadSchema).toBe(false);
-    expect(schemaPanel.controls.canReplaceSchema).toBe(false);
+    expect(schemaPanel.controls.requiresSchemaReplacementConfirmation).toBe(true);
+    expect(schemaPanel.schemaActionText).toBe("Replace schema");
   });
 
   it("normalizes progress counters to non-negative and bounded values", () => {

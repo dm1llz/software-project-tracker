@@ -177,3 +177,10 @@ Template:
 - Action/Decision: Updated `src/test/setupTests.ts` to set React act environment and expanded runtime failure/retry coverage in DOM + nested-render integration tests.
 - Reusable check/command: `npm run test:integration > /tmp/t4-full.log 2>&1 && rg -n "current testing environment is not configured" /tmp/t4-full.log`
 - Applicability: Reuse when hardening React/Vitest signal quality and adding explicit runtime-failure recovery assertions.
+
+### 2026-02-28 FRD-011-T2
+- Situation: Schema choose/replace controls were split across separate file inputs, which bypassed a single-source replacement flow and made cancel-safe reset behavior harder to enforce.
+- Learning: Driving both initial schema upload and replacement through one schema input plus a pre-upload confirmation gate preserves prior run state on cancel while keeping controller reset semantics unchanged for confirmed replacements.
+- Action/Decision: Unified schema control CTA/copy (`Choose schema` -> `Replace schema`), removed the dedicated replace input, and added integration coverage for confirm, cancel, and running-disabled replacement attempts.
+- Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx`
+- Applicability: Reuse when consolidating multi-step file workflows where replacement must be explicit and non-destructive on cancel.
