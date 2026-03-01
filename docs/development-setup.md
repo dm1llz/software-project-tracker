@@ -18,6 +18,9 @@
 - Integration tests: `npm run test:integration`
 - End-to-end tests: `npm run test:e2e`
 - FRD schema validation: `npm run validate:schema`
+- List prompt chains: `npm run prompt:list`
+- Lint prompt chains: `npm run prompt:lint`
+- Assemble prompt chains: `npm run prompt:assemble`
 
 ## Notes
 
