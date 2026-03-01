@@ -9,6 +9,9 @@
   },
   "scripts": {
     "build": "tsc --noEmit -p tsconfig.json",
+    "prompt:list": "node scripts/assemble-prompts.mjs --list",
+    "prompt:lint": "node scripts/assemble-prompts.mjs --lint --all",
+    "prompt:assemble": "node scripts/assemble-prompts.mjs --all",
     "test": "npm run test:unit",
     "test:unit": "vitest run --config vitest.config.ts --passWithNoTests --dir src/domain && vitest run --config vitest.config.ts --passWithNoTests --dir tests/unit",
     "test:integration": "vitest run --config vitest.config.ts --passWithNoTests --dir tests/integration",

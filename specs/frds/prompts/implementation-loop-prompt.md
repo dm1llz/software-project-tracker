@@ -1,3 +1,14 @@
+---
+{
+  "id": "implementation-loop-base",
+  "kind": "base",
+  "appliesWhen": ["always"],
+  "priority": 10,
+  "conflictsWith": [],
+  "overridesSections": []
+}
+---
+
 # FRD Implementation Loop Prompt
 
 You are implementing FRD tasks from `specs/frds/` in this repo.
@@ -9,6 +20,14 @@ Do exactly one PR bundle per run.
 - all `specs/frds/frd-[0-9][0-9][0-9]-*.json`
 - `.codex/NOTES.md` (if present)
 - remote claim refs in `refs/heads/codex/claim/*` (when remote access is available)
+
+## Prompt profile and language selection (required)
+1. Determine the implementation language profile from:
+   - selected task `filesToModify` / `filesToCreate`
+   - repository toolchain files (for example `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`)
+2. Apply language-specific conventions for naming, structure, error handling, testing style, and formatting.
+3. If multiple languages are touched, keep each file idiomatic for its own ecosystem.
+4. Record selected language profile(s) in `RUN_SUMMARY.json` preflight checks.
 
 ## Cross-run memory (required)
 1. Use `.codex/NOTES.md` as persistent run memory across chats/contexts.
@@ -85,6 +104,7 @@ Do exactly one PR bundle per run.
    - when remote claims become available and step 5 remote claim succeeds for the same task, delete `.codex/claims-local/<taskId>.json`.
    - on task completion or explicit cancellation, delete `.codex/claims-local/<taskId>.json`.
 15. If remote claims are unavailable and a non-stale `.codex/claims-local/<taskId>.json` already exists for a task, treat that task as claimed/unavailable.
+16. Always execute stale local-claim cleanup on startup, even when no task is selected, and record the result in `preflightChecks` as `local_claims_stale_cleanup`.
 
 ## Project portability and hygiene (required)
 1. Detect project ecosystem before making tooling decisions (for example: `package.json`, `pnpm-lock.yaml`, `yarn.lock`, `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`, `Gemfile`).
@@ -101,6 +121,19 @@ Do exactly one PR bundle per run.
 - Follow `filesToCreate`, `filesToModify`, `verification`, `notes`, and `gotchas`.
 - Keep scope strictly to selected bundle.
 - Do not implement the next `prLevel: true` task.
+
+## Code quality defaults (required)
+1. Write production-quality code with clear behavior, explicit error handling, and test coverage proportional to risk.
+2. Prefer reuse of existing modules/utilities before introducing new abstractions.
+3. Prefer standard library/native platform capabilities before adding new dependencies.
+4. Add dependencies only when the benefit materially outweighs maintenance cost; note rationale in PR output.
+5. Preserve or improve performance characteristics on touched paths; avoid unnecessary repeated I/O, allocations, or render churn.
+6. For performance-sensitive changes, include measurement evidence or complexity reasoning in PR output.
+7. Comments must be high-value only:
+   - add comments when logic is non-obvious, behavior is surprising, or invariants/tradeoffs need context
+   - do not add comments that merely restate code
+8. When changing code, update or remove stale comments in touched regions.
+9. Before final output, review changed code and generated docs for ambiguity and clarify unclear wording.
 
 ## Commit rules (required)
 1. Use conventional commits.
@@ -133,13 +166,20 @@ Do exactly one PR bundle per run.
   - `in_progress`: not completed/blocked, and at least one task is `in_progress`, `completed`, or `skipped`.
   - `not_started`: all tasks are `not_started`.
 - Update `updatedAt` in every changed FRD file after status reconciliation.
+- For FRD and document dates (`createdAt`, `updatedAt`, and `.codex/NOTES.md` headings), use the executing computer's local calendar date.
+- For claim lease timestamps (`createdAt`, `expiresAt`, `takeoverAt` in claim metadata), use UTC ISO-8601 timestamps with `Z`.
 
 ## PR output files (required)
 1. Create `.codex/pr` if missing.
-2. Write PR body markdown to `.codex/pr/PR_BODY.md`.
-3. Write machine-readable run summary to `.codex/pr/RUN_SUMMARY.json` with:
+2. Write PR title to `.codex/pr/PR_TITLE.md` as a single line using conventional-commit style.
+3. Write PR body markdown to `.codex/pr/PR_BODY.md`.
+4. Ensure `.codex/pr/PR_BODY.md` starts with:
+   - `## PR Title`
+   - the same title string written to `.codex/pr/PR_TITLE.md`
+5. Write machine-readable run summary to `.codex/pr/RUN_SUMMARY.json` with:
    - `selectedBundleTaskIds`
    - `branchName`
+   - `prTitle`
    - `commits` (hash + message)
    - `filesChanged`
    - `validationResults`
@@ -147,13 +187,14 @@ Do exactly one PR bundle per run.
    - `taskClaim`
    - `memoryUpdate`
    - `nextBoundaryTaskId`
-4. Overwrite `.codex/pr/PR_BODY.md` and `.codex/pr/RUN_SUMMARY.json` on each run.
-5. Also print the PR body in terminal output.
+6. Overwrite `.codex/pr/PR_TITLE.md`, `.codex/pr/PR_BODY.md`, and `.codex/pr/RUN_SUMMARY.json` on each run.
+7. Also print the PR title and PR body in terminal output.
 
 ## RUN_SUMMARY.json schema (recommended fields)
 For the `.codex/pr/RUN_SUMMARY.json` output above, use the following fields and types:
 - `selectedBundleTaskIds`: string[]
 - `branchName`: string
+- `prTitle`: string
 - `commits`: array of objects with `{ "hash": string, "message": string }`
 - `filesChanged`: string[]
 - `validationResults`: array of objects with `{ "name": string, "command": string, "exitCode": number, "status": "passed" | "failed" }`
@@ -166,20 +207,24 @@ For the `.codex/pr/RUN_SUMMARY.json` output above, use the following fields and 
 Return:
 1. Selected bundle task IDs
 2. Branch name
-3. Commit list (hash + message)
-4. Files changed
-5. Validation/test results
-6. Preflight checks summary
-7. Task claim summary (claim ref used, and whether claim succeeded or fallback was used)
-8. Memory update summary (`appended` or `no_change`, plus short note)
-9. Next boundary task ID (next `prLevel: true` not implemented)
-10. A PR body in Markdown using this template:
+3. PR title
+4. Commit list (hash + message)
+5. Files changed
+6. Validation/test results
+7. Preflight checks summary
+8. Task claim summary (claim ref used, and whether claim succeeded or fallback was used)
+9. Memory update summary (`appended` or `no_change`, plus short note)
+10. Next boundary task ID (next `prLevel: true` not implemented)
+11. A PR body in Markdown using this template:
 
 ### PR Title
 `<conventional-commit-style summary for bundle>`
 
 ### PR Body
 ```md
+## PR Title
+<same value as .codex/pr/PR_TITLE.md>
+
 ## Summary
 - 
 

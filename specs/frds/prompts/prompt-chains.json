@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "chains": [
+    {
+      "id": "implementation-loop",
+      "title": "FRD Implementation Loop",
+      "outputFile": "implementation-loop.md",
+      "parts": [
+        "implementation-loop-prompt.md"
+      ]
+    },
+    {
+      "id": "implementation-loop-strict-ci",
+      "title": "FRD Implementation Loop (Strict CI)",
+      "outputFile": "implementation-loop-strict-ci.md",
+      "parts": [
+        "implementation-loop-prompt.md",
+        "implementation-loop-prompt-strict-ci.md"
+      ]
+    },
+    {
+      "id": "implementation-loop-typescript",
+      "title": "FRD Implementation Loop (TypeScript)",
+      "outputFile": "implementation-loop-typescript.md",
+      "parts": [
+        "implementation-loop-prompt.md",
+        "language-typescript.md"
+      ]
+    },
+    {
+      "id": "implementation-loop-typescript-strict-ci",
+      "title": "FRD Implementation Loop (TypeScript + Strict CI)",
+      "outputFile": "implementation-loop-typescript-strict-ci.md",
+      "parts": [
+        "implementation-loop-prompt.md",
+        "language-typescript.md",
+        "implementation-loop-prompt-strict-ci.md"
+      ]
+    }
+  ]
+}
