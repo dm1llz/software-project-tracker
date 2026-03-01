@@ -304,11 +304,14 @@ describe("review run page DOM behavior", () => {
     await user.click(getByRole(container, "button", { name: "ok.json" }));
     expect(container.textContent).toContain("File detail");
 
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    await user.click(getByRole(container, "button", { name: "Replace schema" }));
+    await waitFor(() => {
+      expect(getByRole(container, "dialog", { name: "Schema replacement confirmation" })).toBeDefined();
+    });
+    await user.click(getByRole(container, "button", { name: "Continue to file picker" }));
     await user.upload(schemaInput, makeJsonFile("schema-v2.json", schemaPayload));
 
     await waitFor(() => {
-      expect(confirmSpy).toHaveBeenCalledTimes(1);
       expect(container.textContent).toContain("total: 0");
       expect(queryByRole(container, "button", { name: "ok.json" })).toBeNull();
       expect(container.textContent).not.toContain("File detail");
@@ -316,7 +319,7 @@ describe("review run page DOM behavior", () => {
     });
   });
 
-  it("canceling schema replacement confirmation keeps current schema and results unchanged", async () => {
+  it("canceling schema replacement dialog keeps current schema and results unchanged", async () => {
     const { container } = await renderPage();
     const user = userEvent.setup();
 
@@ -344,11 +347,14 @@ describe("review run page DOM behavior", () => {
       expect(getByRole(container, "button", { name: "ok.json" })).toBeDefined();
     });
 
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
-    await user.upload(schemaInput, makeJsonFile("schema-v2.json", schemaPayload));
+    await user.click(getByRole(container, "button", { name: "Replace schema" }));
+    await waitFor(() => {
+      expect(getByRole(container, "dialog", { name: "Schema replacement confirmation" })).toBeDefined();
+    });
+    await user.click(getByRole(container, "button", { name: "Cancel" }));
 
     await waitFor(() => {
-      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      expect(queryByRole(container, "dialog", { name: "Schema replacement confirmation" })).toBeNull();
       expect(container.textContent).toContain("schema-v1.json");
       expect(container.textContent).not.toContain("schema-v2.json");
       expect(getByRole(container, "button", { name: "ok.json" })).toBeDefined();
@@ -356,7 +362,39 @@ describe("review run page DOM behavior", () => {
     });
   });
 
-  it("does not prompt for schema replacement while a review run is processing", async () => {
+  it("closing schema replacement dialog keeps current schema and results unchanged", async () => {
+    const { container } = await renderPage();
+    const user = userEvent.setup();
+
+    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+    const schemaPayload = {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      required: ["title"],
+      properties: {
+        title: { type: "string" },
+      },
+      additionalProperties: false,
+    };
+
+    await user.upload(schemaInput, makeJsonFile("schema-v1.json", schemaPayload));
+    await waitFor(() => {
+      expect(container.textContent).toContain("schema-v1.json");
+    });
+
+    await user.click(getByRole(container, "button", { name: "Replace schema" }));
+    await waitFor(() => {
+      expect(getByRole(container, "dialog", { name: "Schema replacement confirmation" })).toBeDefined();
+    });
+    await user.click(getByRole(container, "button", { name: "Close schema replacement dialog" }));
+
+    await waitFor(() => {
+      expect(queryByRole(container, "dialog", { name: "Schema replacement confirmation" })).toBeNull();
+      expect(container.textContent).toContain("schema-v1.json");
+    });
+  });
+
+  it("does not open schema replacement dialog while a review run is processing", async () => {
     const { container } = await renderPage();
     const user = userEvent.setup();
     const deferredFrd = createDeferred<string>();
@@ -382,19 +420,11 @@ describe("review run page DOM behavior", () => {
 
     await waitFor(() => {
       expect(container.textContent).toContain("Processing 0 / 1");
-      expect(schemaInput.disabled).toBe(true);
+      expect(getByRole(container, "button", { name: "Replace schema" })).toBeDisabled();
     });
 
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
-    await user.upload(
-      schemaInput,
-      makeJsonFile("schema-v2.json", {
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-        type: "object",
-      }),
-    );
-
-    expect(confirmSpy).not.toHaveBeenCalled();
+    await user.click(getByRole(container, "button", { name: "Replace schema" }));
+    expect(queryByRole(container, "dialog", { name: "Schema replacement confirmation" })).toBeNull();
 
     deferredFrd.resolve(
       JSON.stringify({
