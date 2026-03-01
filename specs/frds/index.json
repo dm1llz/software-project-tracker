@@ -1,6 +1,6 @@
 {
   "schemaPath": "./frd-schema.json",
-  "generatedAt": "2026-02-28",
+  "generatedAt": "2026-03-01",
   "scope": "mvp",
   "frds": [
     {
@@ -115,6 +115,62 @@
       "path": "./frd-010-review-run-refactor-resilience.json",
       "dependencies": [
         "FRD-009"
+      ]
+    },
+    {
+      "frdId": "FRD-011",
+      "title": "UI Intake and Layout Refresh",
+      "status": "not_started",
+      "priority": 11,
+      "path": "./frd-011-ui-intake-layout-refresh.json",
+      "dependencies": [
+        "FRD-008",
+        "FRD-005"
+      ]
+    },
+    {
+      "frdId": "FRD-012",
+      "title": "Readable FRD Task Carousel and Smart Detail Defaults",
+      "status": "not_started",
+      "priority": 12,
+      "path": "./frd-012-readable-frd-task-carousel.json",
+      "dependencies": [
+        "FRD-011",
+        "FRD-004",
+        "FRD-005"
+      ]
+    },
+    {
+      "frdId": "FRD-013",
+      "title": "Incremental File Lifecycle and Delta Auto-Run",
+      "status": "not_started",
+      "priority": 13,
+      "path": "./frd-013-incremental-file-lifecycle-delta-runs.json",
+      "dependencies": [
+        "FRD-011",
+        "FRD-003"
+      ]
+    },
+    {
+      "frdId": "FRD-014",
+      "title": "Worker-First Review Processing Performance",
+      "status": "not_started",
+      "priority": 14,
+      "path": "./frd-014-worker-first-processing-performance.json",
+      "dependencies": [
+        "FRD-010",
+        "FRD-013"
+      ]
+    },
+    {
+      "frdId": "FRD-015",
+      "title": "TanStack Router Multi-View Foundation",
+      "status": "not_started",
+      "priority": 15,
+      "path": "./frd-015-tanstack-router-multi-view-foundation.json",
+      "dependencies": [
+        "FRD-009",
+        "FRD-007"
       ]
     }
   ]

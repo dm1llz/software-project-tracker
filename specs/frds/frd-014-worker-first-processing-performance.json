@@ -1,0 +1,317 @@
+{
+  "metadata": {
+    "frdId": "FRD-014",
+    "title": "Worker-First Review Processing Performance",
+    "description": "Implement worker-first schema and FRD processing to reduce main-thread blocking, preserve visible progress updates, and keep resilient main-thread fallback behavior.",
+    "status": "not_started",
+    "priority": 14,
+    "estimatedEffort": "xlarge",
+    "dependencies": [
+      "FRD-010",
+      "FRD-013"
+    ],
+    "specReferences": [
+      "specs/architecture-overview.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/ux-review-flow.md",
+      "docs/performance-maintainability-baseline.md"
+    ],
+    "createdAt": "2026-03-01",
+    "updatedAt": "2026-03-01"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-014-T1",
+      "title": "Establish worker protocol and worker-client lifecycle",
+      "description": "Create a typed request/response/event protocol and long-lived worker client that supports schema operations, FRD batch operations, progress events, request IDs, and cancellation.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-010-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-014-T1-S1",
+          "title": "Define worker message contracts and event schema",
+          "description": "Introduce explicit message types for schema load/compile, batch process, progress, completion, failure, and cancellation acknowledgements.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/infra/workers/reviewRunWorkerProtocol.ts",
+            "src/infra/workers/reviewRun.worker.ts"
+          ],
+          "filesToModify": [
+            "src/types/reviewContracts.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-014-T1-S2",
+          "title": "Implement reusable worker client with request tracking",
+          "description": "Create a worker client adapter that manages a single worker instance, correlates request IDs, emits progress callbacks, and ignores late/stale messages.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/infra/workers/createReviewRunWorkerClient.ts"
+          ],
+          "filesToModify": [
+            "src/infra/workers/runReviewRunWithFallback.ts",
+            "tests/integration/runtime-bootstrap.test.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-014-T1-G1",
+          "severity": "critical",
+          "text": "Compiled Ajv validator functions cannot be transferred across thread boundaries; schema compile and validation must remain in worker-owned memory for worker-mode runs."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-014-T1-V1",
+          "type": "integration",
+          "description": "Worker protocol round-trip supports progress and completion for a mixed-result batch while preserving deterministic result structure."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-014-T1-TR1",
+          "type": "integration",
+          "description": "Validate worker protocol correctness and lifecycle safety.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-014-T1-TR1-S1",
+              "type": "success",
+              "description": "Worker receives schema plus FRD batch and returns progress events followed by a complete result.",
+              "expectedOutcome": "Progress and completion messages are correlated to one request ID and output contracts match main-thread expectations."
+            },
+            {
+              "scenarioId": "FRD-014-T1-TR1-S2",
+              "type": "error",
+              "description": "Worker throws during schema compile or file processing.",
+              "expectedOutcome": "Error is surfaced through typed failure event and caller can trigger fallback without orphaned pending promises."
+            },
+            {
+              "scenarioId": "FRD-014-T1-TR1-S3",
+              "type": "edge",
+              "description": "Late progress message arrives after cancellation of the same request ID.",
+              "expectedOutcome": "Late message is ignored and no stale UI/state mutation occurs."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-014-T2",
+      "title": "Adopt worker-first execution with automatic fallback warning",
+      "description": "Use worker execution by default whenever workers are available for schema and FRD processing, with automatic fallback to main-thread execution and a non-blocking degraded-mode warning when fallback occurs.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-014-T1"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-014-T2-S1",
+          "title": "Wire controller execution through worker client and fallback wrapper",
+          "description": "Replace direct main-thread orchestration calls in the controller with worker-first execution that falls back automatically on worker unavailability or runtime worker failure.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/domain/review-run/executeReviewRun.ts",
+            "src/infra/workers/runReviewRunWithFallback.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-014-T2-S2",
+          "title": "Expose non-blocking degraded-mode UI signal",
+          "description": "Show a non-blocking warning banner for the active run when fallback is used, and clear it on the next successful worker-mode run.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/state/reviewRunStore.ts",
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/e2e/network-and-responsiveness.spec.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-014-T2-V1",
+          "type": "integration",
+          "description": "Worker mode is used by default, and fallback mode completes the same run with a visible degraded-mode warning."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-014-T2-TR1",
+          "type": "integration",
+          "description": "Verify worker-first routing and resilient fallback semantics.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-014-T2-TR1-S1",
+              "type": "success",
+              "description": "Worker path is available for schema upload and FRD batch run.",
+              "expectedOutcome": "Run completes in worker mode with no degraded-mode warning and no contract regressions."
+            },
+            {
+              "scenarioId": "FRD-014-T2-TR1-S2",
+              "type": "error",
+              "description": "Worker initialization or runtime execution fails mid-run.",
+              "expectedOutcome": "Main-thread fallback completes the run, warning is displayed non-blockingly, and results remain equivalent."
+            },
+            {
+              "scenarioId": "FRD-014-T2-TR1-S3",
+              "type": "edge",
+              "description": "Very small batch (single FRD file) is processed with worker available.",
+              "expectedOutcome": "Worker mode is still used to keep a single execution path and behavior remains stable."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-014-T3",
+      "title": "Guarantee cancellation safety and live progress visibility",
+      "description": "Terminate or supersede active worker requests on newer schema/file actions, and keep progress updates visible during processing with request-version-safe state updates.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-014-T2",
+        "FRD-013-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-014-T3-S1",
+          "title": "Terminate active worker request on replacement or superseding uploads",
+          "description": "When schema is replaced or a newer FRD upload request starts, cancel the in-flight worker request and prevent any stale completion/progress events from mutating state.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/infra/workers/createReviewRunWorkerClient.ts",
+            "src/ui/hooks/useReviewRunController.ts",
+            "tests/integration/review-run-request-race.test.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-014-T3-S2",
+          "title": "Keep progress counters visible with worker-streamed updates",
+          "description": "Map worker progress events to processed/total counters so users continue seeing live progress during worker-mode and fallback-mode runs.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/ui/ReviewRunPage.tsx",
+            "tests/integration/ui-review-run-states.test.ts",
+            "tests/e2e/review-run-smoke.spec.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-014-T3-G1",
+          "severity": "critical",
+          "text": "Cancellation must not leak worker event listeners or leave unresolved controller promises across repeated runs."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-014-T3-V1",
+          "type": "integration",
+          "description": "Overlapping requests terminate safely and progress UI remains coherent for the winning request."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-014-T3-TR1",
+          "type": "integration",
+          "description": "Protect cancellation and progress behavior under concurrent interactions.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-014-T3-TR1-S1",
+              "type": "success",
+              "description": "Worker-mode run streams progress across a multi-file batch.",
+              "expectedOutcome": "Processed and total counters advance visibly to completion with correct final values."
+            },
+            {
+              "scenarioId": "FRD-014-T3-TR1-S2",
+              "type": "error",
+              "description": "New upload request starts while prior worker request is still processing.",
+              "expectedOutcome": "Prior request is canceled, stale messages are ignored, and only the latest request updates progress/results."
+            },
+            {
+              "scenarioId": "FRD-014-T3-TR1-S3",
+              "type": "edge",
+              "description": "Schema replacement occurs during active processing.",
+              "expectedOutcome": "In-flight worker work is terminated, UI resets per schema-replace semantics, and no stale completion appears."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-014-T4",
+      "title": "Add lightweight performance gates and mode-equivalence checks",
+      "description": "Add benchmark and equivalence checks proving worker mode improves responsiveness on larger batches while preserving deterministic review output.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-014-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-014-T4-S1",
+          "title": "Extend profiling command for worker vs fallback comparisons",
+          "description": "Enhance profiling script output with worker-mode and forced-fallback-mode timings for fixed medium and large batches (20 and 60 files).",
+          "status": "not_started",
+          "filesToModify": [
+            "scripts/profile-review-run.mjs",
+            "docs/performance-maintainability-baseline.md",
+            "package.json"
+          ]
+        },
+        {
+          "subtaskId": "FRD-014-T4-S2",
+          "title": "Harden equivalence and responsiveness test coverage",
+          "description": "Add tests that assert worker and fallback outputs are equivalent and that UI remains responsive under larger worker-driven batches.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/infra/workers/__tests__/workerFallback.integration.test.ts",
+            "tests/e2e/network-and-responsiveness.spec.ts",
+            "tests/integration/review-run-processing.test.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-014-T4-V1",
+          "type": "test",
+          "description": "Profiling output demonstrates equal or better large-batch responsiveness in worker mode while preserving output equivalence."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-014-T4-TR1",
+          "type": "benchmark",
+          "description": "Provide low-overhead, repeatable evidence for worker benefit and output stability.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-014-T4-TR1-S1",
+              "type": "success",
+              "description": "Run fixed medium and large batches (20 and 60 files) with worker mode enabled.",
+              "expectedOutcome": "Profiling records stable throughput and visibly responsive UI updates through run completion."
+            },
+            {
+              "scenarioId": "FRD-014-T4-TR1-S2",
+              "type": "error",
+              "description": "Force fallback mode by simulating worker unavailability.",
+              "expectedOutcome": "Run still completes with equivalent summary/files/issues and degraded-mode warning is present."
+            },
+            {
+              "scenarioId": "FRD-014-T4-TR1-S3",
+              "type": "edge",
+              "description": "Process a large mixed-quality batch with duplicate filenames and parse failures.",
+              "expectedOutcome": "Deterministic ordering and display-name disambiguation remain unchanged between worker and fallback modes."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

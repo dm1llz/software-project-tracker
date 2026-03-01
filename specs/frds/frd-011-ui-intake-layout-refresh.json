@@ -1,0 +1,241 @@
+{
+  "metadata": {
+    "frdId": "FRD-011",
+    "title": "UI Intake and Layout Refresh",
+    "description": "Refresh the review workspace to prioritize readability by consolidating schema/file intake controls, co-locating file navigation with upload actions, and simplifying panel nesting.",
+    "status": "not_started",
+    "priority": 11,
+    "estimatedEffort": "large",
+    "dependencies": [
+      "FRD-008",
+      "FRD-005"
+    ],
+    "specReferences": [
+      "specs/ux-review-flow.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/architecture-overview.md"
+    ],
+    "createdAt": "2026-03-01",
+    "updatedAt": "2026-03-01"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-011-T1",
+      "title": "Restructure the page layout around intake and focused detail review",
+      "description": "Create a two-row layout where the top row places intake-plus-file controls and summary side-by-side (approximately 2/3 and 1/3 widths), and the second row is a full-width issues/readable detail workspace with reduced nested containers.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-008-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-011-T1-S1",
+          "title": "Implement top-row intake and summary column proportions",
+          "description": "Refactor page shell layout so schema/file intake and file-list interactions occupy the primary top-row column and summary occupies a secondary column.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-011-T1-S2",
+          "title": "Flatten unnecessary nested visual containers",
+          "description": "Reduce box-within-box composition across top-level sections to improve scannability while keeping semantic grouping and accessible headings.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/ReviewSummaryView.tsx",
+            "src/ui/components/FileIssueTableView.tsx",
+            "src/ui/components/ReadableFrdSectionView.tsx",
+            "src/ui/components/RunIssuePanelView.tsx"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-011-T1-G1",
+          "severity": "critical",
+          "text": "Layout simplification must preserve existing accessibility labels/roles relied on by integration and e2e tests."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-011-T1-V1",
+          "type": "manual",
+          "description": "On desktop and mobile breakpoints, the new layout stays readable with no overlapping controls or clipped detail content."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-011-T1-TR1",
+          "type": "integration",
+          "description": "Validate the new layout structure and responsive behavior across major review states.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-011-T1-TR1-S1",
+              "type": "success",
+              "description": "A completed review run renders intake plus summary in the top row and detail content in a full-width second row.",
+              "expectedOutcome": "All regions are visible and navigable with expected width proportions on large screens."
+            },
+            {
+              "scenarioId": "FRD-011-T1-TR1-S2",
+              "type": "error",
+              "description": "Schema-level run issues are present before any file results are rendered.",
+              "expectedOutcome": "Run issues appear inside the full-width detail workspace without collapsing or displacing top-row controls."
+            },
+            {
+              "scenarioId": "FRD-011-T1-TR1-S3",
+              "type": "edge",
+              "description": "Viewport width is reduced to mobile breakpoints during a completed run.",
+              "expectedOutcome": "Sections stack predictably with no horizontal overflow and no loss of actionable controls."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-011-T2",
+      "title": "Unify schema selection and replacement in a single control surface",
+      "description": "Replace the dedicated third 'replace schema' box with a single schema control that always shows the active schema filename, switches CTA text from choose to replace when active, and requires explicit confirmation before replacement.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-005-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-011-T2-S1",
+          "title": "Update schema control copy and state model",
+          "description": "Show the active schema name inline and derive dynamic button text so users can see when selecting a new file will replace the current schema.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/SchemaControlPanel.tsx",
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-011-T2-S2",
+          "title": "Add replacement confirmation and preserve reset semantics",
+          "description": "Introduce an explicit confirmation dialog before replacing an active schema and keep existing behavior that clears prior run/file state only after replacement is confirmed.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/SchemaControlPanel.tsx",
+            "src/ui/hooks/useReviewRunController.ts",
+            "tests/integration/review-run-page-dom.test.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-011-T2-V1",
+          "type": "integration",
+          "description": "Replacing an active schema after confirmation clears summary, file rows, and detail state while canceling replacement leaves state unchanged."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-011-T2-TR1",
+          "type": "integration",
+          "description": "Verify schema control clarity and guarded replacement flows.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-011-T2-TR1-S1",
+              "type": "success",
+              "description": "User confirms replacement after a completed run.",
+              "expectedOutcome": "New schema becomes active and previous run/files/selection are fully reset."
+            },
+            {
+              "scenarioId": "FRD-011-T2-TR1-S2",
+              "type": "error",
+              "description": "User initiates replacement but cancels the confirmation dialog.",
+              "expectedOutcome": "Active schema and current results remain unchanged with no partial reset."
+            },
+            {
+              "scenarioId": "FRD-011-T2-TR1-S3",
+              "type": "edge",
+              "description": "Review run is currently processing and user attempts schema interaction.",
+              "expectedOutcome": "Schema replacement/upload remains disabled and no confirmation prompt is shown."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-011-T3",
+      "title": "Move file navigation next to upload controls and retire the separate files panel",
+      "description": "Render loaded file entries adjacent to FRD upload controls so file management and file selection happen in one place, retire the separate files panel from the results column, and preserve status badges, stable-ID selection, and duplicate-name disambiguation.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-011-T1",
+        "FRD-005-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-011-T3-S1",
+          "title": "Render inline file list beside FRD upload actions",
+          "description": "Introduce an intake-adjacent file list with file status indicators and selection affordances, and remove duplicate list rendering from the previous results panel location.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/SchemaControlPanel.tsx",
+            "src/ui/ReviewRunPage.tsx",
+            "src/ui/components/FileResultListView.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-011-T3-S2",
+          "title": "Wire inline file selection into detail panel state",
+          "description": "Keep file-selection behavior keyed by file ID and ensure detail panel updates correctly when files are chosen from the intake-adjacent list.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/FileResultList.ts",
+            "src/ui/ReviewRunPage.tsx",
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/e2e/review-run-smoke.spec.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-011-T3-G1",
+          "severity": "critical",
+          "text": "Relocating file navigation must not break stable selection behavior for duplicate filenames."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-011-T3-V1",
+          "type": "integration",
+          "description": "Inline file list supports selection and correctly drives issues/readable detail updates."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-011-T3-TR1",
+          "type": "integration",
+          "description": "Verify relocated file list behavior and detail routing contracts.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-011-T3-TR1-S1",
+              "type": "success",
+              "description": "User selects a passed file from the inline intake list.",
+              "expectedOutcome": "Detail panel updates to the selected file with correct tab availability and status context, and only one file navigator is rendered."
+            },
+            {
+              "scenarioId": "FRD-011-T3-TR1-S2",
+              "type": "error",
+              "description": "Run is blocked at schema level and no file results are available.",
+              "expectedOutcome": "Inline file list is absent or empty and no stale file selection appears."
+            },
+            {
+              "scenarioId": "FRD-011-T3-TR1-S3",
+              "type": "edge",
+              "description": "Two files with identical names are displayed in the inline list.",
+              "expectedOutcome": "Display names remain disambiguated and each entry maps to the correct unique file ID."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
