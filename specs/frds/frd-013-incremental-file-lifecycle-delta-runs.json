@@ -1,0 +1,238 @@
+{
+  "metadata": {
+    "frdId": "FRD-013",
+    "title": "Incremental File Lifecycle and Delta Auto-Run",
+    "description": "Allow FRD files to be incrementally added or removed near upload controls, auto-run processing for deltas only, and provide explicit reset/unload actions without requiring full list replacement.",
+    "status": "not_started",
+    "priority": 13,
+    "estimatedEffort": "xlarge",
+    "dependencies": [
+      "FRD-011",
+      "FRD-003"
+    ],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/ux-review-flow.md",
+      "specs/data-contracts.md",
+      "specs/architecture-overview.md"
+    ],
+    "createdAt": "2026-03-01",
+    "updatedAt": "2026-03-01"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-013-T1",
+      "title": "Introduce persistent loaded-file inventory with add/remove/reset actions",
+      "description": "Track loaded FRD files as a managed collection independent from computed results so users can add files incrementally, remove single entries, and reset all loaded files from the intake area.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-011-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-013-T1-S1",
+          "title": "Extend store/controller state for file lifecycle operations",
+          "description": "Add state primitives and reducer helpers for append, remove-one, and reset-all file actions while preserving schema context and selection consistency.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/state/reviewRunStore.ts",
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/ui/state/reviewRunScreenStateHelpers.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-013-T1-S2",
+          "title": "Expose intake-adjacent lifecycle controls",
+          "description": "Add UI actions for add files, remove individual files, and unload/reset all files in the same area as upload controls.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/SchemaControlPanel.tsx",
+            "src/ui/ReviewRunPage.tsx",
+            "tests/integration/review-run-page-dom.test.tsx"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-013-T1-V1",
+          "type": "integration",
+          "description": "Users can append and unload files from the intake panel without re-uploading schema and without stale UI state."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-013-T1-TR1",
+          "type": "integration",
+          "description": "Verify foundational file-lifecycle operations and UI/state synchronization.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-013-T1-TR1-S1",
+              "type": "success",
+              "description": "User uploads a schema, loads files, then appends additional files.",
+              "expectedOutcome": "Loaded-file list contains both original and appended files with no unintended replacement."
+            },
+            {
+              "scenarioId": "FRD-013-T1-TR1-S2",
+              "type": "error",
+              "description": "User attempts to remove a file ID that is no longer present.",
+              "expectedOutcome": "Operation is a no-op and existing loaded file/results state remains unchanged."
+            },
+            {
+              "scenarioId": "FRD-013-T1-TR1-S3",
+              "type": "edge",
+              "description": "User selects reset/unload all after a mixed-result run.",
+              "expectedOutcome": "All files/results/selection clear while active schema remains loaded and ready for new file additions."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-013-T2",
+      "title": "Implement delta-only auto-processing and deterministic result merging",
+      "description": "When files are appended, process only newly added files, then merge and re-sort results with existing entries while recomputing summary counts from the merged set; existing file results must remain unchanged unless their source file is removed or schema is replaced.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-013-T1"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-013-T2-S1",
+          "title": "Support globally stable file IDs/upload indices across incremental uploads",
+          "description": "Update input-file mapping so repeated append actions do not reuse upload indices or IDs and duplicate-name disambiguation remains deterministic.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/domain/review-run/mapReviewInputFiles.ts",
+            "src/domain/review-run/disambiguateDisplayName.ts",
+            "src/types/reviewContracts.ts",
+            "tests/integration/map-review-input-files.test.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-013-T2-S2",
+          "title": "Process and merge only delta files during auto-run",
+          "description": "Refactor controller flow so append actions trigger processing only for new files, merge those results with existing results, and update progress metrics based on delta batch size rather than total loaded-file count.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/ui/state/reviewRunStore.ts",
+            "src/domain/review-run/summarizeBatchReview.ts",
+            "tests/integration/review-run-processing.test.ts",
+            "tests/integration/ui-review-run-states.test.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-013-T2-G1",
+          "severity": "critical",
+          "text": "Delta processing must preserve request-version race safety so stale async completions cannot overwrite newer merged results."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-013-T2-V1",
+          "type": "integration",
+          "description": "Appending one file updates progress and results based on the delta batch only while preserving previously computed files."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-013-T2-TR1",
+          "type": "integration",
+          "description": "Protect delta-only processing semantics and merged-output correctness.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-013-T2-TR1-S1",
+              "type": "success",
+              "description": "User appends one valid file to an existing completed run.",
+              "expectedOutcome": "Only the new file is processed, prior file results remain intact, and summary reflects the merged total."
+            },
+            {
+              "scenarioId": "FRD-013-T2-TR1-S2",
+              "type": "error",
+              "description": "Appended file fails parsing while existing results contain passed/failed entries.",
+              "expectedOutcome": "New parse_failed result is merged without reprocessing prior files and summary counters stay consistent."
+            },
+            {
+              "scenarioId": "FRD-013-T2-TR1-S3",
+              "type": "edge",
+              "description": "Duplicate filenames are appended across separate upload actions.",
+              "expectedOutcome": "Display names and IDs remain unique and deterministic across the full merged list, including existing and newly appended files."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-013-T3",
+      "title": "Define removal/reset selection semantics and running-state guards",
+      "description": "Ensure single-file deletion and full reset actions update selection/detail visibility predictably and block unsafe mutations while processing is active.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-013-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-013-T3-S1",
+          "title": "Implement deterministic selection fallback after file deletion",
+          "description": "When a selected file is removed, select the next available sorted file or clear detail when none remain.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/state/reviewRunStore.ts",
+            "src/ui/ReviewRunPage.tsx",
+            "tests/integration/ui-results-detail-reset.test.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-013-T3-S2",
+          "title": "Guard destructive file actions while processing and validate reset baseline",
+          "description": "Disable remove/reset controls during active processing and verify reset returns UI to schema-ready baseline without stale detail tabs or stale file counts.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/SchemaControlPanel.tsx",
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/e2e/network-and-responsiveness.spec.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-013-T3-V1",
+          "type": "integration",
+          "description": "Deletion and reset actions preserve coherent selection and summary/detail behavior before and after processing cycles."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-013-T3-TR1",
+          "type": "integration",
+          "description": "Validate file-removal outcomes, running-state guards, and zero-file baseline behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-013-T3-TR1-S1",
+              "type": "success",
+              "description": "User removes the currently selected file from a multi-file list.",
+              "expectedOutcome": "Selection moves to the next deterministic candidate and detail panel updates accordingly."
+            },
+            {
+              "scenarioId": "FRD-013-T3-TR1-S2",
+              "type": "error",
+              "description": "User attempts remove/reset actions while delta processing is running.",
+              "expectedOutcome": "Actions are blocked and no intermediate state mutation occurs."
+            },
+            {
+              "scenarioId": "FRD-013-T3-TR1-S3",
+              "type": "edge",
+              "description": "User removes the final remaining file in the loaded list.",
+              "expectedOutcome": "Summary resets to zeros, file list becomes empty, and detail panel is hidden while schema remains loaded and FRD add control stays enabled."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

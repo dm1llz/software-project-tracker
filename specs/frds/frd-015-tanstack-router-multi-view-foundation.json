@@ -1,0 +1,311 @@
+{
+  "metadata": {
+    "frdId": "FRD-015",
+    "title": "TanStack Router Multi-View Foundation",
+    "description": "Adopt TanStack Router with code-based route configuration to support top-level app views while keeping review-run workflow state in memory and preserving existing behavior.",
+    "status": "not_started",
+    "priority": 15,
+    "estimatedEffort": "large",
+    "dependencies": [
+      "FRD-009",
+      "FRD-007"
+    ],
+    "specReferences": [
+      "specs/architecture-overview.md",
+      "specs/ux-review-flow.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/roadmap.md"
+    ],
+    "createdAt": "2026-03-01",
+    "updatedAt": "2026-03-01"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-015-T1",
+      "title": "Introduce TanStack Router runtime with code-based route tree",
+      "description": "Install and wire TanStack Router at app bootstrap using code-defined routes (not file-based generation) to establish explicit control over route composition and future extensibility.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-007-T1"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-015-T1-S1",
+          "title": "Add TanStack Router dependencies and router entry modules",
+          "description": "Install router packages and create foundational router modules with typed route declarations.",
+          "status": "not_started",
+          "filesToModify": [
+            "package.json",
+            "package-lock.json",
+            "src/main.tsx"
+          ],
+          "filesToCreate": [
+            "src/ui/routing/router.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-015-T1-S2",
+          "title": "Move app shell to RouterProvider",
+          "description": "Replace direct single-page mounting with RouterProvider while preserving existing global app styling and runtime bootstrap behavior.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/App.tsx",
+            "tests/integration/runtime-bootstrap.test.ts"
+          ]
+        }
+      ],
+      "notes": [
+        "This FRD covers TanStack Router only; TanStack Query adoption remains deferred until remote/server-state workflows are introduced."
+      ],
+      "verification": [
+        {
+          "id": "FRD-015-T1-V1",
+          "type": "build",
+          "description": "Dev and build pipelines run successfully with RouterProvider bootstrap and no runtime mount regressions."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-015-T1-TR1",
+          "type": "integration",
+          "description": "Verify runtime bootstraps through router infrastructure without breaking app startup guarantees.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-015-T1-TR1-S1",
+              "type": "success",
+              "description": "App mounts with router initialized and default path loaded.",
+              "expectedOutcome": "Root render succeeds and configured default route content is visible."
+            },
+            {
+              "scenarioId": "FRD-015-T1-TR1-S2",
+              "type": "error",
+              "description": "Router initialization receives malformed route config.",
+              "expectedOutcome": "Failure is surfaced deterministically in test/build rather than producing silent blank-screen behavior."
+            },
+            {
+              "scenarioId": "FRD-015-T1-TR1-S3",
+              "type": "edge",
+              "description": "StrictMode development mount/unmount cycle runs with router active.",
+              "expectedOutcome": "No duplicate side effects or runtime bootstrap warnings occur."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-015-T2",
+      "title": "Create top-level routes and placeholder views",
+      "description": "Define top-level routes for `/` (Landing page placeholder), `/frd-review` (current review workspace), and `/templates` (Templates placeholder), plus shared top-level navigation.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-015-T1"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-015-T2-S1",
+          "title": "Implement route components for home and templates placeholders",
+          "description": "Create minimal placeholder views that render exact placeholder text `Landing page` for `/` and `Templates` for `/templates`.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/views/LandingPage.tsx",
+            "src/ui/views/TemplatesPage.tsx"
+          ],
+          "filesToModify": [
+            "src/ui/routing/router.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-015-T2-S2",
+          "title": "Mount existing review workspace at `/frd-review` with top-level nav",
+          "description": "Route current ReviewRunPage into `/frd-review` and add global navigation links between the three top-level views.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/ReviewRunPage.tsx",
+            "src/App.tsx",
+            "src/ui/routing/router.tsx",
+            "tests/e2e/review-run-smoke.spec.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-015-T2-V1",
+          "type": "integration",
+          "description": "All three top-level routes render expected content and navigation links correctly switch views."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-015-T2-TR1",
+          "type": "integration",
+          "description": "Validate top-level route rendering contracts and navigation behavior.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-015-T2-TR1-S1",
+              "type": "success",
+              "description": "User navigates between `/`, `/frd-review`, and `/templates` via top navigation links.",
+              "expectedOutcome": "Each route renders its intended view content (`Landing page`, FRD review workspace, `Templates`) with active navigation state updates."
+            },
+            {
+              "scenarioId": "FRD-015-T2-TR1-S2",
+              "type": "error",
+              "description": "Route component throws runtime error while navigating to one top-level view.",
+              "expectedOutcome": "Error boundary displays controlled fallback UI and app navigation remains recoverable."
+            },
+            {
+              "scenarioId": "FRD-015-T2-TR1-S3",
+              "type": "edge",
+              "description": "User refreshes browser directly on `/templates`.",
+              "expectedOutcome": "Router resolves the path correctly and placeholder content renders without redirect loops."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-015-T3",
+      "title": "Enforce top-level-only routing and guard semantics",
+      "description": "Keep navigation scoped to top-level views only for now, with redirect/guard behavior for unknown or unsupported paths and no URL-driven file/detail subroutes.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-015-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-015-T3-S1",
+          "title": "Add route guard redirects for unknown and unsupported paths",
+          "description": "Implement not-found/guard logic that redirects unknown paths to `/` and unsupported nested review paths (for example `/frd-review/*`) to `/frd-review`.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/routing/router.tsx",
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/e2e/network-and-responsiveness.spec.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-015-T3-S2",
+          "title": "Keep file/detail selection memory-only",
+          "description": "Ensure selected file and detail tab state remain in-memory UI state and are not represented in route path or query params during this phase.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/ui/ReviewRunPage.tsx",
+            "tests/integration/ui-results-detail-reset.test.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-015-T3-G1",
+          "severity": "critical",
+          "text": "Introducing router state must not accidentally reset review-run in-memory state when users navigate between top-level views in the same session."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-015-T3-V1",
+          "type": "integration",
+          "description": "Unknown paths redirect safely and review detail state remains memory-driven rather than URL-driven."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-015-T3-TR1",
+          "type": "integration",
+          "description": "Protect guard behavior and explicit non-goal of nested/detail routes.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-015-T3-TR1-S1",
+              "type": "success",
+              "description": "Browser back/forward is used across top-level routes.",
+              "expectedOutcome": "Navigation history transitions only between top-level views with expected content restoration."
+            },
+            {
+              "scenarioId": "FRD-015-T3-TR1-S2",
+              "type": "error",
+              "description": "User opens unknown route such as `/unknown-view`.",
+              "expectedOutcome": "Router redirects to `/` without app crash."
+            },
+            {
+              "scenarioId": "FRD-015-T3-TR1-S3",
+              "type": "edge",
+              "description": "User manually appends query values resembling file selection to `/frd-review`.",
+              "expectedOutcome": "Review file/tab selection behavior remains memory-driven and query values are ignored for detail-state initialization."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-015-T4",
+      "title": "Migrate and expand test coverage for routed app behavior",
+      "description": "Update existing tests to run through routed entrypoints and add targeted integration/e2e coverage for route rendering, navigation, guards, and review-flow compatibility.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-015-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-015-T4-S1",
+          "title": "Refactor integration test harness for route-aware rendering",
+          "description": "Adjust integration render helpers to initialize at explicit paths and preserve existing review-flow test intent.",
+          "status": "not_started",
+          "filesToModify": [
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/integration/ui-review-run-states.test.ts",
+            "tests/integration/runtime-bootstrap.test.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-015-T4-S2",
+          "title": "Add e2e assertions for route navigation and review page compatibility",
+          "description": "Update smoke/e2e flows to enter via `/frd-review` and verify route transitions do not regress current upload and detail interactions.",
+          "status": "not_started",
+          "filesToModify": [
+            "tests/e2e/review-run-smoke.spec.ts",
+            "tests/e2e/network-and-responsiveness.spec.ts",
+            "playwright.config.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-015-T4-V1",
+          "type": "test",
+          "description": "Integration and e2e suites pass with routed entrypoints and no regressions in current FRD review flow."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-015-T4-TR1",
+          "type": "e2e",
+          "description": "Validate routing migration quality and ensure current review interactions remain intact.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-015-T4-TR1-S1",
+              "type": "success",
+              "description": "User starts at `/frd-review` and completes existing mixed-result review smoke flow.",
+              "expectedOutcome": "All prior review-flow assertions still pass under routed app entry."
+            },
+            {
+              "scenarioId": "FRD-015-T4-TR1-S2",
+              "type": "error",
+              "description": "User navigates to unknown path during a test run.",
+              "expectedOutcome": "Guard redirect occurs and subsequent navigation back to `/frd-review` still allows successful interaction."
+            },
+            {
+              "scenarioId": "FRD-015-T4-TR1-S3",
+              "type": "edge",
+              "description": "User switches to `/templates` and returns to `/frd-review` in the same session.",
+              "expectedOutcome": "In-memory review state remains available and no unintended reset occurs."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

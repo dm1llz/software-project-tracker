@@ -1,0 +1,303 @@
+{
+  "metadata": {
+    "frdId": "FRD-010",
+    "title": "Review-Run Refactor and Resilience",
+    "description": "Refactor duplicated review-run orchestration, clarify runtime-error recovery semantics, and close high-value test gaps for request races and UI runtime-failure handling.",
+    "status": "not_started",
+    "priority": 10,
+    "estimatedEffort": "large",
+    "dependencies": [
+      "FRD-009"
+    ],
+    "specReferences": [
+      "specs/architecture-overview.md",
+      "specs/mvp-frd-review-spec.md",
+      "specs/roadmap.md",
+      "docs/performance-maintainability-baseline.md"
+    ],
+    "createdAt": "2026-02-28",
+    "updatedAt": "2026-02-28"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-010-T1",
+      "title": "Align schema/runtime recovery semantics for upload and run failures",
+      "description": "Ensure schema runtime state is cleared on schema upload failures, but preserved on FRD processing runtime failures so users can retry FRD uploads without re-uploading schema.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-009"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-010-T1-S1",
+          "title": "Preserve loaded schema after FRD-processing runtime errors",
+          "description": "Update FRD upload error handling so schemaName/schemaBundle/validator remain available when run-level runtime failures occur.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/ui/state/reviewRunErrorMapping.ts",
+            "src/ui/state/reviewRunStore.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-010-T1-S2",
+          "title": "Clear schema runtime state on unexpected schema-upload exceptions",
+          "description": "Ensure unexpected schema upload failures keep runtime internals and store state aligned by clearing schema runtime references before resetting UI state.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-010-T1-G1",
+          "severity": "critical",
+          "text": "Recovery behavior must remain request-version safe: stale async completions must not overwrite current schema/run state."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-010-T1-V1",
+          "type": "integration",
+          "description": "After a runtime run failure, FRD input remains enabled and a follow-up FRD upload succeeds without schema re-upload."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-010-T1-TR1",
+          "type": "integration",
+          "description": "Validate user-visible recovery behavior for schema and run failures.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-010-T1-TR1-S1",
+              "type": "success",
+              "description": "Schema upload succeeds and FRD upload runs successfully after prior runtime run failure.",
+              "expectedOutcome": "User can retry FRD files without schema re-upload and receives normal complete-state output."
+            },
+            {
+              "scenarioId": "FRD-010-T1-TR1-S2",
+              "type": "error",
+              "description": "Unexpected exception occurs during FRD processing.",
+              "expectedOutcome": "Run issues are shown, schema context remains loaded, and FRD upload control stays available."
+            },
+            {
+              "scenarioId": "FRD-010-T1-TR1-S3",
+              "type": "edge",
+              "description": "Unexpected exception occurs during schema upload path.",
+              "expectedOutcome": "Schema runtime state is cleared and UI returns to blocked-until-valid-schema behavior."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-010-T2",
+      "title": "Extract shared review-run processing orchestration",
+      "description": "Remove duplicated parse/validate/render/result-assembly logic between UI controller and domain runner by introducing a shared domain-level processing module.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-010-T1"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-010-T2-S1",
+          "title": "Create shared review-result processing function",
+          "description": "Implement a shared domain processor that accepts mapped review files and returns deterministic review results plus summary inputs.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/domain/review-run/processReviewRunBatch.ts"
+          ],
+          "filesToModify": [
+            "src/domain/review-run/executeReviewRun.ts",
+            "src/ui/hooks/useReviewRunController.ts",
+            "src/domain/review-run/buildReviewResult.ts",
+            "src/domain/review-run/summarizeBatchReview.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-010-T2-S2",
+          "title": "Keep output ordering and failure mapping semantics identical",
+          "description": "Retain deterministic sort order, file-issue mapping, and summary behavior while moving orchestration into the shared processor.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/domain/review-run/sortReviewResults.ts",
+            "src/domain/review-run/mapReviewInputFiles.ts",
+            "tests/integration/review-run-processing.test.ts",
+            "src/domain/review-run/__tests__/reviewRun.integration.test.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-010-T2-V1",
+          "type": "build",
+          "description": "Typecheck and existing integration suite pass with no behavior regressions after orchestration extraction."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-010-T2-TR1",
+          "type": "integration",
+          "description": "Protect result determinism while consolidating orchestration logic.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-010-T2-TR1-S1",
+              "type": "success",
+              "description": "All-valid FRD batch is processed through both UI and domain entrypoints.",
+              "expectedOutcome": "Result statuses, summary counts, and selected ordering remain unchanged."
+            },
+            {
+              "scenarioId": "FRD-010-T2-TR1-S2",
+              "type": "error",
+              "description": "Mixed parse/validation/read-failure batch is processed through refactored flow.",
+              "expectedOutcome": "Run output contains identical issue categorization and deterministic ordering."
+            },
+            {
+              "scenarioId": "FRD-010-T2-TR1-S3",
+              "type": "edge",
+              "description": "Duplicate filenames and sparse read failures appear in one batch.",
+              "expectedOutcome": "Disambiguated display names, upload indices, and fallback IDs remain stable."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-010-T3",
+      "title": "Add race/cancellation guard tests for controller request-version logic",
+      "description": "Add focused tests to prove stale asynchronous requests cannot mutate state after newer schema/FRD upload actions begin.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-010-T2"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-010-T3-S1",
+          "title": "Cover overlapping schema upload requests",
+          "description": "Add tests where two schema uploads race and ensure only the latest request updates store/schema runtime state.",
+          "status": "not_started",
+          "filesToCreate": [
+            "tests/integration/review-run-request-race.test.tsx"
+          ],
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "tests/integration/review-run-page-dom.test.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-010-T3-S2",
+          "title": "Cover overlapping FRD upload requests",
+          "description": "Add tests for concurrent FRD upload submissions ensuring stale completions are ignored and progress counters stay coherent.",
+          "status": "not_started",
+          "filesToModify": [
+            "tests/integration/review-run-request-race.test.tsx",
+            "tests/integration/review-run-processing.test.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-010-T3-V1",
+          "type": "test",
+          "description": "Race/cancellation test suite reliably detects stale-request state mutation regressions."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-010-T3-TR1",
+          "type": "integration",
+          "description": "Exercise concurrent request behavior in controller-driven flows.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-010-T3-TR1-S1",
+              "type": "success",
+              "description": "Latest schema upload wins after an earlier slower upload resolves.",
+              "expectedOutcome": "Final schema name and control state reflect only the latest upload."
+            },
+            {
+              "scenarioId": "FRD-010-T3-TR1-S2",
+              "type": "error",
+              "description": "Earlier request fails after a newer request has already succeeded.",
+              "expectedOutcome": "Late failure is ignored and does not overwrite current success state."
+            },
+            {
+              "scenarioId": "FRD-010-T3-TR1-S3",
+              "type": "edge",
+              "description": "Multiple FRD uploads overlap with progress updates batched.",
+              "expectedOutcome": "Displayed progress and final review results correspond to the latest active request only."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-010-T4",
+      "title": "Harden test environment signal and runtime-failure coverage",
+      "description": "Eliminate noisy React act-environment warnings and add explicit integration coverage for readable-section runtime failure behavior.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-010-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-010-T4-S1",
+          "title": "Configure React act environment for JSDOM tests",
+          "description": "Set the React act environment flag in test setup so DOM integration tests run without repetitive act warnings.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/test/setupTests.ts"
+          ]
+        },
+        {
+          "subtaskId": "FRD-010-T4-S2",
+          "title": "Add integration coverage for readable-render runtime failure and retry",
+          "description": "Add tests for unsupported mixed-array runtime rendering path, validate surfaced run issues, and verify retry behavior with schema retained.",
+          "status": "not_started",
+          "filesToModify": [
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/integration/rendering-nested-sections.test.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-010-T4-V1",
+          "type": "integration",
+          "description": "Integration suite runs without act-environment warnings and includes explicit runtime-failure/retry coverage."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-010-T4-TR1",
+          "type": "integration",
+          "description": "Improve signal quality and runtime-failure test coverage in UI integration tests.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-010-T4-TR1-S1",
+              "type": "success",
+              "description": "Current happy-path DOM tests execute under configured act environment.",
+              "expectedOutcome": "Tests pass with no repeated act-environment warning output."
+            },
+            {
+              "scenarioId": "FRD-010-T4-TR1-S2",
+              "type": "error",
+              "description": "Unsupported nested/mixed array input triggers readable-section rendering failure.",
+              "expectedOutcome": "Run issues are surfaced and app remains recoverable for a subsequent upload."
+            },
+            {
+              "scenarioId": "FRD-010-T4-TR1-S3",
+              "type": "edge",
+              "description": "Retry with valid FRD data after runtime rendering failure.",
+              "expectedOutcome": "Run completes successfully without requiring schema re-upload."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

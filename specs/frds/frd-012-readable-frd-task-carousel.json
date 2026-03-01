@@ -1,0 +1,243 @@
+{
+  "metadata": {
+    "frdId": "FRD-012",
+    "title": "Readable FRD Task Carousel and Smart Detail Defaults",
+    "description": "Redesign the Readable FRD experience around FRD-aware metadata and major-task cards, add compact/detailed display modes, and choose file detail tabs automatically based on issue presence.",
+    "status": "not_started",
+    "priority": 12,
+    "estimatedEffort": "large",
+    "dependencies": [
+      "FRD-011",
+      "FRD-004",
+      "FRD-005"
+    ],
+    "specReferences": [
+      "specs/mvp-frd-review-spec.md",
+      "specs/ux-review-flow.md",
+      "specs/data-contracts.md"
+    ],
+    "createdAt": "2026-03-01",
+    "updatedAt": "2026-03-01"
+  },
+  "majorTasks": [
+    {
+      "taskId": "FRD-012-T1",
+      "title": "Build FRD-aware readable models with metadata header and task cards",
+      "description": "For FRD-structured files, render top-level metadata in a header panel and show one major-task card at a time with grouped sections for subtasks, verification, tests, notes, gotchas, and expanded dependency details (id/title/status/description when resolvable).",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-011",
+        "FRD-004"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-012-T1-S1",
+          "title": "Create FRD semantic projection for readable rendering",
+          "description": "Introduce a typed projection layer that derives FRD metadata/task card structures (including expanded task dependency details) from validated file content and preserves unresolved dependency IDs with fallback labels.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/readableFrd/deriveFrdTaskCards.ts",
+            "src/ui/components/readableFrd/types.ts"
+          ],
+          "filesToModify": [
+            "src/types/reviewContracts.ts",
+            "src/domain/review-run/buildReviewResult.ts",
+            "src/ui/components/ReadableFrdView.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-012-T1-S2",
+          "title": "Render detailed and compact task-card modes",
+          "description": "Implement a detailed-by-default mode with grouped content blocks plus a compact toggle that collapses lower-priority metadata while preserving required execution context.",
+          "status": "not_started",
+          "filesToCreate": [
+            "src/ui/components/ReadableFrdTaskCarouselView.tsx"
+          ],
+          "filesToModify": [
+            "src/ui/components/ReadableFrdSectionView.tsx",
+            "src/ui/components/FileDetailPanel.tsx",
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        }
+      ],
+      "gotchas": [
+        {
+          "id": "FRD-012-T1-G1",
+          "severity": "critical",
+          "text": "FRD-aware rendering must gracefully fall back to the generic readable section renderer for valid JSON files that do not match FRD structures."
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-012-T1-V1",
+          "type": "integration",
+          "description": "FRD files render metadata header plus grouped major-task cards, and non-FRD files continue rendering without runtime errors."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-012-T1-TR1",
+          "type": "integration",
+          "description": "Validate FRD-aware rendering behavior and compatibility fallbacks.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-012-T1-TR1-S1",
+              "type": "success",
+              "description": "A valid FRD file with multiple major tasks is opened in Readable FRD view.",
+              "expectedOutcome": "Metadata header renders first and the first major-task card is displayed in detailed mode with grouped sections including expanded dependencies."
+            },
+            {
+              "scenarioId": "FRD-012-T1-TR1-S2",
+              "type": "error",
+              "description": "A major task references dependency IDs that cannot be expanded from available task data.",
+              "expectedOutcome": "Dependency section shows unresolved dependency entries without crashing the readable view."
+            },
+            {
+              "scenarioId": "FRD-012-T1-TR1-S3",
+              "type": "edge",
+              "description": "A valid non-FRD JSON file is selected while readable rendering is available.",
+              "expectedOutcome": "Generic section rendering path is used and FRD-specific card UI is not forced."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-012-T2",
+      "title": "Add slideshow navigation with wrap-around and keyboard support",
+      "description": "Enable left/right arrow controls and keyboard arrow navigation to cycle through major-task cards one at a time, including wrap-around from end to start and start to end.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-012-T1"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-012-T2-S1",
+          "title": "Implement left/right controls with cyclic card indexing",
+          "description": "Add explicit previous/next controls adjacent to the current task card and wrap indices across bounds.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/ReadableFrdTaskCarouselView.tsx",
+            "src/ui/components/ReadableFrdSectionView.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-012-T2-S2",
+          "title": "Add keyboard navigation and focus-safe interactions",
+          "description": "Support ArrowLeft/ArrowRight for card navigation when carousel context is focused, keep controls accessible, and ensure focus does not become trapped after file or tab changes.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/ReadableFrdTaskCarouselView.tsx",
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/e2e/review-run-smoke.spec.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-012-T2-V1",
+          "type": "manual",
+          "description": "Card navigation works via click and keyboard with correct wrap-around behavior and visible current-card context."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-012-T2-TR1",
+          "type": "integration",
+          "description": "Verify slideshow navigation stability and accessibility interactions.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-012-T2-TR1-S1",
+              "type": "success",
+              "description": "User clicks next/previous controls across a multi-task FRD.",
+              "expectedOutcome": "Displayed task card updates in order and wraps correctly at both ends."
+            },
+            {
+              "scenarioId": "FRD-012-T2-TR1-S2",
+              "type": "error",
+              "description": "User changes selected file while current card index points past the next file's available task count.",
+              "expectedOutcome": "Card index resets to a valid position and readable view remains stable with no runtime error."
+            },
+            {
+              "scenarioId": "FRD-012-T2-TR1-S3",
+              "type": "edge",
+              "description": "Readable FRD contains only one major task.",
+              "expectedOutcome": "Navigation controls do not cause index changes, keyboard arrows are safe no-ops, and no duplicate card render occurs."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "taskId": "FRD-012-T3",
+      "title": "Apply issue-aware default detail tab on every file selection",
+      "description": "When a file is selected, default to Issues if any warnings/errors exist, otherwise default to Readable FRD when available; apply this rule on every file selection while still allowing manual tab switching.",
+      "status": "not_started",
+      "prLevel": true,
+      "dependencies": [
+        "FRD-012-T1",
+        "FRD-011-T3"
+      ],
+      "subtasks": [
+        {
+          "subtaskId": "FRD-012-T3-S1",
+          "title": "Derive default tab from file issues and readable availability",
+          "description": "Update detail-panel model logic so per-file default tab selection depends on issue presence rather than a fixed Issues default.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/components/FileDetailPanel.tsx",
+            "src/ui/ReviewRunPage.tsx"
+          ]
+        },
+        {
+          "subtaskId": "FRD-012-T3-S2",
+          "title": "Reapply tab-default rules when selection context changes",
+          "description": "Ensure the default-tab decision is recomputed whenever users pick another file, including auto-selected files after processing and selections restored after list mutations.",
+          "status": "not_started",
+          "filesToModify": [
+            "src/ui/hooks/useReviewRunController.ts",
+            "tests/integration/ui-results-detail-reset.test.ts",
+            "tests/integration/review-run-page-dom.test.tsx",
+            "tests/e2e/review-run-smoke.spec.ts"
+          ]
+        }
+      ],
+      "verification": [
+        {
+          "id": "FRD-012-T3-V1",
+          "type": "integration",
+          "description": "Tab defaults match issue state for each newly selected file and manual tab overrides persist only within the current file context."
+        }
+      ],
+      "testRequirements": [
+        {
+          "id": "FRD-012-T3-TR1",
+          "type": "integration",
+          "description": "Protect issue-aware tab-selection behavior across file transitions.",
+          "requiredScenarios": [
+            {
+              "scenarioId": "FRD-012-T3-TR1-S1",
+              "type": "success",
+              "description": "User selects a passed file with no issues and readable content available.",
+              "expectedOutcome": "Readable FRD is the active default tab."
+            },
+            {
+              "scenarioId": "FRD-012-T3-TR1-S2",
+              "type": "error",
+              "description": "User selects a file that includes one or more warning/error issues.",
+              "expectedOutcome": "Issues tab is the active default even when readable content exists."
+            },
+            {
+              "scenarioId": "FRD-012-T3-TR1-S3",
+              "type": "edge",
+              "description": "User manually switches tabs, then selects different files with mixed issue states.",
+              "expectedOutcome": "Each new selection reapplies the defaulting rule, parse-failed files remain issues-only, and prior manual tab choice does not leak across files."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
