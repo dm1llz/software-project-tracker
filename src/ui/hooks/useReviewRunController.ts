@@ -34,6 +34,9 @@ import {
 
 const PROGRESS_BATCH_SIZE = 5;
 const FILE_PROCESS_CONCURRENCY = 4;
+const yieldToMacrotask = (): Promise<void> => new Promise((resolve) => {
+  setTimeout(resolve, 0);
+});
 
 const toUploadIndexFromFileId = (fileId: string, fallbackIndex: number): number => {
   const match = fileId.match(/^frd-(\d+)-/);
@@ -213,7 +216,7 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
 
           const fileIndex = nextFileIndex;
           nextFileIndex += 1;
-          await Promise.resolve();
+          await yieldToMacrotask();
 
           const file = mapped.files[fileIndex];
           if (!file) {
@@ -295,6 +298,8 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         return;
       }
       setStore(toErrorStoreState([mapUnexpectedRunIssue(error)]));
+      setSchemaBundle(null);
+      setValidator(null);
       // Reset transient runtime UI state for the active request after an upload error.
       resetRuntimeState(requestVersion);
     }
