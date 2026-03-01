@@ -106,6 +106,16 @@
         "FRD-005",
         "FRD-001"
       ]
+    },
+    {
+      "frdId": "FRD-010",
+      "title": "Review-Run Refactor and Resilience",
+      "status": "not_started",
+      "priority": 10,
+      "path": "./frd-010-review-run-refactor-resilience.json",
+      "dependencies": [
+        "FRD-009"
+      ]
     }
   ]
 }
