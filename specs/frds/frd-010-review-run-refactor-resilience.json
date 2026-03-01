@@ -3,7 +3,7 @@
     "frdId": "FRD-010",
     "title": "Review-Run Refactor and Resilience",
     "description": "Refactor duplicated review-run orchestration, clarify runtime-error recovery semantics, and close high-value test gaps for request races and UI runtime-failure handling.",
-    "status": "in_progress",
+    "status": "completed",
     "priority": 10,
     "estimatedEffort": "large",
     "dependencies": [
@@ -238,7 +238,7 @@
       "taskId": "FRD-010-T4",
       "title": "Harden test environment signal and runtime-failure coverage",
       "description": "Eliminate noisy React act-environment warnings and add explicit integration coverage for readable-section runtime failure behavior.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-010-T3"
@@ -248,7 +248,7 @@
           "subtaskId": "FRD-010-T4-S1",
           "title": "Configure React act environment for JSDOM tests",
           "description": "Set the React act environment flag in test setup so DOM integration tests run without repetitive act warnings.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/test/setupTests.ts"
           ]
@@ -257,7 +257,7 @@
           "subtaskId": "FRD-010-T4-S2",
           "title": "Add integration coverage for readable-render runtime failure and retry",
           "description": "Add tests for unsupported mixed-array runtime rendering path, validate surfaced run issues, and verify retry behavior with schema retained.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "tests/integration/review-run-page-dom.test.tsx",
             "tests/integration/rendering-nested-sections.test.ts"

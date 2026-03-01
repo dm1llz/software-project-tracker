@@ -125,7 +125,7 @@ describe("review run page DOM behavior", () => {
 
   });
 
-  it("keeps schema loaded after runtime run failure and allows FRD retry without re-uploading schema", async () => {
+  it("surfaces mixed-array runtime failure details and allows retry with schema retained", async () => {
     const { container } = await renderPage();
     const user = userEvent.setup();
 
@@ -154,7 +154,9 @@ describe("review run page DOM behavior", () => {
 
     await waitFor(() => {
       expect(container.textContent).toContain("Run issues");
+      expect(container.textContent).toContain("RUNTIME_ERROR");
       expect(container.textContent).toContain("Unexpected runtime failure");
+      expect(container.textContent).toContain("Unsupported mixed array item types at path /items.");
     });
 
     expect(container.textContent).toContain("runtime-schema.json");
@@ -165,6 +167,7 @@ describe("review run page DOM behavior", () => {
     await waitFor(() => {
       expect(getByRole(container, "button", { name: "retry-success.json" })).toBeDefined();
       expect(container.textContent).not.toContain("Unexpected runtime failure");
+      expect(container.textContent).not.toContain("RUNTIME_ERROR");
     });
   });
 

@@ -170,3 +170,10 @@ Template:
 - Action/Decision: Added `review-run-request-race` integration cases for latest-schema-wins, stale-failure ignored, and overlapping FRD uploads with latest-only progress/results assertions.
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-request-race.test.tsx tests/integration/review-run-page-dom.test.tsx tests/integration/review-run-processing.test.ts`
 - Applicability: Reuse for future async race/cancellation tests where request ordering and stale completion guards must be proven.
+
+### 2026-02-28 FRD-010-T4
+- Situation: Integration output was noisy with React act-environment warnings and lacked explicit assertions on mixed-array runtime-render failure details.
+- Learning: Setting `IS_REACT_ACT_ENVIRONMENT` in global test setup removes environment-misconfiguration warnings; explicit DOM assertions on `RUNTIME_ERROR` plus mixed-array path messaging make runtime-retry behavior clearer.
+- Action/Decision: Updated `src/test/setupTests.ts` to set React act environment and expanded runtime failure/retry coverage in DOM + nested-render integration tests.
+- Reusable check/command: `npm run test:integration > /tmp/t4-full.log 2>&1 && rg -n "current testing environment is not configured" /tmp/t4-full.log`
+- Applicability: Reuse when hardening React/Vitest signal quality and adding explicit runtime-failure recovery assertions.
