@@ -3,7 +3,7 @@
     "frdId": "FRD-011",
     "title": "UI Intake and Layout Refresh",
     "description": "Refresh the review workspace to prioritize readability by consolidating schema/file intake controls, co-locating file navigation with upload actions, and simplifying panel nesting.",
-    "status": "not_started",
+    "status": "in_progress",
     "priority": 11,
     "estimatedEffort": "large",
     "dependencies": [
@@ -16,14 +16,14 @@
       "specs/architecture-overview.md"
     ],
     "createdAt": "2026-03-01",
-    "updatedAt": "2026-03-01"
+    "updatedAt": "2026-02-28"
   },
   "majorTasks": [
     {
       "taskId": "FRD-011-T1",
       "title": "Restructure the page layout around intake and focused detail review",
       "description": "Create a two-row layout where the top row places intake-plus-file controls and summary side-by-side (approximately 2/3 and 1/3 widths), and the second row is a full-width issues/readable detail workspace with reduced nested containers.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-008-T3"
@@ -33,7 +33,7 @@
           "subtaskId": "FRD-011-T1-S1",
           "title": "Implement top-row intake and summary column proportions",
           "description": "Refactor page shell layout so schema/file intake and file-list interactions occupy the primary top-row column and summary occupies a secondary column.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/ReviewRunPage.tsx"
           ]
@@ -42,7 +42,7 @@
           "subtaskId": "FRD-011-T1-S2",
           "title": "Flatten unnecessary nested visual containers",
           "description": "Reduce box-within-box composition across top-level sections to improve scannability while keeping semantic grouping and accessible headings.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/ui/components/ReviewSummaryView.tsx",
             "src/ui/components/FileIssueTableView.tsx",
