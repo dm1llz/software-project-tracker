@@ -6,37 +6,13 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ReviewRunPage } from "../../src/ui/ReviewRunPage";
+import { createDeferred, makeDeferredTextFile } from "../helpers/deferredFile";
 
 const makeJsonFile = (name: string, data: unknown): File =>
   new File([JSON.stringify(data)], name, { type: "application/json" });
 
 const makeTextFile = (name: string, text: string): File =>
   new File([text], name, { type: "application/json" });
-
-type Deferred<T> = {
-  promise: Promise<T>;
-  resolve: (value: T) => void;
-  reject: (reason?: unknown) => void;
-};
-
-const createDeferred = <T,>(): Deferred<T> => {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((innerResolve, innerReject) => {
-    resolve = innerResolve;
-    reject = innerReject;
-  });
-  return { promise, resolve, reject };
-};
-
-const makeDeferredTextFile = (name: string, deferred: Deferred<string>): File => {
-  const file = new File(["{}"], name, { type: "application/json" });
-  Object.defineProperty(file, "text", {
-    configurable: true,
-    value: () => deferred.promise,
-  });
-  return file;
-};
 
 type RenderedPage = {
   root: Root;
