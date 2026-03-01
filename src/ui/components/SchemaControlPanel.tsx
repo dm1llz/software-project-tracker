@@ -117,11 +117,16 @@ export const SchemaControlPanel = ({
     >
       <h2 className="text-lg font-semibold text-slate-100">Schema controls</h2>
       <p className="mt-2 text-sm text-slate-300">{model.schemaStatusText}</p>
-      <p className="mt-1 text-xs text-slate-400">{model.schemaName ?? "No active schema"}</p>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200">
+      <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-2">
+        <div className="flex h-full flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200">
           <span>Schema file</span>
+          <div className="rounded-md border border-slate-600/70 bg-slate-950/70 px-3 py-2">
+            <p className="text-[11px] uppercase tracking-wide text-slate-400">Active schema</p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-100">
+              {model.schemaName ?? "No active schema"}
+            </p>
+          </div>
           <button
             type="button"
             className="inline-flex w-fit items-center rounded-md border border-amber-500/60 bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-50"
@@ -166,30 +171,28 @@ export const SchemaControlPanel = ({
           />
         </div>
 
-        <div className="space-y-3">
-          <label className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-teal-300/80 focus-within:ring-2 focus-within:ring-teal-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
-            FRD files
-            <span className="inline-flex w-fit items-center rounded-md border border-teal-500/60 bg-teal-500/15 px-3 py-1.5 text-xs font-semibold text-teal-200">
-              Choose one or more FRDs
-            </span>
-            <input
-              type="file"
-              multiple
-              accept="application/json,.json"
-              aria-label="FRD files"
-              className="sr-only"
-              onChange={(event) => {
-                const files = fileList(event);
-                if (files.length > 0) {
-                  onFrdUpload(files);
-                }
-              }}
-              disabled={!model.controls.canUploadFrdFiles}
-            />
-          </label>
-          {fileListContent}
-        </div>
+        <label className="flex h-full flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/70 p-3 text-sm font-medium text-slate-200 transition focus-within:border-teal-300/80 focus-within:ring-2 focus-within:ring-teal-300/70 focus-within:ring-offset-2 focus-within:ring-offset-slate-900">
+          FRD files
+          <span className="inline-flex w-fit items-center rounded-md border border-teal-500/60 bg-teal-500/15 px-3 py-1.5 text-xs font-semibold text-teal-200">
+            Choose one or more FRDs
+          </span>
+          <input
+            type="file"
+            multiple
+            accept="application/json,.json"
+            aria-label="FRD files"
+            className="sr-only"
+            onChange={(event) => {
+              const files = fileList(event);
+              if (files.length > 0) {
+                onFrdUpload(files);
+              }
+            }}
+            disabled={!model.controls.canUploadFrdFiles}
+          />
+        </label>
       </div>
+      {fileListContent ? <div className="mt-3">{fileListContent}</div> : null}
 
       <ConfirmDialog
         open={showReplacementModal && model.schemaName !== null}
