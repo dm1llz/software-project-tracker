@@ -156,3 +156,10 @@ Template:
 - Action/Decision: Added explicit schema-upload vs recoverable-run error store mapping, preserved `schemaBundle`/`validator` on FRD runtime failures, and cleared them in schema-upload catch handling.
 - Reusable check/command: `npm run test:integration -- tests/integration/review-run-page-dom.test.tsx tests/integration/review-run-controller-recovery.test.tsx`
 - Applicability: Reuse when separating blocking schema intake failures from retryable run-processing failures in UI controllers.
+
+### 2026-02-28 FRD-010-T2
+- Situation: Parse/validate/render/result assembly logic diverged between `executeReviewRun` and the UI controller, making behavior-parity changes high risk.
+- Learning: A shared batch processor with optional concurrency, progress callbacks, and cancellation checks can consolidate orchestration while preserving deterministic output ordering and read-failure mapping semantics.
+- Action/Decision: Added `processReviewRunBatch` and routed both `executeReviewRun` and `useReviewRunController` through it; kept controller request-version safety by passing `shouldContinue` and guarded progress callbacks.
+- Reusable check/command: `npm run test:unit && npm run test:integration && npm run build`
+- Applicability: Reuse when domain and UI entrypoints need identical review-run semantics without duplicated orchestration logic.

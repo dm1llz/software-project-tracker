@@ -1,18 +1,11 @@
 import { useCallback, useRef, useState } from "react";
 
-import { buildRenderedSections } from "../../domain/rendering/buildRenderedSections";
-import { buildReviewResult } from "../../domain/review-run/buildReviewResult";
 import { mapReviewInputFiles } from "../../domain/review-run/mapReviewInputFiles";
-import { parseFrdFile } from "../../domain/review-run/parseFrdFile";
-import { summarizeBatchReview } from "../../domain/review-run/summarizeBatchReview";
-import { validateFrdFile } from "../../domain/review-run/validateFrdFile";
+import { processReviewRunBatch } from "../../domain/review-run/processReviewRunBatch";
 import { compileSchema } from "../../domain/validation/compileSchema";
 import { loadSchemaFile } from "../../domain/validation/loadSchemaFile";
-import type {
-  FileIssue,
-  ReviewResult,
-  SchemaBundle,
-} from "../../types/reviewContracts";
+import type { SchemaBundle } from "../../types/reviewContracts";
+import { yieldToMacrotask } from "../../utils/async";
 import { applyReplaceSchemaAction } from "../components/SchemaControlPanel";
 import type { FileDetailTab } from "../components/FileDetailPanel";
 import { deriveScreenStateFromStore } from "../state/reviewRunScreenStateHelpers";
@@ -35,34 +28,6 @@ import {
 
 const PROGRESS_BATCH_SIZE = 5;
 const FILE_PROCESS_CONCURRENCY = 4;
-const yieldToMacrotask = (): Promise<void> => new Promise((resolve) => {
-  setTimeout(resolve, 0);
-});
-
-const toUploadIndexFromFileId = (fileId: string, fallbackIndex: number): number => {
-  const match = fileId.match(/^frd-(\d+)-/);
-  if (!match || !match[1]) {
-    return fallbackIndex;
-  }
-
-  const parsed = Number.parseInt(match[1], 10);
-  return Number.isNaN(parsed) ? fallbackIndex : parsed;
-};
-
-const mapReadFailureToReviewResult = (
-  issue: FileIssue,
-  displayNameById: Record<string, string>,
-  fallbackIndex: number,
-): ReviewResult => ({
-  id: issue.fileId,
-  uploadIndex: toUploadIndexFromFileId(issue.fileId, fallbackIndex),
-  fileName: issue.fileName,
-  displayName: displayNameById[issue.fileId] ?? issue.fileName,
-  status: "parse_failed",
-  parseOk: false,
-  valid: false,
-  issues: [issue],
-});
 
 const readFileText = async (file: File): Promise<string> => {
   const withText = file as File & { text?: () => Promise<string> };
@@ -204,95 +169,31 @@ export const useReviewRunController = (): UseReviewRunControllerResult => {
         return;
       }
 
-      const processedResults = new Array<ReviewResult>(mapped.files.length);
-      let nextFileIndex = 0;
-      let completedCount = 0;
-      const workerCount = Math.max(
-        1,
-        Math.min(FILE_PROCESS_CONCURRENCY, mapped.files.length || FILE_PROCESS_CONCURRENCY),
-      );
-
-      const workers = Array.from({ length: workerCount }, async () => {
-        while (nextFileIndex < mapped.files.length) {
-          if (!isCurrentRequest(requestVersionRef, requestVersion)) {
+      const processed = await processReviewRunBatch({
+        mappedFiles: mapped,
+        validator,
+        schemaRaw: schemaBundle.raw,
+        concurrency: FILE_PROCESS_CONCURRENCY,
+        shouldContinue: () => isCurrentRequest(requestVersionRef, requestVersion),
+        yieldToMacrotask,
+        onFileProcessed: ({ completedCount, totalFiles: mappedTotalFiles }) => {
+          if (
+            !isCurrentRequest(requestVersionRef, requestVersion)
+            || (completedCount !== mappedTotalFiles && completedCount % PROGRESS_BATCH_SIZE !== 0)
+          ) {
             return;
           }
-
-          const fileIndex = nextFileIndex;
-          nextFileIndex += 1;
-          await yieldToMacrotask();
-
-          const file = mapped.files[fileIndex];
-          if (!file) {
-            throw new Error(`Missing mapped file at index ${fileIndex}`);
-          }
-          const displayName = mapped.displayNameById[file.id] ?? file.fileName;
-          const parseResult = parseFrdFile(file);
-          const validationIssues = parseResult.ok
-            ? validateFrdFile({
-                fileId: file.id,
-                fileName: file.fileName,
-                parsed: parseResult.parsed,
-                validator,
-              })
-            : [];
-
-          const hasErrorIssues = validationIssues.some((issue) => issue.level === "error");
-          let sections: ReviewResult["sections"];
-          if (parseResult.ok && !hasErrorIssues) {
-            sections = buildRenderedSections({
-              id: `${file.id}-root`,
-              title: displayName,
-              path: "/",
-              value: parseResult.parsed,
-              schema: schemaBundle.raw,
-            });
-          }
-
-          processedResults[fileIndex] = buildReviewResult({
-            file,
-            displayName,
-            parseResult,
-            validationIssues,
-            ...(sections ? { sections } : {}),
-          });
-
-          completedCount += 1;
-          if (!isCurrentRequest(requestVersionRef, requestVersion)) {
-            return;
-          }
-          if (completedCount === mapped.files.length || completedCount % PROGRESS_BATCH_SIZE === 0) {
-            setProcessedFiles(completedCount);
-          }
-        }
+          setProcessedFiles(completedCount);
+        },
       });
-
-      await Promise.all(workers);
-
-      if (!isCurrentRequest(requestVersionRef, requestVersion)) {
+      if (processed.cancelled || !isCurrentRequest(requestVersionRef, requestVersion)) {
         return;
       }
-
-      const results = [...processedResults];
-      for (const [index, issue] of mapped.fileIssues.entries()) {
-        results.push(
-          mapReadFailureToReviewResult(
-            issue,
-            mapped.displayNameById,
-            mapped.files.length + index,
-          ),
-        );
-      }
-
-      if (!isCurrentRequest(requestVersionRef, requestVersion)) {
-        return;
-      }
-      const summary = summarizeBatchReview(results);
       setStore((previous) =>
         completeReviewRun(previous, {
           runIssues: [],
-          summary,
-          files: results,
+          summary: processed.summary,
+          files: processed.files,
         }),
       );
       setPreferredTabState("issues");

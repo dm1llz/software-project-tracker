@@ -96,7 +96,7 @@
       "taskId": "FRD-010-T2",
       "title": "Extract shared review-run processing orchestration",
       "description": "Remove duplicated parse/validate/render/result-assembly logic between UI controller and domain runner by introducing a shared domain-level processing module.",
-      "status": "not_started",
+      "status": "completed",
       "prLevel": true,
       "dependencies": [
         "FRD-010-T1"
@@ -106,7 +106,7 @@
           "subtaskId": "FRD-010-T2-S1",
           "title": "Create shared review-result processing function",
           "description": "Implement a shared domain processor that accepts mapped review files and returns deterministic review results plus summary inputs.",
-          "status": "not_started",
+          "status": "completed",
           "filesToCreate": [
             "src/domain/review-run/processReviewRunBatch.ts"
           ],
@@ -121,7 +121,7 @@
           "subtaskId": "FRD-010-T2-S2",
           "title": "Keep output ordering and failure mapping semantics identical",
           "description": "Retain deterministic sort order, file-issue mapping, and summary behavior while moving orchestration into the shared processor.",
-          "status": "not_started",
+          "status": "completed",
           "filesToModify": [
             "src/domain/review-run/sortReviewResults.ts",
             "src/domain/review-run/mapReviewInputFiles.ts",
