@@ -6,6 +6,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ReviewRunPage } from "../../src/ui/ReviewRunPage";
+import { createDeferred, makeDeferredTextFile } from "../helpers/deferredFile";
 
 const makeJsonFile = (name: string, data: unknown): File =>
   new File([JSON.stringify(data)], name, { type: "application/json" });
@@ -140,6 +141,55 @@ describe("review run page DOM behavior", () => {
     await waitFor(() => {
       expect(getByRole(container, "button", { name: "retry-success.json" })).toBeDefined();
       expect(container.textContent).not.toContain("Unexpected runtime failure");
+    });
+  });
+
+  it("keeps the latest schema visible when overlapping schema uploads complete out of order", async () => {
+    const { container } = await renderPage();
+    const user = userEvent.setup();
+    const slowSchema = createDeferred<string>();
+    const fastSchema = createDeferred<string>();
+
+    const schemaInput = getByLabelText(container, "Schema file") as HTMLInputElement;
+
+    const slowUpload = user.upload(
+      schemaInput,
+      makeDeferredTextFile("schema-slow.json", slowSchema),
+    );
+
+    const fastUpload = user.upload(
+      schemaInput,
+      makeDeferredTextFile("schema-fast.json", fastSchema),
+    );
+
+    fastSchema.resolve(
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+      }),
+    );
+    await fastUpload;
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("schema-fast.json");
+      expect(container.textContent).toContain("Schema ready for FRD upload.");
+    });
+
+    slowSchema.resolve(
+      JSON.stringify({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        required: ["title"],
+        properties: {
+          title: { type: "string" },
+        },
+      }),
+    );
+    await slowUpload;
+
+    await waitFor(() => {
+      expect(container.textContent).toContain("schema-fast.json");
+      expect(container.textContent).not.toContain("Schema error");
     });
   });
 
